@@ -6,23 +6,23 @@
  * The instant it scrolls into view (isVisible), every character becomes noise —
  * bright, high-contrast glyphs re-rolling at flickerRate. Then, left to right over
  * durationMs, characters lock in one at a time (revealedCount). Locked characters
- * are the signal: stable, in textColor, pulsing like the vinyl's progress bar.
- * The rest stay noise in scrambleColor, set in a fixed-width font so the chaos
- * doesn't shake the line. Everything scrambles — spaces, apostrophes, numbers,
- * symbols, any language. When the last character locks, the flicker stops
- * (hasRevealed) and the word keeps pulsing for as long as it's on screen.
+ * are the signal: stable, in textColor, lit like the vinyl's meter — a steady glow
+ * with a sheen sweeping across. The rest stay noise in scrambleColor, set in a
+ * fixed-width font so the chaos doesn't shake the line. Everything scrambles —
+ * spaces, apostrophes, numbers, symbols, any language. When the last character
+ * locks, the flicker stops and the word stays lit for as long as it's on screen.
  * Scroll away and back, and the whole reveal plays again.
  *
  * Edges: no text → render nothing. durationMs of 0 → no noise, just the stable
  * signal. flickerRate of 0 or less → the noise freezes in place. Reduced motion →
- * same as durationMs 0: stable text, no flicker, no pulse.
+ * same as durationMs 0: stable text, no flicker, no sheen.
  *
  * Reference: TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace.
  */
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./TextScrambler.module.css";
 
 const GLYPHS = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?!<>/\\|[]{}");
@@ -69,7 +69,8 @@ export default function TextScrambler({
                     setRevealedCount(0);
                     setNoise("");
                 }
-            }, { threshold: 0.5 }
+            },
+            { threshold: 0.5 }
         );
         observer.observe(element);
 
@@ -78,13 +79,16 @@ export default function TextScrambler({
 
     useEffect(() => {
         if (!isVisible) return;
+
         const isMotionReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         const isAnimated = durationMs > 0 && !isMotionReduced;
         const total = Array.from(text).length;
-        let start: number | null = null;
         const rollEveryMs = flickerRate > 0 ? 1000 / (flickerRate * 20) : Infinity;
+
+        let start: number | null = null;
         let currentNoise = makeNoise(total);
         let lastRoll: number | null = null;
+
         function flicker(now: number) {
             if (start === null) start = now;
             const elapsed = now - start;
@@ -92,11 +96,13 @@ export default function TextScrambler({
             const count = Math.floor(progress * total);
 
             setRevealedCount(count);
+
             if (lastRoll === null || now - lastRoll >= rollEveryMs) {
                 currentNoise = makeNoise(total);
                 lastRoll = now;
             }
             setNoise(currentNoise.slice(count));
+
             if (count < total) {
                 frameRef.current = requestAnimationFrame(flicker);
             }
@@ -109,7 +115,6 @@ export default function TextScrambler({
         };
     }, [text, durationMs, flickerRate, isVisible]);
 
-
     if (characters.length === 0) return null;
 
     const signal = characters.slice(0, revealedCount).join("");
@@ -117,11 +122,16 @@ export default function TextScrambler({
     return (
         <span ref={textRef} className={styles.root}>
             <span className={styles.srOnly}>{text}</span>
-            <span aria-hidden="true" style={{ color: textColor }}>
-                {signal}
+            <span aria-hidden="true" className={styles.ghost}>
+                {text}
             </span>
-            <span aria-hidden="true" className={styles.noise} style={{ color: scrambleColor }}>
-                {noise}
+            <span aria-hidden="true" className={styles.live}>
+                <span className={styles.signal} style={{ "--tone": textColor } as CSSProperties}>
+                    {signal}
+                </span>
+                <span className={styles.noise} style={{ color: scrambleColor }}>
+                    {noise}
+                </span>
             </span>
         </span>
     );
