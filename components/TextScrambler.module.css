@@ -1,0 +1,7 @@
+.root {
+  display: inline-block;
+  white-space: pre;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
