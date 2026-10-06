@@ -1,6 +1,14 @@
-.main {
+.stage,
+.spacer {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 2rem;
+}
+
+.spacer {
+  color: var(--muted);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }

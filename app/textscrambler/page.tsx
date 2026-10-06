@@ -11,8 +11,12 @@ export const metadata: Metadata = {
 
 export default function TextScramblerPage() {
   return (
-    <main className={`${styles.main} ${spaceGrotesk.className}`}>
-      <TextScrambler text="LET'S ARCHITECT" />
+        <main className={spaceGrotesk.className}>
+      <section className={styles.spacer}>↓ scroll</section>
+      <section className={styles.stage}>
+        <TextScrambler text="LET'S ARCHITECT" />
+      </section>
+      <section className={styles.spacer}>↑ scroll back up to replay</section>
     </main>
   );
 }

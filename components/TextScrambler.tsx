@@ -55,7 +55,24 @@ export default function TextScrambler({
   const [noise, setNoise] = useState("");
   const frameRef = useRef<number | null>(null);
 
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
+    const element = textRef.current;
+    if (element === null) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.5 }
+    );
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
     const total = Array.from(text).length;
     let start: number | null = null;
     const rollEveryMs = flickerRate > 0 ? 1000 / (flickerRate * 20) : Infinity;
@@ -83,14 +100,13 @@ export default function TextScrambler({
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
-  }, [text, durationMs, flickerRate]);
+  }, [text, durationMs, flickerRate, isVisible]);  
   if (characters.length === 0) return null;
 
   const signal = characters.slice(0, revealedCount).join("");
 
   return (
-    <span className={styles.root}>
-      <span className={styles.srOnly}>{text}</span>
+    <span ref={textRef} className={styles.root}>      <span className={styles.srOnly}>{text}</span>
       <span aria-hidden="true" style={{ color: textColor }}>
         {signal}
       </span>
