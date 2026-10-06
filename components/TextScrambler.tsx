@@ -121,8 +121,7 @@ export default function TextScrambler({
 
     return (
         <span ref={textRef} className={styles.root}>
-            <span className={styles.srOnly}>{text}</span>
-            <span aria-hidden="true" className={styles.ghost}>
+            <span className={styles.ghost}>
                 {text}
             </span>
             <span aria-hidden="true" className={styles.live}>

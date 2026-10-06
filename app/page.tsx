@@ -23,8 +23,8 @@ const rungs = [
 
 const builds: Build[] = [
   { number: "01", name: "vinyl", reference: "DiscPlayer by Ahmad (@ohitshmad)", rung: 1, status: "shipped", href: "https://vinyl-swart.vercel.app" },
-  { number: "02", name: "TextScrambler", reference: "Frameblox", rung: 1, status: "next" },
-  { number: "03", name: "BackToTop", reference: "The Velox Studio", rung: 1, status: "planned" },
+  { number: "02", name: "TextScrambler", reference: "TextScrambler by Solt Wagner (@solt)", rung: 1, status: "shipped", href: "/textscrambler" },
+  { number: "03", name: "BackToTop", reference: "The Velox Studio", rung: 1, status: "next" },
   { number: "04", name: "AnimatedFolder", reference: "Launchly", rung: 2, status: "planned" },
   { number: "05", name: "Motion Tiles", reference: "Uzair J.", rung: 2, status: "planned" },
   { number: "06", name: "Live Location", reference: "Amr Rashed", rung: 2, status: "planned" },

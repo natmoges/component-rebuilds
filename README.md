@@ -18,7 +18,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | # | Build | Reference (credited) | Rung |
 |---|---|---|---|
 | 01 | [vinyl](https://vinyl-swart.vercel.app) (own repo: [natmoges/vinyl](https://github.com/natmoges/vinyl)) | DiscPlayer by Ahmad (@ohitshmad) | 1 · Single components |
-| 02 | TextScrambler | Frameblox | 1 |
+| 02 | [TextScrambler](https://component-rebuilds.vercel.app/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
 | 03 | BackToTop | The Velox Studio | 1 |
 | 04 | AnimatedFolder | Launchly | 2 · Composition + data |
 | 05 | Motion Tiles | Uzair J. | 2 |
@@ -31,6 +31,23 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 12 | Gravity | Framer University | 4 |
 | 13 | Retro Screen Effect (optional) | Blue Jackson | 4 |
 | 14 | The Orbit | Replaces a Spline embed on my site | 5 · 3D / WebGL |
+
+## Build notes
+
+### 02 · TextScrambler
+
+**Reference:** TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace. Read for behaviour only; none of its code is here.
+
+**Reused, with credit:** the left-to-right reveal, replay when it scrolls back into view, the flicker-rate formula (`1000 / (rate × 20)` ms), and my own footer's settings (1300 ms, rate 0.3).
+
+**Net-new in mine:**
+- **The speed knob works.** In the reference, the scramble re-rolls every frame no matter what speed is set to. Here `flickerRate` really controls it, and 0 freezes the noise.
+- **Two layers instead of one span per letter:** the locked signal, then the noise tail. Nothing is rebuilt per character.
+- **The line never moves.** The noise is set in a fixed-width font, and an invisible copy of the final word sizes the box, so the reveal can't shift the layout.
+- **Accessibility:** screen readers get the real word once, and the noise is hidden from them. Reduced motion shows the stable word with no flicker and no sheen.
+- **Edges written down first:** empty text renders nothing, a duration of 0 shows the stable word, and text is split by real characters, so emoji and other scripts don't break.
+- **The signal is lit like my vinyl's meter:** a steady glow with a sheen sweeping across.
+- Visibility uses the browser's `IntersectionObserver` directly, not a motion library.
 
 ## Credits
 
