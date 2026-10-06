@@ -48,6 +48,7 @@ export default function TextScrambler({
   textColor = "var(--signal)",
   scrambleColor = "var(--fg)",
   durationMs = 1300,
+  flickerRate = 0.3,
 }: TextScramblerProps) {
   const characters = Array.from(text);
   const [revealedCount, setRevealedCount] = useState(characters.length);
@@ -57,7 +58,9 @@ export default function TextScrambler({
   useEffect(() => {
     const total = Array.from(text).length;
     let start: number | null = null;
-
+    const rollEveryMs = flickerRate > 0 ? 1000 / (flickerRate * 20) : Infinity;
+    let currentNoise = makeNoise(total);
+    let lastRoll: number | null = null;
     function flicker(now: number) {
       if (start === null) start = now;
       const elapsed = now - start;
@@ -65,8 +68,11 @@ export default function TextScrambler({
       const count = Math.floor(progress * total);
 
       setRevealedCount(count);
-      setNoise(makeNoise(total - count));
-
+      if (lastRoll === null || now - lastRoll >= rollEveryMs) {
+        currentNoise = makeNoise(total);
+        lastRoll = now;
+      }
+      setNoise(currentNoise.slice(count));
       if (count < total) {
         frameRef.current = requestAnimationFrame(flicker);
       }
@@ -77,8 +83,7 @@ export default function TextScrambler({
     return () => {
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
     };
-  }, [text, durationMs]);
-
+  }, [text, durationMs, flickerRate]);
   if (characters.length === 0) return null;
 
   const signal = characters.slice(0, revealedCount).join("");
