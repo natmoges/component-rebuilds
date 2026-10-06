@@ -20,7 +20,22 @@
  * Reference: TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace.
  */
 
+"use client"; // ← new
+
+import { useEffect, useState } from "react"; // ← new
 import styles from "./TextScrambler.module.css";
+
+// ← new: the noise pool
+const GLYPHS = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?!<>/\\|[]{}");
+
+// ← new: roll a string of random glyphs
+function makeNoise(length: number): string {
+  let noise = "";
+  for (let i = 0; i < length; i++) {
+    noise += GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+  }
+  return noise;
+}
 
 export interface TextScramblerProps {
   text: string;
@@ -33,12 +48,32 @@ export interface TextScramblerProps {
 export default function TextScrambler({
   text,
   textColor = "var(--signal)",
+  scrambleColor = "var(--fg)", // ← new
 }: TextScramblerProps) {
-  if (text.length === 0) return null;
+  const characters = Array.from(text); // ← new
+  const [revealedCount, setRevealedCount] = useState(characters.length); // ← new
+  const [noise, setNoise] = useState(""); // ← new
+
+  // TEMPORARY (step 2 only): freeze halfway so both spans show. Step 3 replaces this.
+  useEffect(() => {
+    const half = Math.floor(characters.length / 2);
+    setRevealedCount(half);
+    setNoise(makeNoise(characters.length - half));
+  }, [characters.length]);
+
+  if (characters.length === 0) return null; // moved: now below the hooks
+
+  const signal = characters.slice(0, revealedCount).join(""); // ← new
 
   return (
-    <span className={styles.root} style={{ color: textColor }}>
-      {text}
+    <span className={styles.root}>
+      <span className={styles.srOnly}>{text}</span>
+      <span aria-hidden="true" style={{ color: textColor }}>
+        {signal}
+      </span>
+      <span aria-hidden="true" className={styles.noise} style={{ color: scrambleColor }}>
+        {noise}
+      </span>
     </span>
   );
 }
