@@ -20,15 +20,13 @@
  * Reference: TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace.
  */
 
-"use client"; // ← new
+"use client";
 
-import { useEffect, useState } from "react"; // ← new
+import { useEffect, useRef, useState } from "react";
 import styles from "./TextScrambler.module.css";
 
-// ← new: the noise pool
 const GLYPHS = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?!<>/\\|[]{}");
 
-// ← new: roll a string of random glyphs
 function makeNoise(length: number): string {
   let noise = "";
   for (let i = 0; i < length; i++) {
@@ -48,22 +46,42 @@ export interface TextScramblerProps {
 export default function TextScrambler({
   text,
   textColor = "var(--signal)",
-  scrambleColor = "var(--fg)", // ← new
+  scrambleColor = "var(--fg)",
+  durationMs = 1300,
 }: TextScramblerProps) {
-  const characters = Array.from(text); // ← new
-  const [revealedCount, setRevealedCount] = useState(characters.length); // ← new
-  const [noise, setNoise] = useState(""); // ← new
+  const characters = Array.from(text);
+  const [revealedCount, setRevealedCount] = useState(characters.length);
+  const [noise, setNoise] = useState("");
+  const frameRef = useRef<number | null>(null);
 
-  // TEMPORARY (step 2 only): freeze halfway so both spans show. Step 3 replaces this.
   useEffect(() => {
-    const half = Math.floor(characters.length / 2);
-    setRevealedCount(half);
-    setNoise(makeNoise(characters.length - half));
-  }, [characters.length]);
+    const total = Array.from(text).length;
+    let start: number | null = null;
 
-  if (characters.length === 0) return null; // moved: now below the hooks
+    function flicker(now: number) {
+      if (start === null) start = now;
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const count = Math.floor(progress * total);
 
-  const signal = characters.slice(0, revealedCount).join(""); // ← new
+      setRevealedCount(count);
+      setNoise(makeNoise(total - count));
+
+      if (count < total) {
+        frameRef.current = requestAnimationFrame(flicker);
+      }
+    }
+
+    frameRef.current = requestAnimationFrame(flicker);
+
+    return () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [text, durationMs]);
+
+  if (characters.length === 0) return null;
+
+  const signal = characters.slice(0, revealedCount).join("");
 
   return (
     <span className={styles.root}>
