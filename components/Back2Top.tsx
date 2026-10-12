@@ -109,6 +109,14 @@ export default function Back2Top({
     }, []);
 
     function rideUp() {
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        if (prefersReducedMotion) {
+            window.scrollTo(0, 0);
+            return;
+        }
         const start = window.scrollY;
         const durationMs = Math.min((start / rideUpPxPerSec) * 1000, maxRideMs);
         const startTime = performance.now();
