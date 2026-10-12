@@ -1,0 +1,23 @@
+.button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--signal);
+  background: transparent;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+  cursor: pointer;
+  z-index: 100;
+}
+
+.rocket {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.8;
+  transform: rotate(-45deg);
+}
