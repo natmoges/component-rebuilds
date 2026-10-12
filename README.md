@@ -19,7 +19,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 |---|---|---|---|
 | 01 | [vinyl](https://vinyl-swart.vercel.app) (own repo: [natmoges/vinyl](https://github.com/natmoges/vinyl)) | DiscPlayer by Ahmad (@ohitshmad) | 1 · Single components |
 | 02 | [TextScrambler](https://component-rebuilds.vercel.app/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
-| 03 | BackToTop | The Velox Studio | 1 |
+| 03 | [Back2Top](https://component-rebuilds.vercel.app/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
 | 04 | AnimatedFolder | Launchly | 2 · Composition + data |
 | 05 | Motion Tiles | Uzair J. | 2 |
 | 06 | Live Location | Amr Rashed | 2 |
@@ -48,6 +48,23 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Edges written down first:** empty text renders nothing, a duration of 0 shows the stable word, and text is split by real characters, so emoji and other scripts don't break.
 - **The signal is lit like my vinyl's meter:** a steady glow with a sheen sweeping across.
 - Visibility uses the browser's `IntersectionObserver` directly, not a motion library.
+
+### 03 · Back2Top
+
+**Reference:** BackToTop by The Velox Studio, Framer Marketplace. Read for behaviour only; none of its code is here. The rocket is Lucide's `rocket` icon (ISC licence), via `lucide-react`, turned to point straight up.
+
+**Reused, with credit:** the 25% threshold, the easeInOutCubic ride curve, the 3000 ms cap, the breathing pulse (1.06 over 1.6 s), the 0.18 s transitions, the blue focus ring, and my own site's settings (54 px, bottom-right, 24 / 24).
+
+**Net-new in mine:**
+- **The ride follows the page.** The reference's "Scroll Speed" is really a fixed duration. Here the ride moves at a speed (`rideUpPxPerSec`) with a cap (`maxRideMs`), so a longer page is a longer ride.
+- **Two redraws per trip, not sixty a second.** The reference stores scroll progress as a number every frame. Mine stores one yes/no: past the threshold or not.
+- **Truly gone.** Below the threshold the button is removed, not faded, so Tab can't land on an invisible button and the click ring can't get stuck on (a bug visible on my Framer site).
+- **Your scroll wins.** Wheel, touch or keys break the ride instantly, and you take over from where you are.
+- **Exhaust.** On click, a fill grows from the rocket's flame for the length of the ride, driven by the same curve that moves the page.
+- **Hover only on real mice,** so nothing sticks on iPhone, and the click ring shows in Safari too.
+- **Reduced motion:** no breathing, an instant jump, no exhaust. Function over form.
+- **Colour knobs:** ring, hover and exhaust colour, and exhaust on/off, are props. The default is Signal green, inside the site's palette.
+- **The ladder reusing itself:** the transmission at the top of the page is my TextScrambler (build 02).
 
 ## Credits
 
