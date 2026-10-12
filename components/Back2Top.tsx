@@ -31,46 +31,82 @@
  * the page.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Rocket } from "lucide-react";
 import styles from "./Back2Top.module.css";
 
 export interface Back2TopProps {
-  scrollThreshold?: number;
-  rideUpPxPerSec?: number;
-  maxRideMs?: number;
+    scrollThreshold?: number;
+    rideUpPxPerSec?: number;
+    maxRideMs?: number;
+}
+
+function easeInOutCubic(t: number) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 export default function Back2Top({
-  scrollThreshold = 0.25,
-  rideUpPxPerSec = 2000,
-  maxRideMs = 3000,
+    scrollThreshold = 0.25,
+    rideUpPxPerSec = 2000,
+    maxRideMs = 3000,
 }: Back2TopProps) {
-  const [isPastThreshold, setIsPastThreshold] = useState(false);
+    const [isPastThreshold, setIsPastThreshold] = useState(false);
 
-  useEffect(() => {
-    function handleScroll() {
-      const scrollable =
-        document.documentElement.scrollHeight - window.innerHeight;
-      setIsPastThreshold(
-        scrollable > 0 && window.scrollY / scrollable >= scrollThreshold
-      );
+    useEffect(() => {
+        function handleScroll() {
+            const scrollable =
+                document.documentElement.scrollHeight - window.innerHeight;
+            setIsPastThreshold(
+                scrollable > 0 && window.scrollY / scrollable >= scrollThreshold
+            );
+        }
+
+        handleScroll();
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        window.addEventListener("resize", handleScroll);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleScroll);
+        };
+    }, [scrollThreshold]);
+
+    const frameRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+        };
+    }, []);
+
+    function rideUp() {
+        const start = window.scrollY;
+        const durationMs = Math.min((start / rideUpPxPerSec) * 1000, maxRideMs);
+        const startTime = performance.now();
+
+        function step(now: number) {
+            const t = Math.min((now - startTime) / durationMs, 1);
+            window.scrollTo(0, start * (1 - easeInOutCubic(t)));
+            frameRef.current = t < 1 ? requestAnimationFrame(step) : null;
+        }
+
+        frameRef.current = requestAnimationFrame(step);
     }
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
+    function handleClick() {
+        if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+        rideUp();
+    }
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, [scrollThreshold]);
+    if (!isPastThreshold) return null;
 
-  if (!isPastThreshold) return null;
-
-  return (
-    <button type="button" aria-label="Scroll to top" className={styles.button}>
+    return (
+    <button
+      type="button"
+      aria-label="Scroll to top"
+      className={styles.button}
+      onClick={handleClick}
+    >
       <Rocket className={styles.rocket} aria-hidden="true" />
     </button>
   );
