@@ -73,9 +73,23 @@ export default function Back2Top({
 
     const frameRef = useRef<number | null>(null);
 
-    useEffect(() => {
+        useEffect(() => {
+        function breakRide() {
+            if (frameRef.current !== null) {
+                cancelAnimationFrame(frameRef.current);
+                frameRef.current = null;
+            }
+        }
+
+        window.addEventListener("wheel", breakRide, { passive: true });
+        window.addEventListener("pointerdown", breakRide);
+        window.addEventListener("keydown", breakRide);
+
         return () => {
-            if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+            breakRide();
+            window.removeEventListener("wheel", breakRide);
+            window.removeEventListener("pointerdown", breakRide);
+            window.removeEventListener("keydown", breakRide);
         };
     }, []);
 
@@ -101,13 +115,13 @@ export default function Back2Top({
     if (!isPastThreshold) return null;
 
     return (
-    <button
-      type="button"
-      aria-label="Scroll to top"
-      className={styles.button}
-      onClick={handleClick}
-    >
-      <Rocket className={styles.rocket} aria-hidden="true" />
-    </button>
-  );
+        <button
+            type="button"
+            aria-label="Scroll to top"
+            className={styles.button}
+            onClick={handleClick}
+        >
+            <Rocket className={styles.rocket} aria-hidden="true" />
+        </button>
+    );
 }
