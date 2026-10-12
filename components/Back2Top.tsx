@@ -73,7 +73,7 @@ export default function Back2Top({
 
     const frameRef = useRef<number | null>(null);
 
-        useEffect(() => {
+    useEffect(() => {
         function breakRide() {
             if (frameRef.current !== null) {
                 cancelAnimationFrame(frameRef.current);
@@ -107,7 +107,8 @@ export default function Back2Top({
         frameRef.current = requestAnimationFrame(step);
     }
 
-    function handleClick() {
+    function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
+        event.currentTarget.focus();
         if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
         rideUp();
     }
