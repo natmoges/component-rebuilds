@@ -31,6 +31,7 @@
  * the page.
  */
 
+import { useEffect, useState } from "react";
 import { Rocket } from "lucide-react";
 import styles from "./Back2Top.module.css";
 
@@ -45,6 +46,29 @@ export default function Back2Top({
   rideUpPxPerSec = 2000,
   maxRideMs = 3000,
 }: Back2TopProps) {
+  const [isPastThreshold, setIsPastThreshold] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
+      setIsPastThreshold(
+        scrollable > 0 && window.scrollY / scrollable >= scrollThreshold
+      );
+    }
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [scrollThreshold]);
+
+  if (!isPastThreshold) return null;
+
   return (
     <button type="button" aria-label="Scroll to top" className={styles.button}>
       <Rocket className={styles.rocket} aria-hidden="true" />
