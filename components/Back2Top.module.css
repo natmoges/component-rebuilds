@@ -7,7 +7,7 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid var(--signal);
+    border: 1px solid var(--ring-color);
     background: transparent;
     color: #ffffff;
     box-shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
@@ -42,7 +42,7 @@
 @media (hover: hover) {
     .button:hover {
         animation: none;
-        color: #22c55e;
+        color: var(--hover-color);
     }
 }
 
@@ -57,6 +57,6 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: #22c55e;
+    background: var(--exhaust-color);
     clip-path: circle(calc(var(--exhaust, 0) * 75%) at 50% 72%);
 }

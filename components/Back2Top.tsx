@@ -17,6 +17,9 @@
  * clicked, the blue ring appears, the ride starts, and the circle fills
  * Signal green like a rocket taking off: the exhaust stems from the little
  * flame under the rocket and fills the circle for the duration of the ride.
+ * The ring colour, the hover colour, the exhaust colour and whether there's
+ * exhaust at all are knobs on the faceplate (ringColor, hoverColor,
+ * exhaustColor, hasExhaust), tuned from the page, not the code.
  * Crossing back under 25% mid-ride, it disappears even though the ride
  * continues; if the rocket disappears, so does the exhaust. After the middle
  * text layer, the bottom adds another text that says enjoy the ride.
@@ -40,6 +43,10 @@ export interface Back2TopProps {
     scrollThreshold?: number;
     rideUpPxPerSec?: number;
     maxRideMs?: number;
+    exhaustColor?: string;
+    hasExhaust?: boolean;
+    ringColor?: string;
+    hoverColor?: string;
 }
 
 function easeInOutCubic(t: number) {
@@ -50,6 +57,11 @@ export default function Back2Top({
     scrollThreshold = 0.25,
     rideUpPxPerSec = 2000,
     maxRideMs = 3000,
+    exhaustColor = "var(--signal)",
+    hasExhaust = true,
+    ringColor = "var(--signal)",
+    hoverColor = "var(--signal)",
+
 }: Back2TopProps) {
     const [isPastThreshold, setIsPastThreshold] = useState(false);
 
@@ -105,7 +117,7 @@ export default function Back2Top({
             const t = Math.min((now - startTime) / durationMs, 1);
             const eased = easeInOutCubic(t);
             window.scrollTo(0, start * (1 - eased));
-            buttonRef.current?.style.setProperty("--exhaust", String(eased));
+            if (hasExhaust) buttonRef.current?.style.setProperty("--exhaust", String(eased));
             frameRef.current = t < 1 ? requestAnimationFrame(step) : null;
         }
 
@@ -126,6 +138,13 @@ export default function Back2Top({
             type="button"
             aria-label="Scroll to top"
             className={styles.button}
+            style={
+                {
+                    "--exhaust-color": exhaustColor,
+                    "--ring-color": ringColor,
+                    "--hover-color": hoverColor,
+                } as React.CSSProperties
+            }
             onClick={handleClick}
         >
             <Rocket className={styles.rocket} aria-hidden="true" />
