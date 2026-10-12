@@ -13,22 +13,23 @@
  * says continue to scroll for a longer ride: a longer page means a longer
  * ride, because the ride moves at rideUpPxPerSec and never lasts longer
  * than maxRideMs. On hover over the component the breathing stops, just like
- * in the original component, and the rocket turns red. Once it's clicked,
- * the blue ring appears, the ride starts, and the circle fills red like a
- * rocket taking off: the exhaust stems from the little flame under the
- * rocket and fills the circle, orange at the flame into red at the edge, for
- * the duration of the ride. Crossing back under 25% mid-ride, it disappears
- * even though the ride continues; if the rocket disappears, so does the
- * exhaust. After the middle text layer, the bottom adds another text that
- * says enjoy the ride. Arriving at the top, the transmission re-scrambles,
- * message intercepted, every time. Doing it a second time works the same
- * way. Scrolling while the ride is going breaks the ride instantly, and the
- * user's own scroll takes over from exactly where they are. A page too short
- * to scroll: the rocket simply disappears. Reduced motion: the rocket sits
- * still, no breathing, the ride is instant, no red fill, only the icon turns
- * red on click. Function over form. iPhone: no hover, and that's fine.
- * Keyboard users: tab to it, enter, focus falls back to the top/start of
- * the page.
+ * in the original component, and the rocket turns Signal green. Once it's
+ * clicked, the blue ring appears, the ride starts, and the circle fills
+ * Signal green like a rocket taking off: the exhaust stems from the little
+ * flame under the rocket and fills the circle for the duration of the ride.
+ * Crossing back under 25% mid-ride, it disappears even though the ride
+ * continues; if the rocket disappears, so does the exhaust. After the middle
+ * text layer, the bottom adds another text that says enjoy the ride.
+ * Arriving at the top, the transmission re-scrambles, message intercepted,
+ * every time. Doing it a second time works the same way. Scrolling while the
+ * ride is going breaks the ride instantly, and the user's own scroll takes
+ * over from exactly where they are. A page too short to scroll: the rocket
+ * simply disappears. Reduced motion: the rocket sits still, no breathing,
+ * the ride is instant, no fill, only the icon turns green on click.
+ * Function over form. iPhone: no hover, and that's fine. Keyboard users:
+ * tab to it, enter, focus falls back to the top/start of the page. Colours
+ * stay inside the site's palette: Signal green for the ring, the hover and
+ * the exhaust, with the blue ring for the click.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -72,10 +73,12 @@ export default function Back2Top({
     }, [scrollThreshold]);
 
     const frameRef = useRef<number | null>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         function breakRide() {
             if (frameRef.current !== null) {
+                buttonRef.current?.style.setProperty("--exhaust", "0");
                 cancelAnimationFrame(frameRef.current);
                 frameRef.current = null;
             }
@@ -100,7 +103,9 @@ export default function Back2Top({
 
         function step(now: number) {
             const t = Math.min((now - startTime) / durationMs, 1);
-            window.scrollTo(0, start * (1 - easeInOutCubic(t)));
+            const eased = easeInOutCubic(t);
+            window.scrollTo(0, start * (1 - eased));
+            buttonRef.current?.style.setProperty("--exhaust", String(eased));
             frameRef.current = t < 1 ? requestAnimationFrame(step) : null;
         }
 
@@ -117,6 +122,7 @@ export default function Back2Top({
 
     return (
         <button
+            ref={buttonRef}
             type="button"
             aria-label="Scroll to top"
             className={styles.button}
