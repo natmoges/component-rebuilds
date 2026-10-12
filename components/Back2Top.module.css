@@ -60,3 +60,18 @@
     background: var(--exhaust-color);
     clip-path: circle(calc(var(--exhaust, 0) * 75%) at 50% 72%);
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        animation: none;
+        transition: none;
+    }
+
+    .button:focus {
+        color: var(--hover-color);
+    }
+
+    .button::before {
+        display: none;
+    }
+}
