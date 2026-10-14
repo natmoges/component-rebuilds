@@ -127,6 +127,11 @@
     transform: translate(var(--x), -90px) rotate(var(--rotate)) scale(1);
 }
 
+.card .project[data-hidden="true"] {
+    opacity: 0;
+    transition: none;
+}
+
 .project::after {
     content: "";
     position: absolute;
@@ -251,6 +256,15 @@
     align-items: center;
     justify-content: center;
     padding: 32px;
+    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.viewer[data-closing="true"] {
+    opacity: 0;
+}
+
+.viewer[data-closing="true"] .panel {
+    transform: scale(0.95);
 }
 
 .backdrop {
@@ -259,6 +273,7 @@
     background: var(--backdrop);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    animation: fadeIn 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .close {
@@ -279,6 +294,7 @@
     color: #ffffff;
     cursor: pointer;
     transition: background-color 200ms;
+    animation: fadeIn 300ms ease-out 300ms backwards;
 }
 
 .close:hover {
@@ -294,6 +310,7 @@
     border-radius: 16px;
     background: var(--viewer-bg);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .imageBox {
@@ -312,6 +329,13 @@
 
 .info {
     padding: 16px 24px;
+    animation: fadeIn 300ms ease-out 200ms backwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
 }
 
 .viewerTitle {

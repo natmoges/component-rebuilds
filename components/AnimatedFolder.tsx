@@ -44,7 +44,16 @@
  * Reference: AnimatedFolder by Launchly (Framer Marketplace).
  */
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent } from "react";
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type CSSProperties,
+    type FocusEvent,
+    type Ref,
+} from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import styles from "./AnimatedFolder.module.css";
@@ -126,10 +135,12 @@ interface ProjectCardProps {
     delay: number;
     zIndex: number;
     isFanned: boolean;
+    isHidden: boolean;
     onClick: () => void;
+    ref: Ref<HTMLButtonElement>;
 }
 
-function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, onClick }: ProjectCardProps) {
+function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, isHidden, onClick, ref }: ProjectCardProps) {
     const [hasImageError, setHasImageError] = useState(false);
 
     const cardVars = {
@@ -141,9 +152,11 @@ function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, onClick }: P
 
     return (
         <button
+            ref={ref}
             type="button"
             className={styles.project}
             style={cardVars}
+            data-hidden={isHidden}
             tabIndex={isFanned ? 0 : -1}
             aria-label={`Open ${project.title}`}
             onClick={onClick}
@@ -170,19 +183,54 @@ function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, onClick }: P
 interface ImageLightboxProps {
     projects: Project[];
     selectedIndex: number;
+    sourceRect: DOMRect | null;
     themeVars: CSSProperties;
     onClose: () => void;
 }
 
-function ImageLightbox({ projects, selectedIndex, themeVars, onClose }: ImageLightboxProps) {
+function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose }: ImageLightboxProps) {
+    const [isClosing, setIsClosing] = useState(false);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const closeTimerRef = useRef<number | null>(null);
     const project = projects[selectedIndex];
+
+    const handleClose = useCallback(() => {
+        if (closeTimerRef.current !== null) return;
+        setIsClosing(true);
+        closeTimerRef.current = window.setTimeout(onClose, 300);
+    }, [onClose]);
+
+    useLayoutEffect(() => {
+        const panel = panelRef.current;
+        if (!panel || !sourceRect) return;
+
+        const target = panel.getBoundingClientRect();
+        const dx = sourceRect.left + sourceRect.width / 2 - (target.left + target.width / 2);
+        const dy = sourceRect.top + sourceRect.height / 2 - (target.top + target.height / 2);
+        const scale = Math.max(sourceRect.width / target.width, sourceRect.height / target.height);
+
+        const animation = panel.animate(
+            [
+                { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, borderRadius: "8px" },
+                { transform: "none", borderRadius: "16px" },
+            ],
+            { duration: 400, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+        );
+        return () => animation.cancel();
+    }, [sourceRect]);
+
+    useEffect(() => {
+        return () => {
+            if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current);
+        };
+    }, []);
 
     useEffect(() => {
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         function handleKeyDown(event: KeyboardEvent) {
-            if (event.key === "Escape") onClose();
+            if (event.key === "Escape") handleClose();
         }
 
         window.addEventListener("keydown", handleKeyDown);
@@ -190,20 +238,29 @@ function ImageLightbox({ projects, selectedIndex, themeVars, onClose }: ImageLig
             window.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
         };
-    }, [onClose]);
+    }, [handleClose]);
 
     return createPortal(
-        <div className={styles.viewer} style={themeVars} onClick={onClose}>
+        <div
+            className={styles.viewer}
+            style={themeVars}
+            data-closing={isClosing}
+            onClick={handleClose}
+        >
             <div className={styles.backdrop} />
             <button
                 type="button"
                 className={styles.close}
                 aria-label="Close"
-                onClick={onClose}
+                onClick={handleClose}
             >
                 <X size={22} />
             </button>
-            <div className={styles.panel} onClick={(event) => event.stopPropagation()}>
+            <div
+                ref={panelRef}
+                className={styles.panel}
+                onClick={(event) => event.stopPropagation()}
+            >
                 <div className={styles.imageBox}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -231,7 +288,10 @@ export default function AnimatedFolder({
 }: AnimatedFolderProps) {
     const [isFanned, setIsFanned] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
+    const [hiddenCardId, setHiddenCardId] = useState<string | null>(null);
     const waitForLeaveRef = useRef(false);
+    const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const t = { ...defaultTheme, ...theme };
     const visibleProjects = projects.slice(0, maxCards);
     const count = visibleProjects.length;
@@ -258,11 +318,16 @@ export default function AnimatedFolder({
     }
 
     function handleProjectClick(index: number) {
+        const cardElement = cardRefs.current[index];
+        setSourceRect(cardElement ? cardElement.getBoundingClientRect() : null);
         setSelectedIndex(index);
+        setHiddenCardId(visibleProjects[index].id);
     }
 
     const handleCloseLightbox = useCallback(() => {
         setSelectedIndex(null);
+        setSourceRect(null);
+        setHiddenCardId(null);
         setIsFanned(false);
         waitForLeaveRef.current = true;
     }, []);
@@ -325,7 +390,11 @@ export default function AnimatedFolder({
                                 delay={index * 80}
                                 zIndex={10 - index}
                                 isFanned={isFanned}
+                                isHidden={hiddenCardId === project.id}
                                 onClick={() => handleProjectClick(index)}
+                                ref={(element) => {
+                                    cardRefs.current[index] = element;
+                                }}
                             />
                         ))}
                     </div>
@@ -346,6 +415,7 @@ export default function AnimatedFolder({
                 <ImageLightbox
                     projects={visibleProjects}
                     selectedIndex={selectedIndex}
+                    sourceRect={sourceRect}
                     themeVars={themeVars}
                     onClose={handleCloseLightbox}
                 />
