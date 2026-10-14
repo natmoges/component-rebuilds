@@ -27,7 +27,8 @@
  * empty space and the viewer never jumps in size (a broken image shows a
  * plain tile with its title). While the viewer is open, a Signal green line
  * snakes around its border, chasing its own tail, glowing like the vinyl's
- * progress bar.
+ * progress bar. The chase is a knob (hasBorderChase): turn it off and the
+ * viewer opens clean.
  *
  * The X, Escape, or a click outside the viewer closes it. The folder goes
  * back to its original, unopened state, even if the mouse is still on it.
@@ -49,10 +50,12 @@ import {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useId,
     useRef,
     useState,
     type CSSProperties,
     type FocusEvent,
+    type MouseEvent,
     type Ref,
 } from "react";
 import { createPortal } from "react-dom";
@@ -98,6 +101,7 @@ export interface AnimatedFolderProps {
     titleFont?: string;
     countFont?: string;
     cardTitleFont?: string;
+    hasBorderChase?: boolean;
 }
 
 const signal = "var(--signal, #22C55E)";
@@ -158,7 +162,7 @@ interface ProjectCardProps {
     zIndex: number;
     isFanned: boolean;
     isHidden: boolean;
-    onClick: () => void;
+    onClick: (event: MouseEvent<HTMLButtonElement>) => void;
     ref: Ref<HTMLButtonElement>;
 }
 
@@ -192,14 +196,25 @@ interface ImageLightboxProps {
     selectedIndex: number;
     sourceRect: DOMRect | null;
     themeVars: CSSProperties;
+    hasBorderChase: boolean;
     onClose: () => void;
 }
 
-function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose }: ImageLightboxProps) {
+function ImageLightbox({
+    projects,
+    selectedIndex,
+    sourceRect,
+    themeVars,
+    hasBorderChase,
+    onClose,
+}: ImageLightboxProps) {
     const [isClosing, setIsClosing] = useState(false);
     const [shownIndex, setShownIndex] = useState(selectedIndex);
+    const viewerRef = useRef<HTMLDivElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
     const closeTimerRef = useRef<number | null>(null);
+    const titleId = useId();
     const project = projects[shownIndex];
     const hasPrev = shownIndex > 0;
     const hasNext = shownIndex < projects.length - 1;
@@ -237,10 +252,26 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
     }, []);
 
     useEffect(() => {
+        closeButtonRef.current?.focus({ preventScroll: true });
+    }, []);
+
+    useEffect(() => {
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         function handleKeyDown(event: KeyboardEvent) {
+            if (event.key === "Tab" && viewerRef.current) {
+                const focusable = viewerRef.current.querySelectorAll<HTMLElement>("button, a[href]");
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            }
             if (event.key === "Escape") handleClose();
             if (event.key === "ArrowRight") setShownIndex((index) => Math.min(index + 1, lastIndex));
             if (event.key === "ArrowLeft") setShownIndex((index) => Math.max(index - 1, 0));
@@ -255,13 +286,18 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
 
     return createPortal(
         <div
+            ref={viewerRef}
             className={styles.viewer}
             style={themeVars}
             data-closing={isClosing}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
             onClick={handleClose}
         >
             <div className={styles.backdrop} />
             <button
+                ref={closeButtonRef}
                 type="button"
                 className={styles.close}
                 aria-label="Close"
@@ -300,9 +336,11 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
                 className={styles.flight}
                 onClick={(event) => event.stopPropagation()}
             >
-                <div className={styles.snake} aria-hidden="true">
-                    <div className={styles.snakeRing} />
-                </div>
+                {hasBorderChase && (
+                    <div className={styles.snake} aria-hidden="true">
+                        <div className={styles.snakeRing} />
+                    </div>
+                )}
                 <div className={styles.panel}>
                     <div className={styles.imageBox}>
                         <div
@@ -318,7 +356,9 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
                     </div>
                     <div className={styles.info}>
                         <div className={styles.infoText}>
-                            <h3 className={styles.viewerTitle}>{project.title}</h3>
+                            <h3 id={titleId} className={styles.viewerTitle}>
+                                {project.title}
+                            </h3>
                             <div className={styles.navRow}>
                                 <span className={styles.hint}>
                                     <kbd>←</kbd> <kbd>→</kbd> to navigate
@@ -363,12 +403,15 @@ export default function AnimatedFolder({
     titleFont = "inherit",
     countFont = "inherit",
     cardTitleFont = "inherit",
+    hasBorderChase = true,
 }: AnimatedFolderProps) {
     const [isFanned, setIsFanned] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
     const [sourceRect, setSourceRect] = useState<DOMRect | null>(null);
     const [hiddenCardId, setHiddenCardId] = useState<string | null>(null);
     const waitForLeaveRef = useRef(false);
+    const openedWithKeyboardRef = useRef(false);
+    const folderRef = useRef<HTMLDivElement>(null);
     const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const t = { ...defaultTheme, ...theme };
     const visibleProjects = projects.slice(0, maxCards);
@@ -385,6 +428,19 @@ export default function AnimatedFolder({
         }
     }, [projects.length, title]);
 
+    useEffect(() => {
+        if (!isFanned) return;
+
+        function handlePointerDown(event: PointerEvent) {
+            if (folderRef.current && !folderRef.current.contains(event.target as Node)) {
+                setIsFanned(false);
+            }
+        }
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        return () => document.removeEventListener("pointerdown", handlePointerDown);
+    }, [isFanned]);
+
     function handleMouseEnter() {
         if (waitForLeaveRef.current) return;
         setIsFanned(true);
@@ -395,7 +451,8 @@ export default function AnimatedFolder({
         setIsFanned(false);
     }
 
-    function handleProjectClick(index: number) {
+    function handleProjectClick(index: number, event: MouseEvent<HTMLButtonElement>) {
+        openedWithKeyboardRef.current = event.detail === 0;
         const cardElement = cardRefs.current[index];
         setSourceRect(cardElement ? cardElement.getBoundingClientRect() : null);
         setSelectedIndex(index);
@@ -408,6 +465,9 @@ export default function AnimatedFolder({
         setHiddenCardId(null);
         setIsFanned(false);
         waitForLeaveRef.current = true;
+        if (openedWithKeyboardRef.current) {
+            folderRef.current?.focus({ preventScroll: true });
+        }
     }, []);
 
     function handleBlur(event: FocusEvent<HTMLDivElement>) {
@@ -446,6 +506,7 @@ export default function AnimatedFolder({
     return (
         <>
             <div
+                ref={folderRef}
                 className={styles.card}
                 style={themeVars}
                 data-fanned={isFanned}
@@ -454,6 +515,7 @@ export default function AnimatedFolder({
                 onMouseLeave={handleMouseLeave}
                 onFocus={() => setIsFanned(true)}
                 onBlur={handleBlur}
+                onClick={() => setIsFanned(true)}
             >
                 <div className={styles.stage}>
                     <div className={styles.back} />
@@ -469,7 +531,7 @@ export default function AnimatedFolder({
                                 zIndex={10 - index}
                                 isFanned={isFanned}
                                 isHidden={hiddenCardId === project.id}
-                                onClick={() => handleProjectClick(index)}
+                                onClick={(event) => handleProjectClick(index, event)}
                                 ref={(element) => {
                                     cardRefs.current[index] = element;
                                 }}
@@ -486,7 +548,10 @@ export default function AnimatedFolder({
                         {count} {count === 1 ? "project" : "projects"}
                     </p>
                 </div>
-                <p className={styles.explore}>Hover to explore</p>
+                <p className={styles.explore}>
+                    <span className={styles.exploreHover}>Hover to explore</span>
+                    <span className={styles.exploreTap}>Tap to explore</span>
+                </p>
             </div>
 
             {selectedIndex !== null && (
@@ -495,6 +560,7 @@ export default function AnimatedFolder({
                     selectedIndex={selectedIndex}
                     sourceRect={sourceRect}
                     themeVars={themeVars}
+                    hasBorderChase={hasBorderChase}
                     onClose={handleCloseLightbox}
                 />
             )}

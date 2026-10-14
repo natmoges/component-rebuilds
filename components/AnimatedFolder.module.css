@@ -243,6 +243,28 @@
     transition: opacity 300ms, transform 300ms;
 }
 
+.exploreTap {
+    display: none;
+}
+
+@media (hover: none) {
+    .exploreHover {
+        display: none;
+    }
+
+    .exploreTap {
+        display: inline;
+    }
+
+    .project:active {
+        border-color: var(--project-hover-border);
+    }
+
+    .project:active .projectImage {
+        transform: scale(1.08);
+    }
+}
+
 .card[data-fanned="true"] .explore {
     opacity: 0;
     transform: translate(-50%, 10px);
@@ -520,4 +542,29 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--viewer-text);
+}
+
+@media (max-width: 640px) {
+    .viewer {
+        padding: 16px;
+    }
+
+    .arrow {
+        top: auto;
+        bottom: 24px;
+        margin-top: 0;
+    }
+
+    .prev {
+        left: calc(50% - 64px);
+    }
+
+    .next {
+        right: calc(50% - 64px);
+    }
+
+    .info {
+        flex-wrap: wrap;
+        padding: 16px;
+    }
 }
