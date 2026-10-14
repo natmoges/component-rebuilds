@@ -20,7 +20,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 01 | [vinyl](https://vinyl-swart.vercel.app) (own repo: [natmoges/vinyl](https://github.com/natmoges/vinyl)) | DiscPlayer by Ahmad (@ohitshmad) | 1 · Single components |
 | 02 | [TextScrambler](https://component-rebuilds.vercel.app/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
 | 03 | [Back2Top](https://component-rebuilds.vercel.app/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
-| 04 | AnimatedFolder | Launchly | 2 · Composition + data |
+| 04 | [AnimatedFolder](https://component-rebuilds.vercel.app/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
 | 05 | Motion Tiles | Uzair J. | 2 |
 | 06 | Live Location | Amr Rashed | 2 |
 | 07 | The Ladder | My own (no reference) | 2 |
@@ -65,6 +65,27 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Reduced motion:** no breathing, an instant jump, no exhaust. Function over form.
 - **Colour knobs:** ring, hover and exhaust colour, and exhaust on/off, are props. The default is Signal green, inside the site's palette.
 - **The ladder reusing itself:** the transmission at the top of the page is my TextScrambler (build 02).
+
+### 04 · AnimatedFolder
+
+**Reference:** AnimatedFolder by Launchly, Framer Marketplace (the listing is no longer available). Read for behaviour only; none of its code is here. Icons are Lucide (ISC licence), via `lucide-react`. The demo images were generated for this page with an image model.
+
+**Reused, with credit:** the folder layers and their tilt (back −15°, tab −25°, front +25°, hinged at the bottom), the overshoot easing `cubic-bezier(0.34, 1.56, 0.64, 1)`, the fan's lift, tilt and 80 ms stagger, the 80 × 112 card size, and the viewer's open and slide curves.
+
+**Changed from the reference:**
+- The demo page uses one component three times, once per case study, each with its own list of projects. In Framer I made two copies of the component to get three folders.
+- The folder takes 1 to 6 cards. The spread and tilt are calculated from the number of cards. The reference has three fixed positions. Passing more than 6 shows the first 6 and logs a warning in the console.
+- The viewer is rendered through a portal to the page body. On my Framer site it opens inside the card instead of over the page, because a parent element has `will-change: transform`.
+- Moving between images slides. In the reference, two effects set the same value at the same time, so the images cut instead.
+- The count, the fan and the viewer all read the same list. One card reads "1 project".
+- Colours and border widths are in one `theme` prop (21 values), with my site's colours as defaults. The hover glow and the viewer colours are included; the reference hard-codes them.
+- Images fill a fixed 16:9 box, so the viewer keeps the same size for every image. A broken image shows a plain tile.
+- While the viewer is open, a Signal green line runs around its border, styled after my vinyl's progress bar. `hasBorderChase={false}` turns it off.
+- After the viewer closes, the folder stays closed until the pointer leaves and comes back.
+- The cards are buttons. Keyboard focus opens the folder. The viewer is a labelled dialog that keeps focus inside while open and returns it on close.
+- On touch screens, a tap opens the folder, a tap outside closes it, the prompt reads "Tap to explore", and the arrows sit at the bottom of the screen.
+- With reduced motion on, there is no bounce, zoom, slide or border line. Cards fade in and the folder still tilts open.
+- The open animation measures the clicked card, so each card has its own ref. Using many refs is planned as build 05's new idea; it appears here first.
 
 ## Credits
 
