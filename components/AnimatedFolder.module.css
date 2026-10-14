@@ -1,0 +1,93 @@
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 280px;
+    min-height: 320px;
+    padding: 32px;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: var(--card-border-width) solid var(--card-border);
+    perspective: 1000px;
+}
+
+.stage {
+    position: relative;
+    width: 200px;
+    height: 160px;
+    margin-bottom: 16px;
+}
+
+.back,
+.front,
+.shine {
+    position: absolute;
+    left: 36px;
+    width: 128px;
+    height: 96px;
+    border-radius: 8px;
+    transform-origin: bottom center;
+}
+
+.back {
+    top: 32px;
+    background: var(--folder-back);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.tab {
+    position: absolute;
+    top: 20px;
+    left: 52px;
+    width: 48px;
+    height: 16px;
+    border-radius: 6px 6px 0 0;
+    background: var(--folder-tab);
+    transform-origin: bottom center;
+    z-index: 10;
+}
+
+.front {
+    top: 36px;
+    background: var(--folder-front);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 30;
+}
+
+.shine {
+    top: 36px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 31;
+}
+
+.title {
+    margin: 16px 0 4px;
+    font-family: var(--title-font);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--title-color);
+}
+
+.count {
+    margin: 0;
+    font-family: var(--count-font);
+    font-size: 12px;
+    color: var(--count-color);
+}
+
+.explore {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    margin: 0;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--explore-color);
+    opacity: 0.6;
+    white-space: nowrap;
+}
