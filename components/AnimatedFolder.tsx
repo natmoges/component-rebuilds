@@ -44,7 +44,7 @@
  * Reference: AnimatedFolder by Launchly (Framer Marketplace).
  */
 
-import { useState, type CSSProperties, type FocusEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FocusEvent } from "react";
 import styles from "./AnimatedFolder.module.css";
 
 export interface Project {
@@ -115,6 +115,54 @@ export const defaultTheme: FolderTheme = {
     backdropColor: "rgba(0, 0, 0, 0.8)",
 };
 
+const maxCards = 6;
+
+interface ProjectCardProps {
+    project: Project;
+    x: number;
+    rotate: number;
+    delay: number;
+    zIndex: number;
+    isFanned: boolean;
+}
+
+function ProjectCard({ project, x, rotate, delay, zIndex, isFanned }: ProjectCardProps) {
+    const [hasImageError, setHasImageError] = useState(false);
+
+    const cardVars = {
+        "--x": `${x}px`,
+        "--rotate": `${rotate}deg`,
+        "--delay": `${delay}ms`,
+        zIndex,
+    } as CSSProperties;
+
+    return (
+        <button
+            type="button"
+            className={styles.project}
+            style={cardVars}
+            tabIndex={isFanned ? 0 : -1}
+            aria-label={`Open ${project.title}`}
+        >
+            {!hasImageError && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    className={styles.projectImage}
+                    src={project.image}
+                    alt={project.alt ?? project.title}
+                    ref={(image) => {
+                        if (image && image.complete && image.naturalWidth === 0) {
+                            setHasImageError(true);
+                        }
+                    }}
+                    onError={() => setHasImageError(true)}
+                />
+            )}
+            <span className={styles.projectTitle}>{project.title}</span>
+        </button>
+    );
+}
+
 export default function AnimatedFolder({
     title,
     projects,
@@ -126,7 +174,19 @@ export default function AnimatedFolder({
 
     const [isFanned, setIsFanned] = useState(false);
     const t = { ...defaultTheme, ...theme };
-    const count = projects.length;
+    const visibleProjects = projects.slice(0, maxCards);
+    const count = visibleProjects.length;
+    const middle = (count - 1) / 2;
+    const fanSpread = count > 1 ? Math.min(55, 200 / (count - 1)) : 0;
+    const fanAngle = count > 1 ? Math.min(12, 30 / (count - 1)) : 0;
+
+    useEffect(() => {
+        if (projects.length > maxCards) {
+            console.warn(
+                `AnimatedFolder "${title}": ${projects.length} projects passed, the max is ${maxCards}. Showing the first ${maxCards}.`
+            );
+        }
+    }, [projects.length, title]);
 
     function handleBlur(event: FocusEvent<HTMLDivElement>) {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -175,6 +235,19 @@ export default function AnimatedFolder({
             <div className={styles.stage}>
                 <div className={styles.back} />
                 <div className={styles.tab} />
+                <div className={styles.fan}>
+                    {visibleProjects.map((project, index) => (
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            x={(index - middle) * fanSpread}
+                            rotate={(index - middle) * fanAngle}
+                            delay={index * 80}
+                            zIndex={10 - index}
+                            isFanned={isFanned}
+                        />
+                    ))}
+                </div>
                 <div className={styles.front} />
                 <div className={styles.shine} />
             </div>
