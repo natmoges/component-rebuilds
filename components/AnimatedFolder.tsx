@@ -44,7 +44,7 @@
  * Reference: AnimatedFolder by Launchly (Framer Marketplace).
  */
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties, type FocusEvent } from "react";
 import styles from "./AnimatedFolder.module.css";
 
 export interface Project {
@@ -123,8 +123,16 @@ export default function AnimatedFolder({
     countFont = "inherit",
     cardTitleFont = "inherit",
 }: AnimatedFolderProps) {
+
+    const [isFanned, setIsFanned] = useState(false);
     const t = { ...defaultTheme, ...theme };
     const count = projects.length;
+
+    function handleBlur(event: FocusEvent<HTMLDivElement>) {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsFanned(false);
+        }
+    }
 
     const themeVars = {
         "--folder-back": t.folderBack,
@@ -154,7 +162,16 @@ export default function AnimatedFolder({
     } as CSSProperties;
 
     return (
-        <div className={styles.card} style={themeVars}>
+        <div
+            className={styles.card}
+            style={themeVars}
+            data-fanned={isFanned}
+            tabIndex={0}
+            onMouseEnter={() => setIsFanned(true)}
+            onMouseLeave={() => setIsFanned(false)}
+            onFocus={() => setIsFanned(true)}
+            onBlur={handleBlur}
+        >
             <div className={styles.stage}>
                 <div className={styles.back} />
                 <div className={styles.tab} />
@@ -162,10 +179,12 @@ export default function AnimatedFolder({
                 <div className={styles.shine} />
             </div>
 
-            <h3 className={styles.title}>{title}</h3>
-            <p className={styles.count}>
-                {count} {count === 1 ? "project" : "projects"}
-            </p>
+            <div className={styles.labels}>
+                <h3 className={styles.title}>{title}</h3>
+                <p className={styles.count}>
+                    {count} {count === 1 ? "project" : "projects"}
+                </p>
+            </div>
             <p className={styles.explore}>Hover to explore</p>
         </div>
     );
