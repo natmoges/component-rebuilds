@@ -25,8 +25,9 @@
  * button with an external-link icon that opens the link you set for that
  * card (no link, no View button). The image fills its box, so there's no
  * empty space and the viewer never jumps in size (a broken image shows a
- * plain tile with its title). While the viewer is open, it breathes, like
- * the Back2Top rocket.
+ * plain tile with its title). While the viewer is open, a Signal green line
+ * snakes around its border, chasing its own tail, glowing like the vinyl's
+ * progress bar.
  *
  * The X, Escape, or a click outside the viewer closes it. The folder goes
  * back to its original, unopened state, even if the mouse is still on it.
@@ -36,7 +37,7 @@
  * On a phone: tap the folder to fan it, tap a card to open the viewer, tap
  * anywhere outside to close the fan.
  *
- * Reduced motion: no breathing, and the animation goes to a minimum without
+ * Reduced motion: no snake, and the animation goes to a minimum without
  * going dead (the folder tilts and the cards fade into place with no bounce;
  * the viewer fades in instead of zooming; no image zoom; the borders and the
  * tint stay).
@@ -55,7 +56,7 @@ import {
     type Ref,
 } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
 import styles from "./AnimatedFolder.module.css";
 
 export interface Project {
@@ -128,6 +129,27 @@ export const defaultTheme: FolderTheme = {
 
 const maxCards = 6;
 
+function ProjectImage({ project, className }: { project: Project; className: string }) {
+    const [hasImageError, setHasImageError] = useState(false);
+
+    if (hasImageError) return null;
+
+    return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+            className={className}
+            src={project.image}
+            alt={project.alt ?? project.title}
+            ref={(image) => {
+                if (image && image.complete && image.naturalWidth === 0) {
+                    setHasImageError(true);
+                }
+            }}
+            onError={() => setHasImageError(true)}
+        />
+    );
+}
+
 interface ProjectCardProps {
     project: Project;
     x: number;
@@ -141,8 +163,6 @@ interface ProjectCardProps {
 }
 
 function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, isHidden, onClick, ref }: ProjectCardProps) {
-    const [hasImageError, setHasImageError] = useState(false);
-
     const cardVars = {
         "--x": `${x}px`,
         "--rotate": `${rotate}deg`,
@@ -161,20 +181,7 @@ function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, isHidden, on
             aria-label={`Open ${project.title}`}
             onClick={onClick}
         >
-            {!hasImageError && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                    className={styles.projectImage}
-                    src={project.image}
-                    alt={project.alt ?? project.title}
-                    ref={(image) => {
-                        if (image && image.complete && image.naturalWidth === 0) {
-                            setHasImageError(true);
-                        }
-                    }}
-                    onError={() => setHasImageError(true)}
-                />
-            )}
+            <ProjectImage project={project} className={styles.projectImage} />
             <span className={styles.projectTitle}>{project.title}</span>
         </button>
     );
@@ -190,9 +197,13 @@ interface ImageLightboxProps {
 
 function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose }: ImageLightboxProps) {
     const [isClosing, setIsClosing] = useState(false);
+    const [shownIndex, setShownIndex] = useState(selectedIndex);
     const panelRef = useRef<HTMLDivElement>(null);
     const closeTimerRef = useRef<number | null>(null);
-    const project = projects[selectedIndex];
+    const project = projects[shownIndex];
+    const hasPrev = shownIndex > 0;
+    const hasNext = shownIndex < projects.length - 1;
+    const lastIndex = projects.length - 1;
 
     const handleClose = useCallback(() => {
         if (closeTimerRef.current !== null) return;
@@ -231,6 +242,8 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
 
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === "Escape") handleClose();
+            if (event.key === "ArrowRight") setShownIndex((index) => Math.min(index + 1, lastIndex));
+            if (event.key === "ArrowLeft") setShownIndex((index) => Math.max(index - 1, 0));
         }
 
         window.addEventListener("keydown", handleKeyDown);
@@ -238,7 +251,7 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
             window.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
         };
-    }, [handleClose]);
+    }, [handleClose, lastIndex]);
 
     return createPortal(
         <div
@@ -256,21 +269,86 @@ function ImageLightbox({ projects, selectedIndex, sourceRect, themeVars, onClose
             >
                 <X size={22} />
             </button>
+            {hasPrev && (
+                <button
+                    type="button"
+                    className={`${styles.arrow} ${styles.prev}`}
+                    aria-label="Previous"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        setShownIndex(shownIndex - 1);
+                    }}
+                >
+                    <ChevronLeft size={26} />
+                </button>
+            )}
+            {hasNext && (
+                <button
+                    type="button"
+                    className={`${styles.arrow} ${styles.next}`}
+                    aria-label="Next"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        setShownIndex(shownIndex + 1);
+                    }}
+                >
+                    <ChevronRight size={26} />
+                </button>
+            )}
             <div
                 ref={panelRef}
-                className={styles.panel}
+                className={styles.flight}
                 onClick={(event) => event.stopPropagation()}
             >
-                <div className={styles.imageBox}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        className={styles.viewerImage}
-                        src={project.image}
-                        alt={project.alt ?? project.title}
-                    />
+                <div className={styles.snake} aria-hidden="true">
+                    <div className={styles.snakeRing} />
                 </div>
-                <div className={styles.info}>
-                    <h3 className={styles.viewerTitle}>{project.title}</h3>
+                <div className={styles.panel}>
+                    <div className={styles.imageBox}>
+                        <div
+                            className={styles.strip}
+                            style={{ transform: `translateX(-${shownIndex * 100}%)` }}
+                        >
+                            {projects.map((item) => (
+                                <div key={item.id} className={styles.slide}>
+                                    <ProjectImage project={item} className={styles.viewerImage} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className={styles.info}>
+                        <div className={styles.infoText}>
+                            <h3 className={styles.viewerTitle}>{project.title}</h3>
+                            <div className={styles.navRow}>
+                                <span className={styles.hint}>
+                                    <kbd>←</kbd> <kbd>→</kbd> to navigate
+                                </span>
+                                <div className={styles.dots}>
+                                    {projects.map((item, index) => (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            className={styles.dot}
+                                            data-active={index === shownIndex}
+                                            aria-label={`Show ${item.title}`}
+                                            aria-current={index === shownIndex}
+                                            onClick={() => setShownIndex(index)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {project.link && (
+                            <a
+                                className={styles.view}
+                                href={project.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                View <ExternalLink size={14} />
+                            </a>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>,

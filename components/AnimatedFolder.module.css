@@ -263,7 +263,7 @@
     opacity: 0;
 }
 
-.viewer[data-closing="true"] .panel {
+.viewer[data-closing="true"] .flight {
     transform: scale(0.95);
 }
 
@@ -301,23 +301,119 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-.panel {
+.flight {
     position: relative;
     z-index: 1;
     width: 100%;
     max-width: 768px;
+    border-radius: 16px;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panel {
     overflow: hidden;
     border-radius: 16px;
     background: var(--viewer-bg);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@property --snake-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+.snake {
+    position: absolute;
+    inset: -3px;
+    z-index: 2;
+    border-radius: 19px;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px var(--project-hover-border));
+    animation: fadeIn 300ms ease-out 400ms backwards;
+}
+
+.snakeRing {
+    position: absolute;
+    inset: 0;
+    padding: 3px;
+    border-radius: inherit;
+    background: conic-gradient(
+        from var(--snake-angle),
+        transparent 0deg,
+        transparent 250deg,
+        color-mix(in srgb, var(--project-hover-border) 55%, black) 290deg,
+        var(--project-hover-border) 345deg,
+        #ffffff 358deg,
+        transparent 360deg
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: snake 3.8s linear infinite;
+}
+
+@keyframes snake {
+    to {
+        --snake-angle: 360deg;
+    }
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 48px;
+    height: 48px;
+    margin-top: -24px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 200ms;
+    animation: fadeIn 300ms ease-out 450ms backwards;
+}
+
+.arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.prev {
+    left: 32px;
+}
+
+.next {
+    right: 32px;
 }
 
 .imageBox {
     aspect-ratio: 16 / 9;
     max-height: 70vh;
     width: 100%;
+    overflow: hidden;
     background: var(--project-bg);
+}
+
+.strip {
+    display: flex;
+    height: 100%;
+    transition: transform 400ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.slide {
+    flex: 0 0 100%;
+    height: 100%;
 }
 
 .viewerImage {
@@ -328,8 +424,85 @@
 }
 
 .info {
-    padding: 16px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
     animation: fadeIn 300ms ease-out 200ms backwards;
+}
+
+.infoText {
+    min-width: 0;
+}
+
+.navRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.hint {
+    font-size: 13px;
+    color: var(--viewer-muted);
+    white-space: nowrap;
+}
+
+.hint kbd {
+    padding: 2px 6px;
+    font-family: monospace;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid color-mix(in srgb, var(--viewer-muted) 40%, transparent);
+}
+
+@media (hover: none) {
+    .hint {
+        display: none;
+    }
+}
+
+.dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--viewer-muted) 40%, transparent);
+    cursor: pointer;
+    transition: background-color 300ms, transform 300ms;
+}
+
+.dot[data-active="true"] {
+    background: var(--viewer-text);
+    transform: scale(1.2);
+}
+
+.view {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--viewer-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--viewer-muted) 30%, transparent);
+    transition: color 200ms, border-color 200ms;
+}
+
+.view:hover,
+.view:focus-visible {
+    color: var(--viewer-text);
+    border-color: var(--project-hover-border);
 }
 
 @keyframes fadeIn {
@@ -340,6 +513,9 @@
 
 .viewerTitle {
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-family: var(--card-title-font);
     font-size: 16px;
     font-weight: 600;
