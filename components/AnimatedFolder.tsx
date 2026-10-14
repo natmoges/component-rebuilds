@@ -44,7 +44,9 @@
  * Reference: AnimatedFolder by Launchly (Framer Marketplace).
  */
 
-import { useEffect, useState, type CSSProperties, type FocusEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 import styles from "./AnimatedFolder.module.css";
 
 export interface Project {
@@ -124,9 +126,10 @@ interface ProjectCardProps {
     delay: number;
     zIndex: number;
     isFanned: boolean;
+    onClick: () => void;
 }
 
-function ProjectCard({ project, x, rotate, delay, zIndex, isFanned }: ProjectCardProps) {
+function ProjectCard({ project, x, rotate, delay, zIndex, isFanned, onClick }: ProjectCardProps) {
     const [hasImageError, setHasImageError] = useState(false);
 
     const cardVars = {
@@ -143,6 +146,7 @@ function ProjectCard({ project, x, rotate, delay, zIndex, isFanned }: ProjectCar
             style={cardVars}
             tabIndex={isFanned ? 0 : -1}
             aria-label={`Open ${project.title}`}
+            onClick={onClick}
         >
             {!hasImageError && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -163,6 +167,60 @@ function ProjectCard({ project, x, rotate, delay, zIndex, isFanned }: ProjectCar
     );
 }
 
+interface ImageLightboxProps {
+    projects: Project[];
+    selectedIndex: number;
+    themeVars: CSSProperties;
+    onClose: () => void;
+}
+
+function ImageLightbox({ projects, selectedIndex, themeVars, onClose }: ImageLightboxProps) {
+    const project = projects[selectedIndex];
+
+    useEffect(() => {
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        function handleKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") onClose();
+        }
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [onClose]);
+
+    return createPortal(
+        <div className={styles.viewer} style={themeVars} onClick={onClose}>
+            <div className={styles.backdrop} />
+            <button
+                type="button"
+                className={styles.close}
+                aria-label="Close"
+                onClick={onClose}
+            >
+                <X size={22} />
+            </button>
+            <div className={styles.panel} onClick={(event) => event.stopPropagation()}>
+                <div className={styles.imageBox}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        className={styles.viewerImage}
+                        src={project.image}
+                        alt={project.alt ?? project.title}
+                    />
+                </div>
+                <div className={styles.info}>
+                    <h3 className={styles.viewerTitle}>{project.title}</h3>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
+
 export default function AnimatedFolder({
     title,
     projects,
@@ -171,8 +229,9 @@ export default function AnimatedFolder({
     countFont = "inherit",
     cardTitleFont = "inherit",
 }: AnimatedFolderProps) {
-
     const [isFanned, setIsFanned] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+    const waitForLeaveRef = useRef(false);
     const t = { ...defaultTheme, ...theme };
     const visibleProjects = projects.slice(0, maxCards);
     const count = visibleProjects.length;
@@ -187,6 +246,26 @@ export default function AnimatedFolder({
             );
         }
     }, [projects.length, title]);
+
+    function handleMouseEnter() {
+        if (waitForLeaveRef.current) return;
+        setIsFanned(true);
+    }
+
+    function handleMouseLeave() {
+        waitForLeaveRef.current = false;
+        setIsFanned(false);
+    }
+
+    function handleProjectClick(index: number) {
+        setSelectedIndex(index);
+    }
+
+    const handleCloseLightbox = useCallback(() => {
+        setSelectedIndex(null);
+        setIsFanned(false);
+        waitForLeaveRef.current = true;
+    }, []);
 
     function handleBlur(event: FocusEvent<HTMLDivElement>) {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -222,43 +301,55 @@ export default function AnimatedFolder({
     } as CSSProperties;
 
     return (
-        <div
-            className={styles.card}
-            style={themeVars}
-            data-fanned={isFanned}
-            tabIndex={0}
-            onMouseEnter={() => setIsFanned(true)}
-            onMouseLeave={() => setIsFanned(false)}
-            onFocus={() => setIsFanned(true)}
-            onBlur={handleBlur}
-        >
-            <div className={styles.stage}>
-                <div className={styles.back} />
-                <div className={styles.tab} />
-                <div className={styles.fan}>
-                    {visibleProjects.map((project, index) => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            x={(index - middle) * fanSpread}
-                            rotate={(index - middle) * fanAngle}
-                            delay={index * 80}
-                            zIndex={10 - index}
-                            isFanned={isFanned}
-                        />
-                    ))}
+        <>
+            <div
+                className={styles.card}
+                style={themeVars}
+                data-fanned={isFanned}
+                tabIndex={0}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onFocus={() => setIsFanned(true)}
+                onBlur={handleBlur}
+            >
+                <div className={styles.stage}>
+                    <div className={styles.back} />
+                    <div className={styles.tab} />
+                    <div className={styles.fan}>
+                        {visibleProjects.map((project, index) => (
+                            <ProjectCard
+                                key={project.id}
+                                project={project}
+                                x={(index - middle) * fanSpread}
+                                rotate={(index - middle) * fanAngle}
+                                delay={index * 80}
+                                zIndex={10 - index}
+                                isFanned={isFanned}
+                                onClick={() => handleProjectClick(index)}
+                            />
+                        ))}
+                    </div>
+                    <div className={styles.front} />
+                    <div className={styles.shine} />
                 </div>
-                <div className={styles.front} />
-                <div className={styles.shine} />
+
+                <div className={styles.labels}>
+                    <h3 className={styles.title}>{title}</h3>
+                    <p className={styles.count}>
+                        {count} {count === 1 ? "project" : "projects"}
+                    </p>
+                </div>
+                <p className={styles.explore}>Hover to explore</p>
             </div>
 
-            <div className={styles.labels}>
-                <h3 className={styles.title}>{title}</h3>
-                <p className={styles.count}>
-                    {count} {count === 1 ? "project" : "projects"}
-                </p>
-            </div>
-            <p className={styles.explore}>Hover to explore</p>
-        </div>
+            {selectedIndex !== null && (
+                <ImageLightbox
+                    projects={visibleProjects}
+                    selectedIndex={selectedIndex}
+                    themeVars={themeVars}
+                    onClose={handleCloseLightbox}
+                />
+            )}
+        </>
     );
 }
