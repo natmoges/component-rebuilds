@@ -229,6 +229,7 @@ function ImageLightbox({
     useLayoutEffect(() => {
         const panel = panelRef.current;
         if (!panel || !sourceRect) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
         const target = panel.getBoundingClientRect();
         const dx = sourceRect.left + sourceRect.width / 2 - (target.left + target.width / 2);
