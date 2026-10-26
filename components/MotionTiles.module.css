@@ -1,7 +1,35 @@
+@property --breath {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 1;
+}
+
 .root {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+.panel {
+    display: inline-block;
+    max-width: 100%;
+    padding: 16px 20px;
+    border: 1px solid rgba(237, 237, 237, 0.08);
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+            rgba(237, 237, 237, 0.06),
+            rgba(237, 237, 237, 0.015));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(237, 237, 237, 0.06);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.panel[data-engaged="true"] {
+    opacity: 1;
+    transform: none;
 }
 
 .title {
@@ -12,7 +40,6 @@
 }
 
 .tags {
-    max-width: 450px;
     margin: 8px 0 0;
     font-size: 14px;
     line-height: 1.4;
@@ -20,8 +47,13 @@
     color: #616161;
 }
 
-.tag {
+.tagRow {
+    display: flex;
+    column-gap: 0.35em;
     white-space: nowrap;
+}
+
+.tag {
     transition: color 400ms ease;
 }
 
@@ -44,13 +76,19 @@
     padding: 0;
     position: absolute;
     inset: 0;
+    pointer-events: none;
     transform-style: preserve-3d;
     transform: perspective(5000px) rotateX(-30deg) rotateY(40deg);
-    pointer-events: none;
+    transition: --breath 800ms ease-out;
+}
+
+.stack[data-engaged="true"] {
+    --breath: 0;
 }
 
 .tile {
     --home-z: calc((var(--middle) - var(--index)) * var(--depth-step));
+    --offset: calc(var(--middle) - var(--index));
     position: absolute;
     left: 50%;
     top: 50%;
@@ -59,17 +97,30 @@
     margin: -105px 0 0 -155px;
     border-radius: 6px;
     overflow: hidden;
-    transform:
-        translateX(calc((var(--middle) - var(--index)) * var(--spread)))
-        translateZ(var(--home-z));
-    transition: transform 400ms var(--spring);
     pointer-events: auto;
+    transform:
+        translateX(calc(var(--offset) * var(--spread))) translateZ(var(--home-z));
+    transition: transform 400ms var(--spring);
+    animation: breathe 4.5s ease-in-out infinite;
+    animation-delay: calc(var(--index) * -0.35s);
 }
 
 .tile[data-active="true"] {
     transform:
-        translateX(calc((var(--middle) - var(--index)) * var(--spread)))
-        translateZ(calc(var(--home-z) - var(--sink)));
+        translateX(calc(var(--offset) * var(--spread))) translateZ(calc(var(--home-z) - var(--sink)));
+}
+
+@keyframes breathe {
+
+    0%,
+    100% {
+        translate: 0 0 0;
+    }
+
+    50% {
+        translate:
+            calc(var(--offset) * 8px * var(--breath)) 0 calc(var(--offset) * 28px * var(--breath));
+    }
 }
 
 .video {
@@ -78,4 +129,10 @@
     height: 100%;
     object-fit: cover;
     background: var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tile {
+        animation: none;
+    }
 }

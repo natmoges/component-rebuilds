@@ -56,12 +56,31 @@ export interface MotionTilesProps {
     tiles: Tile[];
 }
 
+function splitIntoRows<T>(items: T[], rowCount: number): T[][] {
+    const base = Math.floor(items.length / rowCount);
+    const extra = items.length % rowCount;
+    const rows: T[][] = [];
+    let start = 0;
+    for (let row = 0; row < rowCount; row++) {
+        const size = base + (row < extra ? 1 : 0);
+        rows.push(items.slice(start, start + size));
+        start += size;
+    }
+    return rows.filter((row) => row.length > 0);
+}
+
 export default function MotionTiles({
     title = "VISUAL SYSTEMS: A Creative Arc (2019-2022)",
     tiles,
 }: MotionTilesProps) {
     const [activeTile, setActiveTile] = useState<number | null>(null);
+    const [hasEngaged, setHasEngaged] = useState(false);
     const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+    const stageRef = useRef<HTMLDivElement | null>(null);
+    const tagRows = splitIntoRows(
+        tiles.map((tile, index) => ({ tile, index })),
+        3
+    );
 
     useEffect(() => {
         videoRefs.current.forEach((video, index) => {
@@ -69,12 +88,33 @@ export default function MotionTiles({
             video.muted = true;
             const shouldPlay = activeTile === null || index === activeTile;
             if (shouldPlay) {
-                video.play().catch(() => {});
+                video.play().catch(() => { });
             } else {
                 video.pause();
             }
         });
     }, [activeTile]);
+
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (stage === null || hasEngaged) return;
+        const isTouch = window.matchMedia("(hover: none)").matches;
+        if (!isTouch) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) setHasEngaged(true);
+            },
+            { threshold: 0.5 }
+        );
+        observer.observe(stage);
+
+        return () => observer.disconnect();
+    }, [hasEngaged]);
+
+    function handleEngage() {
+        setHasEngaged(true);
+    }
 
     function handleSelect(index: number) {
         setActiveTile(index);
@@ -82,22 +122,33 @@ export default function MotionTiles({
 
     return (
         <section className={styles.root}>
-            <h2 className={styles.title}>{title}</h2>
-            <p className={styles.tags}>
-                {tiles.map((tile, index) => (
-                    <span
-                        key={tile.id}
-                        className={styles.tag}
-                        data-active={index === activeTile}
-                    >
-                        {tile.tag}
-                        {index < tiles.length - 1 ? " → " : ""}
-                    </span>
-                ))}
-            </p>
-            <div className={styles.stage}>
+            <div className={styles.panel} data-engaged={hasEngaged}>
+                <h2 className={styles.title}>{title}</h2>
+                <div className={styles.tags}>
+                    {tagRows.map((row, rowIndex) => (
+                        <div key={rowIndex} className={styles.tagRow}>
+                            {row.map(({ tile, index }) => (
+                                <span
+                                    key={tile.id}
+                                    className={styles.tag}
+                                    data-active={index === activeTile}
+                                >
+                                    {tile.tag}
+                                    {index < tiles.length - 1 ? " →" : ""}
+                                </span>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div
+                ref={stageRef}
+                className={styles.stage}
+                onPointerEnter={handleEngage}
+            >
                 <ul
                     className={styles.stack}
+                    data-engaged={hasEngaged}
                     style={{ "--middle": (tiles.length - 1) / 2 } as CSSProperties}
                 >
                     {tiles.map((tile, index) => {
