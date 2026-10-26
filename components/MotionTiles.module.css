@@ -5,39 +5,60 @@
 }
 
 .title {
-    margin: 0 0 24px;
+    margin: 0;
     font-size: 14px;
     font-weight: 400;
     color: var(--fg);
 }
 
-.tiles {
+.tags {
+    max-width: 450px;
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0.2px;
+    color: #616161;
+}
+
+.tag {
+    white-space: nowrap;
+}
+
+.stage {
+    position: relative;
+    height: 435px;
+}
+
+.stack {
+    --depth-step: 100px;
+    --spread: 50px;
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: perspective(5000px) rotateX(-30deg) rotateY(40deg);
 }
 
 .tile {
-    margin: 0;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 310px;
+    height: 210px;
+    margin: -105px 0 0 -155px;
+    border-radius: 6px;
+    overflow: hidden;
+    transform:
+        translateX(calc((var(--middle) - var(--index)) * var(--spread)))
+        translateZ(calc((var(--middle) - var(--index)) * var(--depth-step)));
 }
 
 .video {
     display: block;
     width: 100%;
-    aspect-ratio: 3 / 2;
+    height: 100%;
     object-fit: cover;
-    border-radius: 6px;
     background: var(--line);
-}
-
-.tag {
-    display: block;
-    margin-top: 8px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 12px;
-    letter-spacing: 0.2px;
-    color: var(--muted);
 }

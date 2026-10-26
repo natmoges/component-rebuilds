@@ -38,6 +38,7 @@
  * Reference: Motion Tiles by Uzair J., Framer Marketplace.
  */
 
+import type { CSSProperties } from "react";
 import styles from "./MotionTiles.module.css";
 
 export interface Tile {
@@ -60,22 +61,38 @@ export default function MotionTiles({
     return (
         <section className={styles.root}>
             <h2 className={styles.title}>{title}</h2>
-            <ul className={styles.tiles}>
-                {tiles.map((tile) => (
-                    <li key={tile.id} className={styles.tile}>
-                        <video
-                            className={styles.video}
-                            src={tile.video}
-                            poster={tile.poster}
-                            muted
-                            loop
-                            playsInline
-                            autoPlay
-                        />
-                        <span className={styles.tag}>{tile.tag}</span>
-                    </li>
+            <p className={styles.tags}>
+                {tiles.map((tile, index) => (
+                    <span key={tile.id} className={styles.tag}>
+                        {tile.tag}
+                        {index < tiles.length - 1 ? " → " : ""}
+                    </span>
                 ))}
-            </ul>
+            </p>
+            <div className={styles.stage}>
+                <ul
+                    className={styles.stack}
+                    style={{ "--middle": (tiles.length - 1) / 2 } as CSSProperties}
+                >
+                    {tiles.map((tile, index) => (
+                        <li
+                            key={tile.id}
+                            className={styles.tile}
+                            style={{ "--index": index } as CSSProperties}
+                        >
+                            <video
+                                className={styles.video}
+                                src={tile.video}
+                                poster={tile.poster}
+                                muted
+                                loop
+                                playsInline
+                                autoPlay
+                            />
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </section>
     );
 }
