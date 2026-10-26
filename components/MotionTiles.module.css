@@ -100,7 +100,6 @@
     border-radius: 6px;
     overflow: hidden;
     pointer-events: auto;
-    cursor: pointer;
     transform:
         translateX(calc(var(--offset) * var(--spread)))
         translateZ(var(--home-z));
@@ -113,6 +112,21 @@
     transform:
         translateX(calc(var(--offset) * var(--spread)))
         translateZ(calc(var(--home-z) - var(--sink)));
+}
+
+.tile[data-failed="true"] {
+    border: 1px solid rgba(237, 237, 237, 0.1);
+    background: linear-gradient(
+        135deg,
+        rgba(237, 237, 237, 0.07),
+        rgba(237, 237, 237, 0.02)
+    );
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.tile[data-failed="true"] .video {
+    opacity: 0;
 }
 
 @keyframes breathe {
@@ -128,12 +142,29 @@
     }
 }
 
+.tileButton {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    cursor: pointer;
+}
+
+.tileButton:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: -2px;
+}
+
 .video {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     background: var(--line);
+    pointer-events: none;
 }
 
 .backdrop {
@@ -175,6 +206,7 @@
     right: 8px;
     width: 24px;
     height: 24px;
+    padding: 0;
     display: grid;
     place-items: center;
     border-radius: 999px;
@@ -184,7 +216,6 @@
     -webkit-backdrop-filter: blur(8px);
     color: var(--fg);
     cursor: pointer;
-    padding: 0;
 }
 
 .close:hover {
@@ -218,8 +249,43 @@
     color: var(--signal);
 }
 
+@media (max-width: 900px) {
+    .stage {
+        height: 360px;
+    }
+    .stack {
+        scale: 0.78;
+    }
+}
+
+@media (max-width: 640px) {
+    .stage {
+        height: 280px;
+    }
+    .stack {
+        scale: 0.56;
+    }
+}
+
+@media (max-width: 420px) {
+    .stage {
+        height: 230px;
+    }
+    .stack {
+        scale: 0.44;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .tile {
         animation: none;
+        transition: none;
+    }
+    .tile[data-active="true"] {
+        transform:
+            translateX(calc(var(--offset) * var(--spread)))
+            translateZ(var(--home-z));
+        outline: 1px solid var(--signal);
+        outline-offset: -1px;
     }
 }

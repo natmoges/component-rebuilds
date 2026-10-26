@@ -47,6 +47,7 @@ import {
     useRef,
     useState,
     type CSSProperties,
+    type FocusEvent,
 } from "react";
 import { X } from "lucide-react";
 import styles from "./MotionTiles.module.css";
@@ -88,8 +89,10 @@ export default function MotionTiles({
     const [activeTile, setActiveTile] = useState<number | null>(null);
     const [hasEngaged, setHasEngaged] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [failedTiles, setFailedTiles] = useState<number[]>([]);
     const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
     const tileRefs = useRef<(HTMLLIElement | null)[]>([]);
+    const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
     const stageRef = useRef<HTMLDivElement | null>(null);
     const backdropRef = useRef<HTMLDivElement | null>(null);
     const figureRef = useRef<HTMLElement | null>(null);
@@ -167,6 +170,9 @@ export default function MotionTiles({
     const handleClose = useCallback(() => {
         const figure = figureRef.current;
         const backdrop = backdropRef.current;
+        const returnFocus = () => {
+            if (activeTile !== null) buttonRefs.current[activeTile]?.focus();
+        };
         if (figure === null || backdrop === null || activeTile === null) {
             setIsExpanded(false);
             return;
@@ -182,7 +188,10 @@ export default function MotionTiles({
             easing: "cubic-bezier(0.4, 0, 0.6, 1)",
             fill: "forwards",
         });
-        closing.onfinish = () => setIsExpanded(false);
+        closing.onfinish = () => {
+            setIsExpanded(false);
+            returnFocus();
+        };
     }, [activeTile, glideFrames]);
 
     useEffect(() => {
@@ -202,12 +211,24 @@ export default function MotionTiles({
         setActiveTile(index);
     }
 
+    function handleTileFocus(event: FocusEvent<HTMLButtonElement>, index: number) {
+        if (!event.currentTarget.matches(":focus-visible")) return;
+        handleEngage();
+        handleSelect(index);
+    }
+
     function handleTileClick(index: number) {
         if (index !== activeTile) {
             setActiveTile(index);
             return;
         }
         setIsExpanded(true);
+    }
+
+    function handleVideoError(index: number) {
+        setFailedTiles((current) =>
+            current.includes(index) ? current : [...current, index]
+        );
     }
 
     const openTile = isExpanded && activeTile !== null ? tiles[activeTile] : null;
@@ -245,6 +266,7 @@ export default function MotionTiles({
                 >
                     {tiles.map((tile, index) => {
                         const isActive = index === activeTile;
+                        const hasFailed = failedTiles.includes(index);
                         return (
                             <li
                                 key={tile.id}
@@ -253,22 +275,36 @@ export default function MotionTiles({
                                 }}
                                 className={styles.tile}
                                 data-active={isActive}
+                                data-failed={hasFailed}
                                 style={{ "--index": index } as CSSProperties}
                                 onMouseEnter={() => handleSelect(index)}
-                                onClick={() => handleTileClick(index)}
                             >
-                                <video
+                                <button
                                     ref={(element) => {
-                                        videoRefs.current[index] = element;
+                                        buttonRefs.current[index] = element;
                                     }}
-                                    className={styles.video}
-                                    src={tile.video}
-                                    poster={tile.poster}
-                                    muted
-                                    loop
-                                    playsInline
-                                    autoPlay
-                                />
+                                    type="button"
+                                    className={styles.tileButton}
+                                    aria-label={`${tile.tag}, open`}
+                                    aria-pressed={isActive}
+                                    onFocus={(event) => handleTileFocus(event, index)}
+                                    onClick={() => handleTileClick(index)}
+                                >
+                                    <video
+                                        ref={(element) => {
+                                            videoRefs.current[index] = element;
+                                        }}
+                                        className={styles.video}
+                                        src={tile.video}
+                                        poster={tile.poster}
+                                        muted
+                                        loop
+                                        playsInline
+                                        autoPlay
+                                        aria-hidden="true"
+                                        onError={() => handleVideoError(index)}
+                                    />
+                                </button>
                             </li>
                         );
                     })}
