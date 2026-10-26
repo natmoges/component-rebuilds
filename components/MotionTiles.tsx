@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * Motion Tiles. Seven video tiles stand in a tilted 3D stack, each one a
  * chapter of the 2019–2022 arc.
@@ -38,7 +40,7 @@
  * Reference: Motion Tiles by Uzair J., Framer Marketplace.
  */
 
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import styles from "./MotionTiles.module.css";
 
 export interface Tile {
@@ -58,12 +60,22 @@ export default function MotionTiles({
     title = "VISUAL SYSTEMS: A Creative Arc (2019-2022)",
     tiles,
 }: MotionTilesProps) {
+    const [activeTile, setActiveTile] = useState<number | null>(null);
+
+    function handleSelect(index: number) {
+        setActiveTile(index);
+    }
+
     return (
         <section className={styles.root}>
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.tags}>
                 {tiles.map((tile, index) => (
-                    <span key={tile.id} className={styles.tag}>
+                    <span
+                        key={tile.id}
+                        className={styles.tag}
+                        data-active={index === activeTile}
+                    >
                         {tile.tag}
                         {index < tiles.length - 1 ? " → " : ""}
                     </span>
@@ -74,23 +86,28 @@ export default function MotionTiles({
                     className={styles.stack}
                     style={{ "--middle": (tiles.length - 1) / 2 } as CSSProperties}
                 >
-                    {tiles.map((tile, index) => (
-                        <li
-                            key={tile.id}
-                            className={styles.tile}
-                            style={{ "--index": index } as CSSProperties}
-                        >
-                            <video
-                                className={styles.video}
-                                src={tile.video}
-                                poster={tile.poster}
-                                muted
-                                loop
-                                playsInline
-                                autoPlay
-                            />
-                        </li>
-                    ))}
+                    {tiles.map((tile, index) => {
+                        const isActive = index === activeTile;
+                        return (
+                            <li
+                                key={tile.id}
+                                className={styles.tile}
+                                data-active={isActive}
+                                style={{ "--index": index } as CSSProperties}
+                                onMouseEnter={() => handleSelect(index)}
+                            >
+                                <video
+                                    className={styles.video}
+                                    src={tile.video}
+                                    poster={tile.poster}
+                                    muted
+                                    loop
+                                    playsInline
+                                    autoPlay
+                                />
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
         </section>
