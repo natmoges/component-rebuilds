@@ -40,7 +40,15 @@
  * Reference: Motion Tiles by Uzair J., Framer Marketplace.
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState,
+    type CSSProperties,
+} from "react";
+import { X } from "lucide-react";
 import styles from "./MotionTiles.module.css";
 
 export interface Tile {
@@ -69,14 +77,23 @@ function splitIntoRows<T>(items: T[], rowCount: number): T[][] {
     return rows.filter((row) => row.length > 0);
 }
 
+function isMotionReduced() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 export default function MotionTiles({
     title = "VISUAL SYSTEMS: A Creative Arc (2019-2022)",
     tiles,
 }: MotionTilesProps) {
     const [activeTile, setActiveTile] = useState<number | null>(null);
     const [hasEngaged, setHasEngaged] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+    const tileRefs = useRef<(HTMLLIElement | null)[]>([]);
     const stageRef = useRef<HTMLDivElement | null>(null);
+    const backdropRef = useRef<HTMLDivElement | null>(null);
+    const figureRef = useRef<HTMLElement | null>(null);
+    const closeRef = useRef<HTMLButtonElement | null>(null);
     const tagRows = splitIntoRows(
         tiles.map((tile, index) => ({ tile, index })),
         3
@@ -86,14 +103,15 @@ export default function MotionTiles({
         videoRefs.current.forEach((video, index) => {
             if (video === null) return;
             video.muted = true;
-            const shouldPlay = activeTile === null || index === activeTile;
+            const shouldPlay =
+                !isExpanded && (activeTile === null || index === activeTile);
             if (shouldPlay) {
-                video.play().catch(() => { });
+                video.play().catch(() => {});
             } else {
                 video.pause();
             }
         });
-    }, [activeTile]);
+    }, [activeTile, isExpanded]);
 
     useEffect(() => {
         const stage = stageRef.current;
@@ -112,6 +130,70 @@ export default function MotionTiles({
         return () => observer.disconnect();
     }, [hasEngaged]);
 
+    const glideFrames = useCallback((index: number): Keyframe[] | null => {
+        const tile = tileRefs.current[index];
+        const figure = figureRef.current;
+        if (tile === null || tile === undefined || figure === null) return null;
+        const from = tile.getBoundingClientRect();
+        const to = figure.getBoundingClientRect();
+        const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+        const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+        const scale = from.width / to.width;
+        return [
+            { transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: 0.6 },
+            { transform: "none", opacity: 1 },
+        ];
+    }, []);
+
+    useLayoutEffect(() => {
+        if (!isExpanded || activeTile === null) return;
+        const figure = figureRef.current;
+        const backdrop = backdropRef.current;
+        if (figure === null || backdrop === null) return;
+
+        backdrop.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+        const frames = isMotionReduced() ? null : glideFrames(activeTile);
+        if (frames === null) {
+            figure.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+        } else {
+            figure.animate(frames, {
+                duration: 450,
+                easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+            });
+        }
+        closeRef.current?.focus();
+    }, [isExpanded, activeTile, glideFrames]);
+
+    const handleClose = useCallback(() => {
+        const figure = figureRef.current;
+        const backdrop = backdropRef.current;
+        if (figure === null || backdrop === null || activeTile === null) {
+            setIsExpanded(false);
+            return;
+        }
+        const glide = isMotionReduced() ? null : glideFrames(activeTile);
+        const frames = glide === null ? [{ opacity: 1 }, { opacity: 0 }] : [...glide].reverse();
+        backdrop.animate([{ opacity: 1 }, { opacity: 0 }], {
+            duration: 300,
+            fill: "forwards",
+        });
+        const closing = figure.animate(frames, {
+            duration: 350,
+            easing: "cubic-bezier(0.4, 0, 0.6, 1)",
+            fill: "forwards",
+        });
+        closing.onfinish = () => setIsExpanded(false);
+    }, [activeTile, glideFrames]);
+
+    useEffect(() => {
+        if (!isExpanded) return;
+        function handleKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") handleClose();
+        }
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isExpanded, handleClose]);
+
     function handleEngage() {
         setHasEngaged(true);
     }
@@ -119,6 +201,16 @@ export default function MotionTiles({
     function handleSelect(index: number) {
         setActiveTile(index);
     }
+
+    function handleTileClick(index: number) {
+        if (index !== activeTile) {
+            setActiveTile(index);
+            return;
+        }
+        setIsExpanded(true);
+    }
+
+    const openTile = isExpanded && activeTile !== null ? tiles[activeTile] : null;
 
     return (
         <section className={styles.root}>
@@ -156,10 +248,14 @@ export default function MotionTiles({
                         return (
                             <li
                                 key={tile.id}
+                                ref={(element) => {
+                                    tileRefs.current[index] = element;
+                                }}
                                 className={styles.tile}
                                 data-active={isActive}
                                 style={{ "--index": index } as CSSProperties}
                                 onMouseEnter={() => handleSelect(index)}
+                                onClick={() => handleTileClick(index)}
                             >
                                 <video
                                     ref={(element) => {
@@ -178,6 +274,46 @@ export default function MotionTiles({
                     })}
                 </ul>
             </div>
+
+            {openTile !== null && (
+                <div
+                    ref={backdropRef}
+                    className={styles.backdrop}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={openTile.tag}
+                    onClick={handleClose}
+                >
+                    <figure
+                        ref={figureRef}
+                        className={styles.figure}
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <video
+                            className={styles.expandedVideo}
+                            src={openTile.video}
+                            poster={openTile.poster}
+                            muted
+                            loop
+                            playsInline
+                            autoPlay
+                        />
+                        <button
+                            ref={closeRef}
+                            type="button"
+                            className={styles.close}
+                            aria-label="Close"
+                            onClick={handleClose}
+                        >
+                            <X size={12} strokeWidth={1.75} />
+                        </button>
+                        <figcaption className={styles.caption}>
+                            <span className={styles.captionTag}>{openTile.tag}</span>
+                            <p className={styles.detail}>{openTile.detail}</p>
+                        </figcaption>
+                    </figure>
+                </div>
+            )}
         </section>
     );
 }

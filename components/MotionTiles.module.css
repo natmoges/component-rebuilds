@@ -16,9 +16,11 @@
     padding: 16px 20px;
     border: 1px solid rgba(237, 237, 237, 0.08);
     border-radius: 12px;
-    background: linear-gradient(135deg,
-            rgba(237, 237, 237, 0.06),
-            rgba(237, 237, 237, 0.015));
+    background: linear-gradient(
+        135deg,
+        rgba(237, 237, 237, 0.06),
+        rgba(237, 237, 237, 0.015)
+    );
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     box-shadow: inset 0 1px 0 rgba(237, 237, 237, 0.06);
@@ -98,8 +100,10 @@
     border-radius: 6px;
     overflow: hidden;
     pointer-events: auto;
+    cursor: pointer;
     transform:
-        translateX(calc(var(--offset) * var(--spread))) translateZ(var(--home-z));
+        translateX(calc(var(--offset) * var(--spread)))
+        translateZ(var(--home-z));
     transition: transform 400ms var(--spring);
     animation: breathe 4.5s ease-in-out infinite;
     animation-delay: calc(var(--index) * -0.35s);
@@ -107,19 +111,20 @@
 
 .tile[data-active="true"] {
     transform:
-        translateX(calc(var(--offset) * var(--spread))) translateZ(calc(var(--home-z) - var(--sink)));
+        translateX(calc(var(--offset) * var(--spread)))
+        translateZ(calc(var(--home-z) - var(--sink)));
 }
 
 @keyframes breathe {
-
     0%,
     100% {
         translate: 0 0 0;
     }
-
     50% {
         translate:
-            calc(var(--offset) * 8px * var(--breath)) 0 calc(var(--offset) * 28px * var(--breath));
+            calc(var(--offset) * 8px * var(--breath))
+            0
+            calc(var(--offset) * 28px * var(--breath));
     }
 }
 
@@ -129,6 +134,88 @@
     height: 100%;
     object-fit: cover;
     background: var(--line);
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    background: rgba(11, 11, 12, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.figure {
+    position: relative;
+    margin: 0;
+    width: min(960px, 100%, calc((100vh - 220px) * 1.5));
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transform-origin: center;
+}
+
+.expandedVideo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(237, 237, 237, 0.08);
+    background: var(--line);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(237, 237, 237, 0.12);
+    background: rgba(11, 11, 12, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--fg);
+    cursor: pointer;
+    padding: 0;
+}
+
+.close:hover {
+    border-color: var(--signal);
+}
+
+.close:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+}
+
+.caption {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 2px;
+}
+
+.captionTag {
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    color: var(--muted);
+}
+
+.detail {
+    margin: 0;
+    max-width: 64ch;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--signal);
 }
 
 @media (prefers-reduced-motion: reduce) {
