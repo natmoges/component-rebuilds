@@ -21,7 +21,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 02 | [TextScrambler](https://component-rebuilds.vercel.app/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
 | 03 | [Back2Top](https://component-rebuilds.vercel.app/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
 | 04 | [AnimatedFolder](https://component-rebuilds.vercel.app/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
-| 05 | Motion Tiles | Uzair J. | 2 |
+| 05 | [Motion Tiles](https://component-rebuilds.vercel.app/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
 | 06 | Live Location | Amr Rashed | 2 |
 | 07 | The Ladder | My own (no reference) | 2 |
 | 08 | Smooth Scroll | Framer University | 3 · Page-level behaviour |
@@ -86,6 +86,22 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - On touch screens, a tap opens the folder, a tap outside closes it, the prompt reads "Tap to explore", and the arrows sit at the bottom of the screen.
 - With reduced motion on, there is no bounce, zoom, slide or border line. Cards fade in and the folder still tilts open.
 - The open animation measures the clicked card, so each card has its own ref. Using many refs is planned as build 05's new idea; it appears here first.
+
+### 05 · Motion Tiles
+
+**Reference:** Motion Tiles by Uzair J., Framer Marketplace (free). It's a design component, not a code component: 15 variants wired with hover and tap interactions, with no code to read. I read the compiled output of my own Framer site for its numbers and behaviour; none of it is here. The close icon is Lucide's `x` (ISC licence), via `lucide-react`.
+
+**Reused, with credit:** the stage tilt (`perspective(5000px) rotateX(-30deg) rotateY(40deg)`), the 100 px depth step between tiles, the 30 px sink on the selected tile, the spring (bounce 0.2 over 0.4 s, approximated as a curve), the 310 × 210 tile, the latch (no mouse-leave), and the tag colours (#616161 inactive, primary when lit).
+
+**Net-new in mine:**
+- **Seven refs focus playback.** In the reference, all seven videos play the whole time. Here all seven play until you engage. After that only the selected tile plays, and the other six pause where they are, so one video decodes instead of seven. Opening a tile pauses the whole stack.
+- **One rule for the stack.** The depth and spread come from each tile's position in the data, centred on the middle tile. The reference's horizontal steps are uneven (50, 50, 7.5, 7.5, 50, 50), and its own listing describes cursor-driven parallax, which it doesn't have (it's seven hover states).
+- **The stack breathes until you engage.** A staggered accordion drift settles smoothly when your pointer enters the stage (or it scrolls into view on a phone), and the title and chapter words fade in on a glass panel.
+- **Expand to inspect.** Click the selected tile (second tap on a phone) and it glides from its place in the stack to the centre. Underneath is the photo's camera line, read from the original files' EXIF, or the story for GENESIS and SYNTHESIS. ✕, a click outside or Escape glides it back.
+- **Keyboard, phones and fallbacks.** Every tile is a button. Tab moves the selection, Enter opens, and focus comes back on close. On a phone the first tap selects and the second opens. The stack scales down on narrow screens. A video that fails to load becomes a glass placeholder in the same slot. Reduced motion removes the breathing, the sink and the glide, and keeps a thin outline on the selected tile.
+- **Bug I hit and fixed:** in 3D, the stack's own invisible box sits at depth 0 like a pane of glass, so every tile behind it was unreachable. ACTION was blocked completely. `pointer-events: none` on the stack and `auto` on the tiles fixed it.
+
+**The media is mine, rebuilt for this page.** The five middle tiles are my 2019–2022 photographs, cropped to 3:2 and animated with depth parallax. I made 02–04 in Parallax Studio (Depth Anything V2). 05 and 06 were rendered in code by my co-pilot from my photos, with depth calculated from the image. GENESIS shows my 2022 site, `shotbynat`, as it was. SYNTHESIS resolves the five photos into NatFTP. Both bookends were rendered in code by my co-pilot from my direction, reusing the glyph set from my TextScrambler (build 02).
 
 ## Credits
 
