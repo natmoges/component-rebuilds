@@ -40,7 +40,7 @@
  * Reference: Motion Tiles by Uzair J., Framer Marketplace.
  */
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./MotionTiles.module.css";
 
 export interface Tile {
@@ -61,6 +61,20 @@ export default function MotionTiles({
     tiles,
 }: MotionTilesProps) {
     const [activeTile, setActiveTile] = useState<number | null>(null);
+    const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+    useEffect(() => {
+        videoRefs.current.forEach((video, index) => {
+            if (video === null) return;
+            video.muted = true;
+            const shouldPlay = activeTile === null || index === activeTile;
+            if (shouldPlay) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
+            }
+        });
+    }, [activeTile]);
 
     function handleSelect(index: number) {
         setActiveTile(index);
@@ -97,6 +111,9 @@ export default function MotionTiles({
                                 onMouseEnter={() => handleSelect(index)}
                             >
                                 <video
+                                    ref={(element) => {
+                                        videoRefs.current[index] = element;
+                                    }}
                                     className={styles.video}
                                     src={tile.video}
                                     poster={tile.poster}
