@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * SignalLocation — build #6 of the closer ladder.
  * Reference: Live Location by Amr Rashed (Framer Marketplace).
@@ -30,13 +32,61 @@
  * REDUCED MOTION: the dot stays, the ring is gone.
  */
 
+import { useEffect, useState } from "react";
 import styles from "./SignalLocation.module.css";
 
+type Reception = "hunting" | "locked" | "partial" | "adrift" | "lost";
+
+type Place = {
+    city?: string;
+    country?: string;
+};
+
+async function readSignal(signal: AbortSignal): Promise<Place> {
+    const response = await fetch("/api/location", { signal, cache: "no-store" });
+    if (!response.ok) throw new Error(`Signal broke: ${response.status}`);
+    return response.json();
+}
+
+function receptionFor(place: Place): Reception {
+    if (place.city && place.country) return "locked";
+    if (place.country) return "partial";
+    return "adrift";
+}
+
 export default function SignalLocation() {
+    const [reception, setReception] = useState<Reception>("hunting");
+    const [place, setPlace] = useState<Place>({});
+
+    useEffect(() => {
+        const tuner = new AbortController();
+
+        readSignal(tuner.signal)
+            .then((answer) => {
+                setPlace(answer);
+                setReception(receptionFor(answer));
+            })
+            .catch(() => {
+                if (tuner.signal.aborted) return;
+                setReception("lost");
+            });
+
+        return () => tuner.abort();
+    }, []);
+
+    const readouts: Record<Reception, string | undefined> = {
+        hunting: "Locating signal",
+        locked: `${place.city}, ${place.country}`,
+        partial: place.country,
+        adrift: "Somewhere in the world",
+        lost: "Signal unrecoverable",
+    };
+    const readout = readouts[reception];
+
     return (
         <div className={styles.signal} role="status">
             <span className={styles.dot} aria-hidden="true" />
-            <span className={styles.label}>Locating signal</span>
+            <span className={styles.label}>{readout}</span>
         </div>
     );
 }
