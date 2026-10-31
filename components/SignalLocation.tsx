@@ -26,6 +26,9 @@
  *
  * FAILURE: only if the signal itself breaks, the dot turns red and reads
  * "Signal unrecoverable".
+ * 
+ * THE WORDS: every readout scrambles in like my TextScrambler (build #2):
+ * "Locating signal" when it appears, the place when it locks.
  *
  * REPEAT VISIT: nothing saved, so it hunts and locks again from scratch.
  *
@@ -33,7 +36,12 @@
  */
 
 import { useEffect, useState } from "react";
+import TextScrambler from "./TextScrambler";
 import styles from "./SignalLocation.module.css";
+
+const MIN_HUNT_MS = 2000;
+const LABEL_DELAY_MS = 500;
+const TIMEOUT_MS = 5000;
 
 type Reception = "hunting" | "locked" | "partial" | "adrift" | "lost";
 
@@ -54,30 +62,50 @@ function receptionFor(place: Place): Reception {
     return "adrift";
 }
 
+function pause(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default function SignalLocation() {
     const [reception, setReception] = useState<Reception>("hunting");
     const [place, setPlace] = useState<Place>({});
+    const [isLabelShown, setIsLabelShown] = useState(false);
 
     useEffect(() => {
         const tuner = new AbortController();
+        const timeout = setTimeout(() => tuner.abort("timeout"), TIMEOUT_MS);
+        const labelTimer = setTimeout(() => setIsLabelShown(true), LABEL_DELAY_MS);
 
-        readSignal(tuner.signal)
-            .then((answer) => {
-                setPlace(answer);
-                setReception(receptionFor(answer));
-            })
-            .catch(() => {
-                if (tuner.signal.aborted) return;
+        async function lockOn() {
+            const [answer] = await Promise.all([
+                readSignal(tuner.signal).catch(() => null),
+                pause(MIN_HUNT_MS),
+            ]);
+            clearTimeout(timeout);
+
+            if (tuner.signal.reason === "left") return;
+
+            if (answer === null) {
                 setReception("lost");
-            });
+                return;
+            }
+            setPlace(answer);
+            setReception(receptionFor(answer));
+        }
 
-        return () => tuner.abort();
+        lockOn();
+
+        return () => {
+            clearTimeout(timeout);
+            clearTimeout(labelTimer);
+            tuner.abort("left");
+        };
     }, []);
 
-    const readouts: Record<Reception, string | undefined> = {
+    const readouts: Record<Reception, string> = {
         hunting: "Locating signal",
         locked: `${place.city}, ${place.country}`,
-        partial: place.country,
+        partial: place.country ?? "",
         adrift: "Somewhere in the world",
         lost: "Signal unrecoverable",
     };
@@ -86,7 +114,15 @@ export default function SignalLocation() {
     return (
         <div className={styles.signal} role="status">
             <span className={styles.dot} aria-hidden="true" />
-            <span className={styles.label}>{readout}</span>
+            {isLabelShown && (
+                <TextScrambler
+                    key={readout}
+                    text={readout}
+                    className={styles.label}
+                    textColor="#D9D9D9"
+                    scrambleColor="var(--muted)"
+                />
+            )}
         </div>
     );
 }
