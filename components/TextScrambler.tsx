@@ -41,6 +41,7 @@ export interface TextScramblerProps {
     scrambleColor?: string;
     durationMs?: number;
     flickerRate?: number;
+    className?: string;
 }
 
 export default function TextScrambler({
@@ -49,6 +50,7 @@ export default function TextScrambler({
     scrambleColor = "var(--fg)",
     durationMs = 1300,
     flickerRate = 0.3,
+    className,
 }: TextScramblerProps) {
     const characters = Array.from(text);
     const [revealedCount, setRevealedCount] = useState(0);
@@ -120,7 +122,10 @@ export default function TextScrambler({
     const signal = characters.slice(0, revealedCount).join("");
 
     return (
-        <span ref={textRef} className={styles.root}>
+                <span
+            ref={textRef}
+            className={className ? `${styles.root} ${className}` : styles.root}
+        >
             <span className={styles.ghost}>
                 {text}
             </span>
