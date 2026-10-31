@@ -1,0 +1,16 @@
+.signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #D9D9D9;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--signal);
+    flex-shrink: 0;
+}
