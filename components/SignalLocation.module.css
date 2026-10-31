@@ -6,17 +6,41 @@
     white-space: nowrap;
 }
 
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--lock-color);
+/* One slot for the icon: the beacon and the rocket share the same cell,
+   so one can turn into the other instead of being swapped. */
+.icon {
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
-    transition: background-color 0.4s ease;
 }
 
-.signal[data-reception="lost"] .dot {
-    background: var(--lost-color);
+.beacon,
+.rocket {
+    grid-area: 1 / 1;
+}
+
+.beacon {
+    display: inline-grid;
+    width: 10px;
+    height: 10px;
+}
+
+.ring,
+.dot {
+    grid-area: 1 / 1;
+    border-radius: 50%;
+}
+
+.dot {
+    background: var(--lock-color);
+    transition: background-color calc(var(--bar) / 2) ease;
+}
+
+.ring {
+    background: var(--lock-color);
+    opacity: 0;
 }
 
 .rocket {
@@ -24,11 +48,165 @@
     height: 14px;
     stroke-width: 1.8;
     transform: rotate(-45deg);
-    flex-shrink: 0;
+    opacity: 0;
 }
 
 .signal .label {
     font-size: 14px;
     font-weight: 400;
     letter-spacing: normal;
+}
+
+/* ---- every animation runs on the bar (--bar, set from BAR_MS) ---- */
+
+/* bar 0, searching: off-beat hits, the signal can't find its beat */
+.signal[data-reception="hunting"] .ring {
+    animation: hunt var(--bar) linear infinite;
+}
+
+.signal[data-reception="hunting"] .dot {
+    animation: flicker var(--bar) linear infinite;
+}
+
+/* bars 1-2, closing in: the label arrives and the pulse finds a steady
+   quarter-note beat, on the same downbeat */
+.signal[data-reception="hunting"][data-label="true"] .ring {
+    animation: closing var(--bar) linear infinite;
+}
+
+.signal[data-reception="hunting"][data-label="true"] .dot {
+    animation: none;
+}
+
+/* locked: one bar of half-note pulses as the place scrambles in,
+   then a breath every two bars */
+.signal[data-reception="locked"] .ring {
+    animation:
+        settle var(--bar) linear,
+        breathe calc(var(--bar) * 2) ease-out var(--bar) infinite;
+}
+
+/* partial: settles, but keeps breathing every bar */
+.signal[data-reception="partial"] .ring {
+    animation:
+        settle var(--bar) linear,
+        breathe-partial var(--bar) ease-out var(--bar) infinite;
+}
+
+/* adrift: the beacon vibrates harder and harder, bursts, and the rocket
+   rises out of the same spot, handing green over to the text colour */
+.signal[data-reception="adrift"] .beacon {
+    animation: overload calc(var(--bar) / 2) ease-in forwards;
+}
+
+.signal[data-reception="adrift"] .ring {
+    animation: burst calc(var(--bar) / 2) ease-out forwards;
+}
+
+.signal[data-reception="adrift"] .rocket {
+    animation: liftoff calc(var(--bar) / 2) ease-out calc(var(--bar) / 4) both;
+}
+
+/* lost: the dot bleeds to red over half a bar, the ring stops */
+.signal[data-reception="lost"] .dot {
+    background: var(--lost-color);
+}
+
+.signal[data-reception="lost"] .ring {
+    display: none;
+}
+
+/* 8 ticks per bar (12.5% each). Hits on ticks 0, 2, 3 and 6: uneven, but
+   every hit lands on the same grid the scramble's noise rolls on. */
+@keyframes hunt {
+    0% { transform: scale(1); opacity: 0; }
+    3% { opacity: 0.4; }
+    24.9% { transform: scale(1.9); opacity: 0; }
+    25% { transform: scale(1); opacity: 0; }
+    28% { opacity: 0.3; }
+    37.4% { transform: scale(1.6); opacity: 0; }
+    37.5% { transform: scale(1); opacity: 0; }
+    40.5% { opacity: 0.45; }
+    74.9% { transform: scale(2.6); opacity: 0; }
+    75% { transform: scale(1); opacity: 0; }
+    78% { opacity: 0.25; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* The dot dims on ticks 1, 4 and 7: the off-beats between the hits. */
+@keyframes flicker {
+    0%, 12.4%, 25%, 49.9%, 62.5%, 87.4%, 100% { opacity: 1; }
+    12.5%, 24.9% { opacity: 0.5; }
+    50%, 62.4% { opacity: 0.6; }
+    87.5%, 99.9% { opacity: 0.45; }
+}
+
+/* Four even quarter-note pulses: the beat has been found. */
+@keyframes closing {
+    0%, 25%, 50%, 75% { transform: scale(1); opacity: 0; }
+    6.25%, 31.25%, 56.25%, 81.25% { opacity: 0.3; }
+    24.9%, 49.9%, 74.9%, 100% { transform: scale(1.9); opacity: 0; }
+}
+
+/* Two half-note pulses in one bar. The first is Amr's exact pulse: scale 1
+   to 2.8, opacity peaking at 0.35 a quarter of the way in (one tick). */
+@keyframes settle {
+    0% { transform: scale(1); opacity: 0; }
+    12.5% { opacity: 0.35; }
+    49.9% { transform: scale(2.8); opacity: 0; }
+    50% { transform: scale(1); opacity: 0; }
+    62.5% { opacity: 0.25; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes breathe {
+    0% { transform: scale(1); opacity: 0; }
+    25% { opacity: 0.18; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes breathe-partial {
+    0% { transform: scale(1); opacity: 0; }
+    25% { opacity: 0.3; }
+    100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Shakes on every tick, a little harder each time, then collapses. */
+@keyframes overload {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    25% { transform: translate(-1px, 0.5px) scale(1.1); }
+    50% { transform: translate(1px, -1px) scale(1.25); }
+    75% { transform: translate(-1.5px, 1px) scale(1.35); opacity: 1; }
+    100% { transform: translate(0, 0) scale(0); opacity: 0; }
+}
+
+@keyframes burst {
+    0% { transform: scale(1); opacity: 0.45; }
+    100% { transform: scale(3.2); opacity: 0; }
+}
+
+@keyframes liftoff {
+    0% { opacity: 0; color: var(--lock-color); transform: rotate(-45deg) scale(0.4); }
+    100% { opacity: 1; color: var(--text-color); transform: rotate(-45deg) scale(1); }
+}
+
+/* reduced motion: the dot stays, the ring is gone, the rocket just appears */
+@media (prefers-reduced-motion: reduce) {
+    .ring {
+        display: none;
+    }
+
+    .signal[data-reception] .dot,
+    .signal[data-reception] .beacon,
+    .signal[data-reception] .rocket {
+        animation: none;
+    }
+
+    .signal[data-reception="adrift"] .beacon {
+        opacity: 0;
+    }
+
+    .signal[data-reception="adrift"] .rocket {
+        opacity: 1;
+    }
 }

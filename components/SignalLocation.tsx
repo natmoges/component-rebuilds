@@ -9,8 +9,8 @@
  * make a remembered location wrong, so it calculates every time.
  *
  * BEFORE LOAD: a green dot pulses out of rhythm, trying to find the signal.
- * "Locating signal" appears shortly after. The hunt runs at least 2 seconds
- * so the lock can be seen.
+ * After a beat, "Locating signal" scrambles in and the pulse finds a steady
+ * rhythm, closing in. The hunt runs at least 3 seconds so it can be read.
  *
  * THE INSTANT OF LOCK: the out-of-rhythm pulse settles onto a rhythm at once,
  * then slows until it's a subtle breath. The visitor's city and country are
@@ -21,8 +21,9 @@
  * HALF A LOCK: if only the country comes back, it shows the country, but the
  * dot doesn't lock all the way; it keeps breathing a little.
  *
- * NO PLACE: if the signal comes back but carries no place, the dot becomes a
- * small rocket and the text reads "Somewhere in the world".
+ * NO PLACE: if the signal comes back but carries no place, the dot vibrates
+ * harder and harder until it bursts into a small rocket, and the text reads
+ * "Somewhere in the world".
  *
  * FAILURE: only if the signal itself breaks, the dot turns red and reads
  * "Signal unrecoverable".
@@ -35,14 +36,19 @@
  * REDUCED MOTION: the dot stays, the ring is gone.
  */
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Rocket } from "lucide-react";
 import TextScrambler from "./TextScrambler";
 import styles from "./SignalLocation.module.css";
 
-const MIN_HUNT_MS = 2000;
-const LABEL_DELAY_MS = 500;
-const TIMEOUT_MS = 5000;
+// One tempo for everything: a 1-second bar of 8 ticks. The pulse, the
+// scramble's noise and every delay are whole ticks or bars, so nothing drifts.
+const BAR_MS = 1000;
+const TICKS_PER_BAR = 8;
+const TICK_MS = BAR_MS / TICKS_PER_BAR;
+const LABEL_DELAY_MS = BAR_MS;
+const MIN_HUNT_MS = 3 * BAR_MS;
+const TIMEOUT_MS = 5 * BAR_MS;
 
 type Reception = "hunting" | "locked" | "partial" | "adrift" | "lost";
 
@@ -81,9 +87,19 @@ export default function SignalLocation({
     const [reception, setReception] = useState<Reception>("hunting");
     const [place, setPlace] = useState<Place>({});
     const [isLabelShown, setIsLabelShown] = useState(false);
+    const signalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const tuner = new AbortController();
+        const huntStart = performance.now();
+
+        // Restart the pulse's CSS clock now, so it counts bars from the same
+        // instant as the label, the lock and the scramble.
+        signalRef.current
+            ?.getAnimations({ subtree: true })
+            .forEach((animation) => {
+                animation.currentTime = 0;
+            });
         const timeout = setTimeout(() => tuner.abort("timeout"), TIMEOUT_MS);
         const labelTimer = setTimeout(() => setIsLabelShown(true), LABEL_DELAY_MS);
 
@@ -93,6 +109,9 @@ export default function SignalLocation({
                 pause(MIN_HUNT_MS),
             ]);
             clearTimeout(timeout);
+
+            const lateBy = (performance.now() - huntStart) % BAR_MS;
+            if (lateBy > TICK_MS / 2) await pause(BAR_MS - lateBy);
 
             if (tuner.signal.reason === "left") return;
 
@@ -124,22 +143,28 @@ export default function SignalLocation({
 
     return (
         <div
+            ref={signalRef}
             className={styles.signal}
             role="status"
             data-reception={reception}
+            data-label={isLabelShown}
             style={
                 {
                     "--lock-color": lockColor,
                     "--lost-color": lostColor,
+                    "--text-color": textColor,
+                    "--bar": `${BAR_MS}ms`,
                     color: textColor,
                 } as CSSProperties
             }
         >
-            {reception === "adrift" ? (
-                <Rocket className={styles.rocket} aria-hidden="true" />
-            ) : (
-                <span className={styles.dot} aria-hidden="true" />
-            )}
+            <span className={styles.icon} aria-hidden="true">
+                <span className={styles.beacon}>
+                    <span className={styles.ring} />
+                    <span className={styles.dot} />
+                </span>
+                <Rocket className={styles.rocket} />
+            </span>
             {isLabelShown && (
                 <TextScrambler
                     key={readout}
@@ -147,6 +172,8 @@ export default function SignalLocation({
                     className={styles.label}
                     textColor={textColor}
                     scrambleColor="var(--muted)"
+                    durationMs={BAR_MS}
+                    flickerRate={1000 / (TICK_MS * 20)}
                 />
             )}
         </div>
