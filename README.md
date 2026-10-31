@@ -22,7 +22,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 03 | [Back2Top](https://component-rebuilds.vercel.app/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
 | 04 | [AnimatedFolder](https://component-rebuilds.vercel.app/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
 | 05 | [Motion Tiles](https://component-rebuilds.vercel.app/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
-| 06 | Live Location | Amr Rashed | 2 |
+| 06 | [SignalLocation](https://component-rebuilds.vercel.app/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
 | 07 | The Ladder | My own (no reference) | 2 |
 | 08 | Smooth Scroll | Framer University | 3 · Page-level behaviour |
 | 09 | TrailCursor | Akın Gündoğan | 3 |
@@ -102,6 +102,23 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Bug I hit and fixed:** in 3D, the stack's own invisible box sits at depth 0 like a pane of glass, so every tile behind it was unreachable. ACTION was blocked completely. `pointer-events: none` on the stack and `auto` on the tiles fixed it.
 
 **The media is mine, rebuilt for this page.** The five middle tiles are my 2019–2022 photographs, cropped to 3:2 and animated with depth parallax. I made 02–04 in Parallax Studio (Depth Anything V2). 05 and 06 were rendered in code by my co-pilot from my photos, with depth calculated from the image. GENESIS shows my 2022 site, `shotbynat`, as it was. SYNTHESIS resolves the five photos into NatFTP. Both bookends were rendered in code by my co-pilot from my direction, reusing the glyph set from my TextScrambler (build 02).
+
+### 06 · SignalLocation
+
+**Reference:** Live Location by Amr Rashed, Framer Marketplace. Read for behaviour only; none of its code is here. The rocket is Lucide's `rocket` icon (ISC licence), via `lucide-react`.
+
+**Reused, with credit:** the dot-plus-ring pulse, the first beat of the settle (scale 1 to 2.8, opacity peaking at 0.35 a quarter of the way in), the "Somewhere in the world" fallback, and the city, country order.
+
+**Net-new in mine:**
+- **No third-party lookup.** The reference asks an outside IP service, which ad blockers can stop. Mine asks a small route on my own domain (`/api/location`) that reads the location Vercel already attaches to each request. Blockers have nothing third-party to block, there's no rate limit, and no outside company sees a visitor's IP. This is a few lines of server code, which is build 07's new idea arriving one build early.
+- **Nothing saved, asked fresh every visit.** The reference keeps a visitor's location for 24 hours, which contradicted my site's own caption ("in real time"). Hotspots, VPNs and travel make a remembered location wrong, so mine asks on every load, and the route tells the network never to cache the answer.
+- **Five states instead of four:** hunting, locked (city and country), partial (country only: it settles but keeps breathing), adrift (no place: the dot vibrates, bursts and becomes a rocket) and lost (the request broke: the dot bleeds to red, "Signal unrecoverable"). Only a real failure turns red.
+- **One tempo.** Everything runs on a one-second bar of eight ticks: the pulse, the scramble's reveal, its noise and every delay. The pulse's CSS clock is restarted the moment the page wakes up, and the lock waits for the next bar line, so the motion and the words never drift apart.
+- **The first paint isn't blank.** The reference draws nothing until its script runs. Mine starts hunting from the first frame.
+- **The ladder reusing itself:** every readout scrambles in with my TextScrambler (build 02), which gained an optional `className` so it can sit at body size.
+- **Fixed from the reference:** its "Auto" language setting never translated the loading or error text, so I removed language support rather than ship a setting that doesn't work. Turning it off showed the fallback instead of hiding it. Its screen-reader settings switched announcements off at the moment the location arrived. Leaving the page didn't cancel the request.
+- **Reduced motion:** the dot stays, the ring is gone, and the rocket simply appears.
+- **The honest limit:** any location from an IP address is the network's location. A VPN, iCloud Private Relay or a phone hotspot shows where that network exits, not where the visitor is. On localhost there's no location at all, so it shows "Somewhere in the world".
 
 ## Credits
 

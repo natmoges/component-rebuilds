@@ -27,7 +27,7 @@ const builds: Build[] = [
   { number: "03", name: "Back2Top", reference: "BackToTop by The Velox Studio", rung: 1, status: "shipped", href: "/back2top" },
   { number: "04", name: "AnimatedFolder", reference: "AnimatedFolder by Launchly", rung: 2, status: "shipped", href: "/animatedfolder" },
   { number: "05", name: "Motion Tiles", reference: "Motion Tiles by Uzair J.", rung: 2, status: "shipped", href: "/motiontiles" },
-  { number: "06", name: "Live Location", reference: "Amr Rashed", rung: 2, status: "planned" },
+  { number: "06", name: "SignalLocation", reference: "Live Location by Amr Rashed", rung: 2, status: "shipped", href: "/signallocation" },
   { number: "07", name: "The Ladder", reference: "My own — no reference", rung: 2, status: "next" },
   { number: "08", name: "Smooth Scroll", reference: "Framer University", rung: 3, status: "planned" },
   { number: "09", name: "TrailCursor", reference: "Akın Gündoğan", rung: 3, status: "planned" },
