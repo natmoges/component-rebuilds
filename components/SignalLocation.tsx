@@ -35,7 +35,8 @@
  * REDUCED MOTION: the dot stays, the ring is gone.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { Rocket } from "lucide-react";
 import TextScrambler from "./TextScrambler";
 import styles from "./SignalLocation.module.css";
 
@@ -66,7 +67,17 @@ function pause(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export default function SignalLocation() {
+export interface SignalLocationProps {
+    lockColor?: string;
+    lostColor?: string;
+    textColor?: string;
+}
+
+export default function SignalLocation({
+    lockColor = "var(--signal)",
+    lostColor = "#EF4444",
+    textColor = "#D9D9D9",
+}: SignalLocationProps) {
     const [reception, setReception] = useState<Reception>("hunting");
     const [place, setPlace] = useState<Place>({});
     const [isLabelShown, setIsLabelShown] = useState(false);
@@ -112,14 +123,29 @@ export default function SignalLocation() {
     const readout = readouts[reception];
 
     return (
-        <div className={styles.signal} role="status">
-            <span className={styles.dot} aria-hidden="true" />
+        <div
+            className={styles.signal}
+            role="status"
+            data-reception={reception}
+            style={
+                {
+                    "--lock-color": lockColor,
+                    "--lost-color": lostColor,
+                    color: textColor,
+                } as CSSProperties
+            }
+        >
+            {reception === "adrift" ? (
+                <Rocket className={styles.rocket} aria-hidden="true" />
+            ) : (
+                <span className={styles.dot} aria-hidden="true" />
+            )}
             {isLabelShown && (
                 <TextScrambler
                     key={readout}
                     text={readout}
                     className={styles.label}
-                    textColor="#D9D9D9"
+                    textColor={textColor}
                     scrambleColor="var(--muted)"
                 />
             )}
