@@ -64,19 +64,24 @@ function starField(count: number, seed: number): string {
 
 function Satellite() {
     return (
-        <svg className={styles.satellite} viewBox="0 0 120 60" aria-hidden="true">
-            <g fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="2" y="22" width="38" height="16" rx="1" />
-                <line x1="15" y1="22" x2="15" y2="38" />
-                <line x1="28" y1="22" x2="28" y2="38" />
-                <rect x="80" y="22" width="38" height="16" rx="1" />
-                <line x1="93" y1="22" x2="93" y2="38" />
-                <line x1="106" y1="22" x2="106" y2="38" />
+        <svg className={styles.satellite} viewBox="0 0 120 64" aria-hidden="true">
+            <g fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round">
+                <rect className={styles.panel} x="2" y="22" width="38" height="16" rx="1" />
+                <line x1="11.5" y1="22" x2="11.5" y2="38" />
+                <line x1="21" y1="22" x2="21" y2="38" />
+                <line x1="30.5" y1="22" x2="30.5" y2="38" />
+                <line x1="2" y1="30" x2="40" y2="30" />
+                <rect className={styles.panel} x="80" y="22" width="38" height="16" rx="1" />
+                <line x1="89.5" y1="22" x2="89.5" y2="38" />
+                <line x1="99" y1="22" x2="99" y2="38" />
+                <line x1="108.5" y1="22" x2="108.5" y2="38" />
+                <line x1="80" y1="30" x2="118" y2="30" />
                 <line x1="40" y1="30" x2="48" y2="30" />
                 <line x1="72" y1="30" x2="80" y2="30" />
                 <rect x="48" y="20" width="24" height="20" rx="3" />
                 <line x1="60" y1="20" x2="60" y2="10" />
                 <path d="M53 10 Q60 2 67 10" />
+                <path d="M55 40h10l-2 6h-6z" />
             </g>
             <circle className={styles.beacon} cx="60" cy="30" r="2.5" />
         </svg>

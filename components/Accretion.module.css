@@ -1,10 +1,11 @@
 .space {
     --bar: 1000ms;
-    --orbit: min(150px, 34vw);
+    --orbit: min(30vw, 420px);
     min-height: 100vh;
     background: #000;
     color: #d9d9d9;
     padding: 4rem 16px;
+    overflow-x: clip;
 }
 
 /* ---------- The stars ---------- */
@@ -49,15 +50,18 @@
     }
 }
 
-/* ---------- The satellite: top centre ---------- */
+/* ---------- The satellite: top centre, alive ---------- */
 
 .satellite {
     position: fixed;
-    top: 8vh;
-    left: calc(50% - 48px);
-    width: 96px;
-    color: #8a8f98;
-    animation: driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    top: 6vh;
+    left: calc(50% - 75px);
+    width: 150px;
+    color: #9aa0a8;
+    z-index: 1;
+    animation:
+        driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both,
+        bob calc(var(--bar) * 4) ease-in-out calc(var(--bar) * 2) infinite alternate;
 }
 
 @keyframes driftIn {
@@ -69,6 +73,19 @@
         transform: none;
         opacity: 1;
     }
+}
+
+@keyframes bob {
+    from {
+        translate: 0 0;
+    }
+    to {
+        translate: 0 5px;
+    }
+}
+
+.panel {
+    fill: color-mix(in srgb, #3a4a5a 55%, transparent);
 }
 
 .beacon {
@@ -85,7 +102,7 @@
     }
 }
 
-/* ---------- The sight and the beam ---------- */
+/* ---------- The sight: a beam and a lock, only while tractoring ---------- */
 
 .sight {
     position: fixed;
@@ -93,37 +110,42 @@
     pointer-events: none;
 }
 
-.sightline {
+.beam {
     position: absolute;
     left: 50%;
-    top: calc(8vh + 52px);
-    height: calc(42vh - 52px);
-    width: 1px;
+    top: calc(6vh + 72px);
+    height: calc(44vh - 72px - 40px);
+    width: 18px;
     translate: -50% 0;
-    background: repeating-linear-gradient(
-        to bottom,
-        color-mix(in srgb, var(--signal) 35%, transparent) 0 4px,
-        transparent 4px 10px
+    background: linear-gradient(
+        to right,
+        transparent,
+        color-mix(in srgb, var(--signal) 22%, transparent) 35%,
+        var(--signal) 50%,
+        color-mix(in srgb, var(--signal) 22%, transparent) 65%,
+        transparent
     );
+    opacity: 0;
+    transform-origin: top;
+    scale: 1 0;
     transition:
-        width var(--bar),
-        box-shadow var(--bar),
-        opacity var(--bar);
+        opacity calc(var(--bar) / 2),
+        scale calc(var(--bar) / 2) ease-out;
 }
 
-.sight[data-reading="hunting"] .sightline,
-.sight[data-reading="kept"] .sightline {
-    width: 2px;
-    background: var(--signal);
-    box-shadow: 0 0 10px var(--signal);
+.sight[data-reading="hunting"] .beam,
+.sight[data-reading="kept"] .beam {
+    opacity: 1;
+    scale: 1 1;
 }
 
-.sight[data-reading="hunting"] .sightline {
+.sight[data-reading="hunting"] .beam {
     animation: beamFlicker calc(var(--bar) / 4) steps(2) infinite;
 }
 
-.sight[data-reading="debris"] .sightline {
-    opacity: 0.3;
+.sight[data-reading="debris"] .beam {
+    opacity: 0;
+    scale: 1 0.3;
 }
 
 @keyframes beamFlicker {
@@ -131,81 +153,185 @@
         opacity: 1;
     }
     to {
-        opacity: 0.55;
+        opacity: 0.45;
     }
 }
 
-.reticle {
+.lockOn {
+    --corner: linear-gradient(currentColor, currentColor);
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 160px;
-    height: 1px;
-    transform: translate(-50%, -50%);
-    background: color-mix(in srgb, var(--signal) 35%, transparent);
+    width: 84px;
+    height: 84px;
+    translate: -50% -50%;
+    color: var(--signal);
+    background:
+        var(--corner) top left / 18px 2px no-repeat,
+        var(--corner) top left / 2px 18px no-repeat,
+        var(--corner) top right / 18px 2px no-repeat,
+        var(--corner) top right / 2px 18px no-repeat,
+        var(--corner) bottom left / 18px 2px no-repeat,
+        var(--corner) bottom left / 2px 18px no-repeat,
+        var(--corner) bottom right / 18px 2px no-repeat,
+        var(--corner) bottom right / 2px 18px no-repeat;
+    opacity: 0;
+    scale: 1.8;
     transition:
-        width var(--bar),
-        background var(--bar),
-        opacity var(--bar);
+        opacity calc(var(--bar) / 2),
+        scale calc(var(--bar) / 2) ease-out,
+        color var(--bar),
+        background-color calc(var(--bar) / 2);
 }
 
-.sight[data-reading="searching"] .reticle {
-    animation: breathe calc(var(--bar) * 2) ease-in-out infinite alternate;
+.sight[data-reading="hunting"] .lockOn {
+    opacity: 1;
+    animation: lockHunt calc(var(--bar) / 2) ease-in-out infinite alternate;
 }
 
-.sight[data-reading="hunting"] .reticle {
-    animation: hunt calc(var(--bar) / 2) ease-in-out infinite alternate;
+.sight[data-reading="kept"] .lockOn {
+    opacity: 1;
+    scale: 1;
+    background-color: color-mix(in srgb, var(--signal) 14%, transparent);
 }
 
-.sight[data-reading="kept"] .reticle {
-    width: 56px;
-    background: var(--signal);
+.sight[data-reading="debris"] .lockOn {
+    opacity: 0.85;
+    scale: 1.5;
+    color: #c9ced6;
 }
 
-.sight[data-reading="debris"] .reticle {
-    width: 220px;
-    background: #8a8f98;
-    opacity: 0.4;
-}
-
-@keyframes breathe {
+@keyframes lockHunt {
     from {
-        opacity: 1;
+        scale: 1.4;
     }
     to {
-        opacity: 0.4;
+        scale: 1.1;
     }
 }
 
-@keyframes hunt {
-    from {
-        width: 160px;
-    }
-    to {
-        width: 56px;
-    }
-}
-
-/* ---------- The body: kept rocks accrete here ---------- */
+/* ---------- The body: kept matter accretes here, and orbits it ---------- */
 
 .body {
+    --size: min(calc(28px + var(--mass) * 4.5px), 150px, 24vw);
     position: fixed;
     left: calc(50% + var(--orbit));
     top: 50vh;
-    width: min(calc(8px + var(--mass) * 2.5px), 72px);
-    aspect-ratio: 1;
+    width: var(--size);
+    height: var(--size);
     translate: -50% -50%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #9aa0a8, #3a3e44 60%, #1a1c1f);
-    box-shadow: 0 0 calc(4px + var(--mass) * 2px)
-        color-mix(in srgb, var(--signal) 45%, transparent);
     transition:
         width var(--bar) ease-out,
-        box-shadow var(--bar);
+        height var(--bar) ease-out;
     pointer-events: none;
 }
 
-/* ---------- The scan: the beam holds each rock at the reticle ---------- */
+.planet {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 34% 30%, #a3a9b1, #4a4f56 45%, #15171a 78%);
+    box-shadow:
+        inset -6px -8px 18px rgba(0, 0, 0, 0.75),
+        0 0 calc(8px + var(--mass) * 1.5px) color-mix(in srgb, var(--signal) 35%, transparent);
+    transition: box-shadow var(--bar);
+}
+
+.ring {
+    position: absolute;
+    inset: 0;
+    animation: orbit calc(var(--bar) * 40) linear infinite;
+}
+
+.moon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    color: var(--signal);
+    opacity: 0.85;
+    transform: rotate(var(--angle)) translateX(calc(var(--size) / 2 + 14px))
+        rotate(calc(var(--angle) * -1));
+    animation: arrive var(--bar) ease-out both;
+}
+
+.moon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes orbit {
+    to {
+        rotate: 360deg;
+    }
+}
+
+@keyframes arrive {
+    from {
+        opacity: 0;
+        scale: 2;
+    }
+}
+
+.massLabel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0;
+    margin-top: 26px;
+    white-space: nowrap;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* ---------- The field: meteors stream past; scroll stretches them ---------- */
+
+.field {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity calc(var(--bar) / 2);
+}
+
+/* While something is held, the field and the drift step back. */
+.scan[data-reading="hunting"] .field,
+.scan[data-reading="kept"] .field,
+.scan[data-reading="debris"] .field {
+    opacity: 0.3;
+}
+
+.scan[data-reading="hunting"] .drift,
+.scan[data-reading="kept"] .drift,
+.scan[data-reading="debris"] .drift {
+    opacity: calc(0.05 + var(--depth) * 0.12);
+}
+
+.meteor {
+    position: absolute;
+    top: -20vh;
+    width: 1.5px;
+    height: calc(var(--length) * (1 + var(--warp, 0)));
+    border-radius: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, var(--brightness)));
+    rotate: 5deg;
+    animation: fall linear infinite;
+    transition: height 0.25s ease-out;
+}
+
+@keyframes fall {
+    to {
+        transform: translate(-12vw, 140vh);
+    }
+}
+
+/* ---------- The scan: era matter passes; the beam holds it at the lock ---------- */
 
 .scan {
     position: relative;
@@ -217,7 +343,8 @@
     margin: 0;
     padding: 0;
     padding-top: 60vh;
-    padding-bottom: 70vh;
+    padding-bottom: 60vh;
+    overflow: clip;
 }
 
 .passage {
@@ -230,49 +357,61 @@
 
 .object {
     position: sticky;
-    top: calc(50vh - 5px);
+    top: calc(50vh - 26px);
     margin-top: 40vh;
-    width: 14px;
-    height: 10px;
-    border-radius: 40% 60% 55% 45%;
-    background: #6b7078;
+    width: 52px;
+    height: 52px;
+    color: #a3a9b1;
+    z-index: 1;
     transition:
-        background var(--bar),
-        box-shadow var(--bar);
+        color var(--bar),
+        filter var(--bar);
+}
+
+.object svg,
+.drift svg {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .object[data-decision="kept"] {
-    background: var(--signal);
-    box-shadow: 0 0 12px var(--signal);
+    color: var(--signal);
+    filter: drop-shadow(0 0 8px var(--signal));
     animation: absorb calc(var(--bar) * 2) ease-in var(--bar) forwards;
 }
 
 .object[data-decision="debris"] {
+    color: #4a4e55;
     animation: tumble calc(var(--bar) * 3) ease-in forwards;
 }
 
 @keyframes absorb {
     to {
-        transform: translateX(var(--orbit)) scale(0.3);
+        transform: translateX(var(--orbit)) scale(0.25);
         opacity: 0;
     }
 }
 
 @keyframes tumble {
     to {
-        transform: translate(34vw, 22vh) rotate(200deg);
-        opacity: 0.15;
+        transform: translate(-34vw, 30vh) rotate(-220deg) scale(0.6);
+        opacity: 0.1;
     }
 }
 
-/* ---------- The comet shower: passes with the scroll, never scanned ---------- */
-
-.comet {
+/* Each drift sits in its era's stretch of the scroll. Far ones lag behind near ones. */
+.drift {
     position: absolute;
-    width: 1.5px;
-    border-radius: 1px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.75), transparent);
-    rotate: -8deg;
+    top: calc(60vh + var(--slot) * 90vh);
+    width: calc(12px + var(--depth) * 40px);
+    aspect-ratio: 1;
+    color: #8a8f98;
+    opacity: calc(0.1 + var(--depth) * 0.3);
+    transform: translateY(
+        calc((var(--scroll, 0) * 1px + 50vh - (60vh + var(--slot) * 90vh)) * (1 - var(--depth)) * 0.5)
+    );
+    transition: opacity calc(var(--bar) / 2);
     pointer-events: none;
 }
 
@@ -332,88 +471,6 @@
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-}
-
-/* ---------- The record (the reduced-motion view) ---------- */
-
-.record {
-    list-style: none;
-    padding: 0;
-    display: none;
-    gap: 2rem;
-}
-
-.entry[data-state="Debris"] {
-    opacity: 0.45;
-}
-
-.when,
-.credit,
-.lock,
-.source,
-.seam a {
-    color: var(--muted);
-    font-size: 0.85rem;
-}
-
-.title {
-    font-size: 1.1rem;
-    margin: 0.25rem 0;
-}
-
-.title a {
-    color: var(--signal);
-}
-
-.record,
-.source,
-.seam {
-    position: relative;
-    max-width: 640px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.source,
-.seam {
-    display: none;
-    text-align: center;
-}
-
-/* ---------- Small screens ---------- */
-
-@media (max-width: 600px) {
-    .satellite {
-        width: 64px;
-        left: calc(50% - 32px);
-    }
-    .sightline {
-        top: calc(8vh + 36px);
-        height: calc(42vh - 36px);
-    }
-}
-
-/* ---------- Reduced motion ---------- */
-
-@media (prefers-reduced-motion: reduce) {
-    .starLayer,
-    .satellite,
-    .beacon,
-    .reticle,
-    .sightline {
-        animation: none;
-    }
-    .scan,
-    .sight {
-        display: none;
-    }
-    .record {
-        display: grid;
-    }
-    .source,
-    .seam {
-        display: block;
-    }
 }
 
 /* ---------- The artifact: develops on lock, dissolves into the record on tap ---------- */
@@ -477,10 +534,95 @@
     }
 }
 
+/* ---------- The record (the reduced-motion view) ---------- */
+
+.record {
+    list-style: none;
+    padding: 0;
+    display: none;
+    gap: 2rem;
+}
+
+.entry[data-state="Debris"] {
+    opacity: 0.45;
+}
+
+.when,
+.credit,
+.lock,
+.source,
+.seam a {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.title {
+    font-size: 1.1rem;
+    margin: 0.25rem 0;
+}
+
+.title a {
+    color: var(--signal);
+}
+
+.record,
+.source,
+.seam {
+    position: relative;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.source,
+.seam {
+    display: none;
+    text-align: center;
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 600px) {
+    .satellite {
+        width: 104px;
+        left: calc(50% - 52px);
+    }
+    .beam {
+        top: calc(6vh + 50px);
+        height: calc(44vh - 50px - 40px);
+    }
+    .object {
+        width: 44px;
+        height: 44px;
+        top: calc(50vh - 22px);
+    }
+}
+
+/* ---------- Reduced motion ---------- */
+
 @media (prefers-reduced-motion: reduce) {
+    .starLayer,
+    .satellite,
+    .beacon,
+    .beam,
+    .lockOn,
+    .ring,
+    .moon,
     .artifact,
     .snippet,
     .readout {
         animation: none;
+    }
+    .scan,
+    .sight,
+    .field {
+        display: none;
+    }
+    .record {
+        display: grid;
+    }
+    .source,
+    .seam {
+        display: block;
     }
 }
