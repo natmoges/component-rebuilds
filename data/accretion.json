@@ -403,6 +403,19 @@
     "snippet": "type Reception =\n    | \"hunting\"\n    | \"locked\"\n    | \"partial\"\n    | \"adrift\"\n    | \"lost\";"
   },
   {
+    "id": "40b92e44-9278-8181-b6a6-f1718448d900",
+    "title": "07 · Accretion",
+    "when": "Nov 1, 2026",
+    "stratum": "5 · The middle floor",
+    "state": "Kept",
+    "whatChanged": "This page. My record read live from Notion, scanned in order, nothing polished to match. The first build with nothing to copy.",
+    "lockCondition": "",
+    "credit": "No reference",
+    "link": "https://component-rebuilds.vercel.app/",
+    "image": null,
+    "snippet": null
+  },
+  {
     "id": "40b92e44-9278-8110-9db6-e75dbd2cb8d9",
     "title": "08 · Smooth Scroll",
     "when": "Rung 3",

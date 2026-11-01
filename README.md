@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page.
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
 
 ## The method
 
@@ -23,7 +23,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 04 | [AnimatedFolder](https://component-rebuilds.vercel.app/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
 | 05 | [Motion Tiles](https://component-rebuilds.vercel.app/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
 | 06 | [SignalLocation](https://component-rebuilds.vercel.app/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
-| 07 | The Ladder | My own (no reference) | 2 |
+| 07 | [Accretion](https://component-rebuilds.vercel.app) | None. My own | 2 |
 | 08 | Smooth Scroll | Framer University | 3 · Page-level behaviour |
 | 09 | TrailCursor | Akın Gündoğan | 3 |
 | 10 | LogoPreloader | Sukoya Design | 3 |
@@ -119,6 +119,24 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Fixed from the reference:** its "Auto" language setting never translated the loading or error text, so I removed language support rather than ship a setting that doesn't work. Turning it off showed the fallback instead of hiding it. Its screen-reader settings switched announcements off at the moment the location arrived. Leaving the page didn't cancel the request.
 - **Reduced motion:** the dot stays, the ring is gone, and the rocket simply appears.
 - **The honest limit:** any location from an IP address is the network's location. A VPN, iCloud Private Relay or a phone hotspot shows where that network exits, not where the visitor is. On localhost there's no location at all, so it shows "Somewhere in the world".
+
+### 07 · Accretion
+
+**Reference:** none. The first build with nothing to copy. It started as "The Ladder", an index of the builds, and grew into the whole record: from the early years to this page. The paragraph above the code is mine, edited with Claude (Anthropic), which was used as co-pilot.
+
+**What it is:** a satellite in deep space. Scrolling is travel through a meteor field. Each object is held in the crosshair and decoded on a green HUD. If the record can prove it, it's kept: its real artifact develops on the HUD, a tap dissolves it into the text, and it accretes into a body that grows beside the crosshair. If the record can't prove it yet, it's debris and falls away, showing what would lock it.
+
+**Net-new in mine:**
+- **It reads my record live.** The page is a server component that queries my Notion database on the server (`revalidate: 60`), so an edit in Notion shows up on the page within a minute. The key never reaches the browser. If Notion can't be reached, it reads a stored copy (`data/accretion.json`) and the end of the record says which one it read from.
+- **The record decides, not the animation.** Kept or debris is a field in the database. Nothing is promoted because it looks good scrolling past. Claims I can't make yet (React/TypeScript proficiency, a deployed multi-agent system) sit in the debris with their lock conditions.
+- **The scan is a hold test.** Every frame it checks whether an object's centre is within 6 px of the scan line. Objects ride the beam (`position: sticky`) while held. Decisions are remembered, so scrolling back doesn't re-scan.
+- **One tempo,** carried over from SignalLocation (build 06): a 1000 ms bar. The satellite arrives on the first bar, and a decode lasts two.
+- **Bounded parallax.** The drifting matter moves at its own depth but stays inside its slot, so the page ends where the record ends.
+- **The seam is kept.** The old index lives at `/before`, frozen the day it was replaced.
+- **The ladder reusing itself:** every HUD title decodes with my TextScrambler (build 02).
+- **Reduced motion:** no travel, no scan. The whole record as a plain list, with the source line and the link to `/before`.
+
+**The artifacts are mine:** screenshots of my builds, my 2022 site, the NatFTP frame from Motion Tiles, my homelab diagram, the 56-Day and Recall posts, and my own YouTube thumbnail. They're served from this repo, not from Notion, whose file links expire. The satellite and the era icons are drawn in SVG for this page. Nothing private is published: the database has a Publish field, and only those rows are read.
 
 ## Credits
 
