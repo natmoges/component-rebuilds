@@ -1,6 +1,7 @@
 // The ladder index. Every build is listed with the component it rebuilds and who made the original.
 // Each rung is a layer. Each build reuses what the last one taught and adds one new idea.
 import styles from "./page.module.css";
+import Link from "next/link";
 
 type BuildStatus = "shipped" | "next" | "planned";
 
@@ -48,8 +49,8 @@ export default function Home() {
           one layer at a time. Every original is credited. None of its code is here.
         </p>
         <p>
-          This was the ladder's index until Nov 1, 2026. It grew into{" "}
-          <a href="/">Accretion</a>.
+          This was the ladder’s index until Nov 1, 2026. It grew into{" "}
+          <Link href="/">Accretion</Link>.
         </p>
       </header>
 

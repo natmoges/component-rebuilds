@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import TextScrambler from "./TextScrambler";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
@@ -9,9 +9,33 @@ import styles from "./Accretion.module.css";
 const BAR_MS = 1000;
 const HUNT_MS = 2 * BAR_MS;
 const HOLD_TOLERANCE_PX = 6;
+const COMETS_PER_ENTRY = 8;
 
 type Decision = "kept" | "debris";
 type Phase = "rest" | "travelling" | "held" | "end";
+type Reading = "rest" | "searching" | "hunting" | "kept" | "debris" | "end";
+
+type Comet = {
+    left: number;
+    top: number;
+    length: number;
+};
+
+function showerOf(count: number): Comet[] {
+    let state = 97;
+    const next = () => {
+        state = (state * 16807) % 2147483647;
+        return state / 2147483647;
+    };
+    return Array.from({ length: count }, () => {
+        const side = next() < 0.5 ? -1 : 1;
+        return {
+            left: 50 + side * (10 + next() * 38),
+            top: next() * 100,
+            length: 6 + Math.round(next() * 18),
+        };
+    });
+}
 
 export interface ScanProps {
     entries: Entry[];
@@ -25,6 +49,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     const [phase, setPhase] = useState<Phase>("rest");
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
+    const shower = useMemo(() => showerOf(entries.length * COMETS_PER_ENTRY), [entries.length]);
 
     useEffect(() => {
         let frame: number | null = null;
@@ -84,16 +109,29 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     }, [heldId, decisions, entries]);
 
     const held = entries.find((entry) => entry.id === heldId) ?? null;
-    const reading =
-        phase === "held" && held !== null
-            ? decisions[held.id] ?? "hunting"
-            : phase === "travelling"
-              ? "searching"
-              : phase;
+    const decision: Decision | undefined = held !== null ? decisions[held.id] : undefined;
+    let reading: Reading;
+    if (phase === "held" && held !== null) reading = decision ?? "hunting";
+    else if (phase === "travelling") reading = "searching";
+    else if (phase === "end") reading = "end";
+    else reading = "rest";
+    const mass = Object.values(decisions).filter((decision) => decision === "kept").length;
 
     return (
         <div className={styles.scan}>
             <ol className={styles.passages}>
+                {shower.map((comet, index) => (
+                    <span
+                        key={`comet-${index}`}
+                        className={styles.comet}
+                        aria-hidden="true"
+                        style={{
+                            left: `${comet.left}%`,
+                            top: `${comet.top}%`,
+                            height: `${comet.length}px`,
+                        }}
+                    />
+                ))}
                 {entries.map((entry, index) => (
                     <li key={entry.id} className={styles.passage}>
                         <span
@@ -111,6 +149,12 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 <span className={styles.sightline} />
                 <span className={styles.reticle} />
             </div>
+
+            <div
+                className={styles.body}
+                style={{ "--mass": mass } as CSSProperties}
+                aria-hidden="true"
+            />
 
             <aside className={styles.hud} data-reading={reading} aria-live="polite">
                 {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}

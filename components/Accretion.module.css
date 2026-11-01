@@ -84,7 +84,7 @@
     }
 }
 
-/* ---------- The sight: one axis from satellite to scan line ---------- */
+/* ---------- The sight and the beam ---------- */
 
 .sight {
     position: fixed;
@@ -98,11 +98,40 @@
     top: calc(8vh + 52px);
     height: calc(42vh - 52px);
     width: 1px;
+    translate: -50% 0;
     background: repeating-linear-gradient(
         to bottom,
         color-mix(in srgb, var(--signal) 35%, transparent) 0 4px,
         transparent 4px 10px
     );
+    transition:
+        width var(--bar),
+        box-shadow var(--bar),
+        opacity var(--bar);
+}
+
+.sight[data-reading="hunting"] .sightline,
+.sight[data-reading="kept"] .sightline {
+    width: 2px;
+    background: var(--signal);
+    box-shadow: 0 0 10px var(--signal);
+}
+
+.sight[data-reading="hunting"] .sightline {
+    animation: beamFlicker calc(var(--bar) / 4) steps(2) infinite;
+}
+
+.sight[data-reading="debris"] .sightline {
+    opacity: 0.3;
+}
+
+@keyframes beamFlicker {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.55;
+    }
 }
 
 .reticle {
@@ -156,13 +185,33 @@
     }
 }
 
-/* ---------- The scan: the beam holds each object at the reticle ---------- */
+/* ---------- The body: kept rocks accrete here ---------- */
+
+.body {
+    position: fixed;
+    left: 50%;
+    top: 64vh;
+    width: calc(8px + var(--mass) * 5px);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #9aa0a8, #3a3e44 60%, #1a1c1f);
+    box-shadow: 0 0 calc(4px + var(--mass) * 2px)
+        color-mix(in srgb, var(--signal) 45%, transparent);
+    transition:
+        width var(--bar) ease-out,
+        box-shadow var(--bar);
+    pointer-events: none;
+}
+
+/* ---------- The scan: the beam holds each rock at the reticle ---------- */
 
 .scan {
     position: relative;
 }
 
 .passages {
+    position: relative;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -187,8 +236,6 @@
     border-radius: 40% 60% 55% 45%;
     background: #6b7078;
     transition:
-        transform calc(var(--bar) * 2) ease-in,
-        opacity calc(var(--bar) * 2),
         background var(--bar),
         box-shadow var(--bar);
 }
@@ -196,11 +243,36 @@
 .object[data-decision="kept"] {
     background: var(--signal);
     box-shadow: 0 0 12px var(--signal);
+    animation: absorb calc(var(--bar) * 2) ease-in var(--bar) forwards;
 }
 
 .object[data-decision="debris"] {
-    transform: translateY(30vh) rotate(90deg);
-    opacity: 0.25;
+    animation: tumble calc(var(--bar) * 3) ease-in forwards;
+}
+
+@keyframes absorb {
+    to {
+        transform: translateY(14vh) scale(0.3);
+        opacity: 0;
+    }
+}
+
+@keyframes tumble {
+    to {
+        transform: translate(34vw, 22vh) rotate(200deg);
+        opacity: 0.15;
+    }
+}
+
+/* ---------- The comet shower: passes with the scroll, never scanned ---------- */
+
+.comet {
+    position: absolute;
+    width: 1.5px;
+    border-radius: 1px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.75), transparent);
+    rotate: -8deg;
+    pointer-events: none;
 }
 
 /* ---------- The HUD: bottom centre, an instrument readout ---------- */
@@ -325,7 +397,8 @@
     .starLayer,
     .satellite,
     .beacon,
-    .reticle {
+    .reticle,
+    .sightline {
         animation: none;
     }
     .scan,
