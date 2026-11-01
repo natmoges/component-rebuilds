@@ -47,6 +47,7 @@
 
 import Link from "next/link";
 import { readRecord } from "../lib/record";
+import Scan from "./Scan";
 import styles from "./Accretion.module.css";
 
 function starField(count: number, seed: number): string {
@@ -95,6 +96,7 @@ export default async function Accretion() {
                 <span className={styles.starLayer} style={{ boxShadow: starField(24, 41) }} />
             </div>
             <Satellite />
+            <Scan entries={entries} source={source} keptCount={keptCount} debrisCount={debrisCount} />
 
             <ol className={styles.record}>
                 {entries.map((entry) => (

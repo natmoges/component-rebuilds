@@ -6,34 +6,7 @@
     padding: 4rem 16px;
 }
 
-.record {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: 2rem;
-}
-
-.entry[data-state="Debris"] {
-    opacity: 0.45;
-}
-
-.when,
-.credit,
-.lock,
-.source,
-.seam a {
-    color: var(--muted);
-    font-size: 0.85rem;
-}
-
-.title {
-    font-size: 1.1rem;
-    margin: 0.25rem 0;
-}
-
-.title a {
-    color: var(--signal);
-}
+/* ---------- The stars ---------- */
 
 .stars {
     position: fixed;
@@ -67,22 +40,34 @@
 }
 
 @keyframes twinkle {
-    from { opacity: 1; }
-    to { opacity: 0.3; }
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.3;
+    }
 }
+
+/* ---------- The satellite: top centre ---------- */
 
 .satellite {
     position: fixed;
-    top: 12vh;
-    right: 8vw;
+    top: 8vh;
+    left: calc(50% - 48px);
     width: 96px;
     color: #8a8f98;
     animation: driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 @keyframes driftIn {
-    from { transform: translate(40vw, -20vh) rotate(-12deg); opacity: 0; }
-    to { transform: none; opacity: 1; }
+    from {
+        transform: translate(40vw, -20vh) rotate(-12deg);
+        opacity: 0;
+    }
+    to {
+        transform: none;
+        opacity: 1;
+    }
 }
 
 .beacon {
@@ -91,8 +76,219 @@
 }
 
 @keyframes blink {
-    0% { opacity: 1; }
-    12.5% { opacity: 0.15; }
+    0% {
+        opacity: 1;
+    }
+    12.5% {
+        opacity: 0.15;
+    }
+}
+
+/* ---------- The sight: one axis from satellite to scan line ---------- */
+
+.sight {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+}
+
+.sightline {
+    position: absolute;
+    left: 50%;
+    top: calc(8vh + 52px);
+    height: calc(42vh - 52px);
+    width: 1px;
+    background: repeating-linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--signal) 35%, transparent) 0 4px,
+        transparent 4px 10px
+    );
+}
+
+.reticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 160px;
+    height: 1px;
+    transform: translate(-50%, -50%);
+    background: color-mix(in srgb, var(--signal) 35%, transparent);
+    transition:
+        width var(--bar),
+        background var(--bar),
+        opacity var(--bar);
+}
+
+.sight[data-reading="searching"] .reticle {
+    animation: breathe calc(var(--bar) * 2) ease-in-out infinite alternate;
+}
+
+.sight[data-reading="hunting"] .reticle {
+    animation: hunt calc(var(--bar) / 2) ease-in-out infinite alternate;
+}
+
+.sight[data-reading="kept"] .reticle {
+    width: 56px;
+    background: var(--signal);
+}
+
+.sight[data-reading="debris"] .reticle {
+    width: 220px;
+    background: #8a8f98;
+    opacity: 0.4;
+}
+
+@keyframes breathe {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.4;
+    }
+}
+
+@keyframes hunt {
+    from {
+        width: 160px;
+    }
+    to {
+        width: 56px;
+    }
+}
+
+/* ---------- The scan: the beam holds each object at the reticle ---------- */
+
+.scan {
+    position: relative;
+}
+
+.passages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-top: 60vh;
+    padding-bottom: 70vh;
+}
+
+.passage {
+    position: relative;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.object {
+    position: sticky;
+    top: calc(50vh - 5px);
+    margin-top: 40vh;
+    width: 14px;
+    height: 10px;
+    border-radius: 40% 60% 55% 45%;
+    background: #6b7078;
+    transition:
+        transform calc(var(--bar) * 2) ease-in,
+        opacity calc(var(--bar) * 2),
+        background var(--bar),
+        box-shadow var(--bar);
+}
+
+.object[data-decision="kept"] {
+    background: var(--signal);
+    box-shadow: 0 0 12px var(--signal);
+}
+
+.object[data-decision="debris"] {
+    transform: translateY(30vh) rotate(90deg);
+    opacity: 0.25;
+}
+
+/* ---------- The HUD: bottom centre, an instrument readout ---------- */
+
+.hud {
+    position: fixed;
+    left: 50%;
+    bottom: 6vh;
+    transform: translateX(-50%);
+    width: min(480px, calc(100vw - 32px));
+    padding: 1rem 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--signal) 40%, transparent);
+    background: color-mix(in srgb, var(--signal) 6%, transparent);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    color: #d9d9d9;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.hud p {
+    margin: 0.4rem 0 0;
+}
+
+.hud[data-reading="debris"] {
+    border-color: color-mix(in srgb, #8a8f98 40%, transparent);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.hudWhen,
+.hudCredit,
+.hudLock,
+.hudHint {
+    display: block;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.hud .hudTitle {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: 0.3rem;
+}
+
+.hudLink {
+    display: inline-block;
+    margin-top: 0.6rem;
+    color: var(--signal);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ---------- The record (the reduced-motion view) ---------- */
+
+.record {
+    list-style: none;
+    padding: 0;
+    display: none;
+    gap: 2rem;
+}
+
+.entry[data-state="Debris"] {
+    opacity: 0.45;
+}
+
+.when,
+.credit,
+.lock,
+.source,
+.seam a {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.title {
+    font-size: 1.1rem;
+    margin: 0.25rem 0;
+}
+
+.title a {
+    color: var(--signal);
 }
 
 .record,
@@ -104,12 +300,43 @@
     margin-right: auto;
 }
 
-@media (max-width: 600px) {
-    .satellite { width: 64px; }
+.source,
+.seam {
+    display: none;
+    text-align: center;
 }
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 600px) {
+    .satellite {
+        width: 64px;
+        left: calc(50% - 32px);
+    }
+    .sightline {
+        top: calc(8vh + 36px);
+        height: calc(42vh - 36px);
+    }
+}
+
+/* ---------- Reduced motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
     .starLayer,
     .satellite,
-    .beacon { animation: none; }
+    .beacon,
+    .reticle {
+        animation: none;
+    }
+    .scan,
+    .sight {
+        display: none;
+    }
+    .record {
+        display: grid;
+    }
+    .source,
+    .seam {
+        display: block;
+    }
 }
