@@ -1,12 +1,37 @@
 .space {
     min-height: 100vh;
     background: #000;
-    color: var(--muted);
-    display: grid;
-    place-items: end center;
-    padding: 2rem 16px;
+    color: #d9d9d9;
+    padding: 4rem 16px;
+    max-width: 640px;
+    margin: 0 auto;
 }
 
+.record {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 2rem;
+}
+
+.entry[data-state="Debris"] {
+    opacity: 0.45;
+}
+
+.when,
+.credit,
+.lock,
+.source,
 .seam a {
-    color: inherit;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.title {
+    font-size: 1.1rem;
+    margin: 0.25rem 0;
+}
+
+.title a {
+    color: var(--signal);
 }

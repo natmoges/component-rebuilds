@@ -46,11 +46,35 @@
  */
 
 import Link from "next/link";
+import { readRecord } from "../lib/record";
 import styles from "./Accretion.module.css";
 
-export default function Accretion() {
+export default async function Accretion() {
+    const { entries, source } = await readRecord();
+    const keptCount = entries.filter((entry) => entry.state === "Kept").length;
+    const debrisCount = entries.length - keptCount;
+
     return (
         <main className={styles.space}>
+            <ol className={styles.record}>
+                {entries.map((entry) => (
+                    <li key={entry.id} className={styles.entry} data-state={entry.state}>
+                        <span className={styles.when}>{entry.when}</span>
+                        <h2 className={styles.title}>
+                            {entry.link ? <a href={entry.link}>{entry.title}</a> : entry.title}
+                        </h2>
+                        <p>{entry.whatChanged}</p>
+                        {entry.credit && <p className={styles.credit}>{entry.credit}</p>}
+                        {entry.state === "Debris" && (
+                            <p className={styles.lock}>Locks when: {entry.lockCondition}</p>
+                        )}
+                    </li>
+                ))}
+            </ol>
+            <p className={styles.source}>
+                Read from {source === "substrate" ? "the substrate" : "cache"} · {keptCount} kept ·{" "}
+                {debrisCount} debris
+            </p>
             <p className={styles.seam}>
                 <Link href="/before">The index this page grew out of</Link>
             </p>
