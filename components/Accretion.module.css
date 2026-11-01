@@ -1,0 +1,12 @@
+.space {
+    min-height: 100vh;
+    background: #000;
+    color: var(--muted);
+    display: grid;
+    place-items: end center;
+    padding: 2rem 16px;
+}
+
+.seam a {
+    color: inherit;
+}

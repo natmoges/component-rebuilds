@@ -1,0 +1,79 @@
+// The ladder index. Every build is listed with the component it rebuilds and who made the original.
+// Each rung is a layer. Each build reuses what the last one taught and adds one new idea.
+import styles from "./page.module.css";
+
+type BuildStatus = "shipped" | "next" | "planned";
+
+type Build = {
+  number: string;
+  name: string;
+  reference: string;
+  rung: number;
+  status: BuildStatus;
+  href?: string;
+};
+
+const rungs = [
+  { number: 1, name: "Single components" },
+  { number: 2, name: "Composition + data" },
+  { number: 3, name: "Page-level behaviour" },
+  { number: 4, name: "Drawing the pixels" },
+  { number: 5, name: "3D / WebGL" },
+];
+
+const builds: Build[] = [
+  { number: "01", name: "vinyl", reference: "DiscPlayer by Ahmad (@ohitshmad)", rung: 1, status: "shipped", href: "https://vinyl-swart.vercel.app" },
+  { number: "02", name: "TextScrambler", reference: "TextScrambler by Solt Wagner (@solt)", rung: 1, status: "shipped", href: "/textscrambler" },
+  { number: "03", name: "Back2Top", reference: "BackToTop by The Velox Studio", rung: 1, status: "shipped", href: "/back2top" },
+  { number: "04", name: "AnimatedFolder", reference: "AnimatedFolder by Launchly", rung: 2, status: "shipped", href: "/animatedfolder" },
+  { number: "05", name: "Motion Tiles", reference: "Motion Tiles by Uzair J.", rung: 2, status: "shipped", href: "/motiontiles" },
+  { number: "06", name: "SignalLocation", reference: "Live Location by Amr Rashed", rung: 2, status: "shipped", href: "/signallocation" },
+  { number: "07", name: "The Ladder", reference: "My own — no reference", rung: 2, status: "next" },
+  { number: "08", name: "Smooth Scroll", reference: "Framer University", rung: 3, status: "planned" },
+  { number: "09", name: "TrailCursor", reference: "Akın Gündoğan", rung: 3, status: "planned" },
+  { number: "10", name: "LogoPreloader", reference: "Sukoya Design", rung: 3, status: "planned" },
+  { number: "11", name: "StarCloud", reference: "Sabo Sugi (v1)", rung: 4, status: "planned" },
+  { number: "12", name: "Gravity", reference: "Framer University", rung: 4, status: "planned" },
+  { number: "13", name: "Retro Screen Effect", reference: "Blue Jackson (optional)", rung: 4, status: "planned" },
+  { number: "14", name: "The Orbit", reference: "Replaces a Spline embed", rung: 5, status: "planned" },
+];
+
+export default function Home() {
+  return (
+    <main className={styles.main}>
+      <header className={styles.header}>
+        <h1>Component Rebuilds</h1>
+        <p>
+          The sourced components from my portfolio, rebuilt from scratch in React + TypeScript,
+          one layer at a time. Every original is credited. None of its code is here.
+        </p>
+        <p>
+          This was the ladder's index until Nov 1, 2026. It grew into{" "}
+          <a href="/">Accretion</a>.
+        </p>
+      </header>
+
+      {rungs.map((rung) => (
+        <section key={rung.number} className={styles.rung}>
+          <h2>
+            Rung {rung.number} · {rung.name}
+          </h2>
+          <ul className={styles.list}>
+            {builds
+              .filter((build) => build.rung === rung.number)
+              .map((build) => (
+                <li key={build.number} className={styles.row} data-status={build.status}>
+                  <span className={styles.number}>{build.number}</span>
+                  <span className={styles.name}>
+                    {build.href ? <a href={build.href}>{build.name}</a> : build.name}
+                  </span>
+                  <span className={styles.reference}>{build.reference}</span>
+                  <span className={styles.status}>{build.status}</span>
+                </li>
+              ))}
+          </ul>
+        </section>
+      ))}
+    </main>
+  );
+}
