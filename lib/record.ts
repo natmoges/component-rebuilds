@@ -12,6 +12,8 @@ export interface Entry {
     lockCondition: string;
     credit: string;
     link: string | null;
+    image: string | null;
+    snippet: string | null;
 }
 
 export interface Reading {
@@ -32,6 +34,8 @@ type Row = {
         "Lock condition": { rich_text: Text };
         Credit: { rich_text: Text };
         Link: { url: string | null };
+        Image: { rich_text: Text };
+        Snippet: { rich_text: Text };
     };
 };
 
@@ -51,6 +55,8 @@ function toEntry(row: Row): Entry {
         lockCondition: plain(p["Lock condition"].rich_text),
         credit: plain(p.Credit.rich_text),
         link: p.Link.url,
+        image: plain(p.Image.rich_text) || null,
+        snippet: plain(p.Snippet.rich_text) || null,
     };
 }
 

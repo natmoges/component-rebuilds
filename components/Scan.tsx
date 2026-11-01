@@ -48,6 +48,8 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
+    const [dissolvedId, setDissolvedId] = useState<string | null>(null);
+    const [failedImages, setFailedImages] = useState<string[]>([]);
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const shower = useMemo(() => showerOf(entries.length * COMETS_PER_ENTRY), [entries.length]);
 
@@ -115,7 +117,20 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     else if (phase === "travelling") reading = "searching";
     else if (phase === "end") reading = "end";
     else reading = "rest";
-    const mass = Object.values(decisions).filter((decision) => decision === "kept").length;
+
+    const mass = Object.values(decisions).filter((choice) => choice === "kept").length;
+
+    const hasImage = held !== null && held.image !== null && !failedImages.includes(held.id);
+    const hasArtifact = held !== null && (hasImage || held.snippet !== null);
+    const isDissolved = held !== null && (dissolvedId === held.id || !hasArtifact);
+
+    function handleDissolve() {
+        if (held !== null) setDissolvedId(held.id);
+    }
+
+    function handleImageError(id: string) {
+        setFailedImages((current) => (current.includes(id) ? current : [...current, id]));
+    }
 
     return (
         <div className={styles.scan}>
@@ -183,19 +198,47 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                             scrambleColor="var(--muted)"
                             durationMs={BAR_MS}
                         />
-                        <p>{held.whatChanged}</p>
-                        {reading === "kept" && held.credit && (
-                            <p className={styles.hudCredit}>{held.credit}</p>
+
+                        {reading === "kept" && !isDissolved && (
+                            <button
+                                key={`${held.id}-artifact`}
+                                type="button"
+                                className={styles.artifactButton}
+                                onClick={handleDissolve}
+                                aria-label={`${held.title}: read the record`}
+                            >
+                                {hasImage ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={held.image ?? ""}
+                                        alt=""
+                                        className={styles.artifact}
+                                        onError={() => handleImageError(held.id)}
+                                    />
+                                ) : (
+                                    <pre className={styles.snippet}>{held.snippet}</pre>
+                                )}
+                                <span className={styles.hudHint}>Tap to read</span>
+                            </button>
                         )}
-                        {reading === "kept" && held.link && (
-                            <a href={held.link} className={styles.hudLink}>
-                                Open →
-                            </a>
-                        )}
-                        {reading === "debris" && (
-                            <p className={styles.hudLock}>
-                                Signal lost. Locks when: {held.lockCondition}
-                            </p>
+
+                        {(isDissolved || reading === "debris") && (
+                            <div key={`${held.id}-readout`} className={styles.readout}>
+                                <p>{held.whatChanged}</p>
+                                {reading === "kept" && held.credit && (
+                                    <p className={styles.hudCredit}>{held.credit}</p>
+                                )}
+                                {reading === "kept" && held.link && (
+                                    <a href={held.link} className={styles.hudLink}>
+                                        Open →
+                                    </a>
+                                )}
+                                {reading === "debris" && (
+                                    <p className={styles.hudLock}>
+                                        Signal lost. Locks when: {held.lockCondition}
+                                    </p>
+                                )}
+                            </div>
                         )}
                     </>
                 )}
