@@ -49,6 +49,39 @@ import Link from "next/link";
 import { readRecord } from "../lib/record";
 import styles from "./Accretion.module.css";
 
+function starField(count: number, seed: number): string {
+    let state = seed;
+    const next = () => {
+        state = (state * 16807) % 2147483647;
+        return state / 2147483647;
+    };
+    return Array.from(
+        { length: count },
+        () => `${Math.round(next() * 2560)}px ${Math.round(next() * 1600)}px #fff`
+    ).join(", ");
+}
+
+function Satellite() {
+    return (
+        <svg className={styles.satellite} viewBox="0 0 120 60" aria-hidden="true">
+            <g fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="22" width="38" height="16" rx="1" />
+                <line x1="15" y1="22" x2="15" y2="38" />
+                <line x1="28" y1="22" x2="28" y2="38" />
+                <rect x="80" y="22" width="38" height="16" rx="1" />
+                <line x1="93" y1="22" x2="93" y2="38" />
+                <line x1="106" y1="22" x2="106" y2="38" />
+                <line x1="40" y1="30" x2="48" y2="30" />
+                <line x1="72" y1="30" x2="80" y2="30" />
+                <rect x="48" y="20" width="24" height="20" rx="3" />
+                <line x1="60" y1="20" x2="60" y2="10" />
+                <path d="M53 10 Q60 2 67 10" />
+            </g>
+            <circle className={styles.beacon} cx="60" cy="30" r="2.5" />
+        </svg>
+    );
+}
+
 export default async function Accretion() {
     const { entries, source } = await readRecord();
     const keptCount = entries.filter((entry) => entry.state === "Kept").length;
@@ -56,6 +89,13 @@ export default async function Accretion() {
 
     return (
         <main className={styles.space}>
+            <div className={styles.stars} aria-hidden="true">
+                <span className={styles.starLayer} style={{ boxShadow: starField(140, 7) }} />
+                <span className={styles.starLayer} style={{ boxShadow: starField(60, 23) }} />
+                <span className={styles.starLayer} style={{ boxShadow: starField(24, 41) }} />
+            </div>
+            <Satellite />
+
             <ol className={styles.record}>
                 {entries.map((entry) => (
                     <li key={entry.id} className={styles.entry} data-state={entry.state}>

@@ -1,10 +1,9 @@
 .space {
+    --bar: 1000ms;
     min-height: 100vh;
     background: #000;
     color: #d9d9d9;
     padding: 4rem 16px;
-    max-width: 640px;
-    margin: 0 auto;
 }
 
 .record {
@@ -34,4 +33,83 @@
 
 .title a {
     color: var(--signal);
+}
+
+.stars {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.starLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    border-radius: 50%;
+    animation: twinkle calc(var(--bar) * 3) ease-in-out infinite alternate;
+}
+
+.starLayer:nth-child(2) {
+    width: 1.5px;
+    height: 1.5px;
+    animation-duration: calc(var(--bar) * 5);
+    animation-delay: calc(var(--bar) * -2);
+}
+
+.starLayer:nth-child(3) {
+    width: 2px;
+    height: 2px;
+    animation-duration: calc(var(--bar) * 7);
+    animation-delay: calc(var(--bar) * -4);
+}
+
+@keyframes twinkle {
+    from { opacity: 1; }
+    to { opacity: 0.3; }
+}
+
+.satellite {
+    position: fixed;
+    top: 12vh;
+    right: 8vw;
+    width: 96px;
+    color: #8a8f98;
+    animation: driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes driftIn {
+    from { transform: translate(40vw, -20vh) rotate(-12deg); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+.beacon {
+    fill: var(--signal);
+    animation: blink var(--bar) steps(1) infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    12.5% { opacity: 0.15; }
+}
+
+.record,
+.source,
+.seam {
+    position: relative;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 600px) {
+    .satellite { width: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .starLayer,
+    .satellite,
+    .beacon { animation: none; }
 }
