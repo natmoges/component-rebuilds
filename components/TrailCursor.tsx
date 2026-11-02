@@ -90,6 +90,8 @@ export default function TrailCursor({
     useEffect(() => {
         const stage = stageRef.current;
         if (!stage || text.length === 0) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (!document.querySelector("[data-trail-zone]")) return;
 
         const drawFrame = (now: number) => {
             const holdMs = lifeMs * HOLD_SHARE;
@@ -136,6 +138,8 @@ export default function TrailCursor({
         };
 
         const handlePointerMove = (event: PointerEvent) => {
+            if (event.pointerType !== "mouse") return;
+
             const target = event.target as Element | null;
             const isInside =
                 !!target?.closest("[data-trail-zone]") &&
@@ -166,12 +170,18 @@ export default function TrailCursor({
             }
         };
 
+        const handlePointerLeave = () => {
+            isInsideRef.current = false;
+        };
+
         window.addEventListener("pointermove", handlePointerMove, { passive: true });
+        document.documentElement.addEventListener("pointerleave", handlePointerLeave);
 
         return () => {
             if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
             frameRef.current = null;
             window.removeEventListener("pointermove", handlePointerMove);
+            document.documentElement.removeEventListener("pointerleave", handlePointerLeave);
             lettersRef.current.forEach((letter) => letter.el.remove());
             lettersRef.current = [];
             isInsideRef.current = false;
