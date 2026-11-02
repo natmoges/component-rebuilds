@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import LogoPreloader from "../components/LogoPreloader";
 
 export const metadata: Metadata = {
   title: "Component Rebuilds — Nat Moges",
@@ -12,7 +13,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <LogoPreloader
+          logoSrc="/preloader/natftp-hud.png"
+          videoSrc="/preloader/preloader-starfield.mp4"
+          posterSrc="/preloader/preloader-starfield-poster.jpg"
+        />
+        {children}
+      </body>
     </html>
   );
 }
