@@ -132,7 +132,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **The scan is a hold test.** Every frame it checks whether an object's centre is within 6 px of the scan line. Objects ride the beam (`position: sticky`) while held. Decisions are remembered, so scrolling back doesn't re-scan.
 - **One tempo,** carried over from SignalLocation (build 06): a 1000 ms bar. The satellite arrives on the first bar, and a decode lasts two.
 - **Bounded parallax.** The drifting matter moves at its own depth but stays inside its slot, so the page ends where the record ends.
-- **The seam is kept.** The old index lives at `/before`, frozen the day it was replaced.
+- **The seam is kept.** The old index lives at `/before`: a plain, static page beside the meteor-shower record.
 - **The ladder reusing itself:** every HUD title decodes with my TextScrambler (build 02).
 - **Reduced motion:** no travel, no scan. The whole record as a plain list, with the source line and the link to `/before`.
 
