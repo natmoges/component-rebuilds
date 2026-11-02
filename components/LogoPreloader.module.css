@@ -23,6 +23,7 @@
 .logo {
     position: relative;
     height: auto;
+    max-width: 46vw;
     user-select: none;
     opacity: 0;
     transform: translateY(var(--lift));

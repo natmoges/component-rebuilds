@@ -14,7 +14,8 @@
  * the site.
  *
  * THE KNOBS, carried over from my natmoges.com settings: the NatFTP HUD logo
- * at 300 px · my screen-recording loop behind it · hold 2.2 seconds · fades
+ * at 540 px, so the title under the wordmark reads · my screen-recording loop 
+ * behind it · hold 2.2 seconds · fades
  * of 0.7 seconds on Brett's curve, cubic-bezier(.7,.2,.2,1) · the logo
  * travels 80 px in and 80 px out · Screen blending on the whole layer, the
  * logo cut clear, the video graded to true black.
@@ -66,7 +67,7 @@ export default function LogoPreloader({
     logoSrc,
     videoSrc,
     posterSrc,
-    logoSize = 300,
+    logoSize = 540,
     holdSeconds = 2.2,
 }: LogoPreloaderProps) {
     const [phase, setPhase] = useState<PreloaderPhase>("armed");
