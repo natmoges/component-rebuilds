@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
 
 ## The method
 
@@ -25,7 +25,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 06 | [SignalLocation](https://component-rebuilds.vercel.app/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
 | 07 | [Accretion](https://component-rebuilds.vercel.app) | None. My own | 2 |
 | 08 | [SmoothScroll](https://component-rebuilds.vercel.app) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
-| 09 | TrailCursor | Akın Gündoğan | 3 |
+| 09 | [TrailCursor](https://component-rebuilds.vercel.app) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
 | 10 | LogoPreloader | Sukoya Design | 3 |
 | 11 | StarCloud | Sabo Sugi (v1) | 4 · Drawing the pixels |
 | 12 | Gravity | Framer University | 4 |
@@ -156,6 +156,24 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **Tuned by eye, then measured** on localhost at 40: one wheel tick finishes 90% of its move in about half a second and settles by 1.3 s; a burst of five glides as one move with no bounce-back; flinging into the end of the record stops exactly at the end, with no overshoot. The scan still locks mid-glide.
 
 **Next:** Back2Top (build 03) rides the same engine, so its ride and the page's glide stop fighting. That needs the engine shared between components, which is its own idea.
+
+### 09 · TrailCursor
+
+**Reference:** Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace, the component running over the case studies on my Framer site. Read for behaviour only; none of its code is here.
+
+**Reused, with credit:** a letter dropped per distance travelled with a longer gap before each word, the envelope (hold for 70% of a letter's life, fade the last 30%), the cube-root fade curve, the shrink to half size, and my own settings from natmoges.com.
+
+**Net-new in mine:**
+- **Refs, not state.** This rung's idea. The reference keeps every letter in React state, so the whole trail redraws on every letter and on a cleanup timer 10 times a second, forever, even with nothing on screen. Mine places each letter on the glass by hand and remembers it in a ref; React draws the component once.
+- **A real fade.** The reference only updates when React redraws, so its fade moves in 100 ms steps blurred by a CSS transition. Mine runs one animation loop that draws every frame.
+- **Sleeps when empty.** The loop stops when the last letter is gone and wakes on the next one. A still mouse costs nothing.
+- **One label for the zone.** The Scan is marked `data-trail-zone` and the readout panel `data-trail-off`. The reference hunts up every parent comparing names four ways: any layer named "section" counts as inside, and hovering an SVG icon throws an error.
+- **Every pass reads from the start.** Entering the Scan (or coming back into the window) restarts the phrase and drops the first letter right under the pointer.
+- **Moved by transform,** not by `left`/`top`, so letters never re-lay out the page.
+- **Touch, reduced motion and failure:** no trail on touch screens, none with reduced motion, and none if the Scan isn't on the page.
+- **Cut:** a true/false the reference sets on every move and never reads, two window listeners that never fire, and a counter bumped inside a state update (React can run that twice, which skips letters).
+
+**Measured** on localhost at 120 frames a second: a letter holds at full strength until about 490 ms, fades and shrinks over 27 frames, and is gone at 706 ms; with the mouse still, the trail books zero frames. Phrase: INSPECT OBJECTS, kept to 15 characters so a slow pass reads it whole.
 
 ## Credits
 
