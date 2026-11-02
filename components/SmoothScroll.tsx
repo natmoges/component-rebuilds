@@ -14,7 +14,7 @@
  * SMOOTHNESS: a single knob from 0 to 100. 0 is off, the browser's native
  * scroll, untouched. Above 0, the higher the number, the heavier it feels:
  * the glide lasts smoothness ÷ 25 seconds, so 25 is one second and 100 is
- * four. Accretion runs at 30.
+ * four. Accretion runs at 40.
  *
  * BEFORE LOAD: the page arrives from the server and scrolls natively until
  * the browser starts the engine. Nothing jumps; wherever the visitor was,

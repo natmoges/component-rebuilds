@@ -4,7 +4,7 @@ import SmoothScroll from "../components/SmoothScroll";
 export default function Home() {
     return (
         <>
-            <SmoothScroll smoothness={30} />
+            <SmoothScroll smoothness={40} />
             <Accretion />
         </>
     );
