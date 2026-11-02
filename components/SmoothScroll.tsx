@@ -1,3 +1,5 @@
+"use client";
+
 /*
  * SmoothScroll — build #8 of the closer ladder.
  * Reference: Smooth Scroll by Nandi Muzsik and Clément Roche (Framer
@@ -47,10 +49,28 @@
  * plain list as before.
  */
 
+import { useEffect } from "react";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
+
 interface SmoothScrollProps {
     smoothness?: number;
 }
 
 export default function SmoothScroll({ smoothness = 30 }: SmoothScrollProps) {
+    useEffect(() => {
+        if (smoothness <= 0) return;
+
+        try {
+            const lenis = new Lenis({
+                duration: Math.min(smoothness, 100) / 25,
+                autoRaf: true,
+            });
+            return () => lenis.destroy();
+        } catch {
+            // The engine didn't start. Native scroll stays.
+        }
+    }, [smoothness]);
+
     return null;
 }
