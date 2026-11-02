@@ -52,9 +52,15 @@
 import { useEffect, useRef } from "react";
 import styles from "./TrailCursor.module.css";
 
+const HOLD_SHARE = 0.7;
+const FADE_CURVE = 3;
+const SHRINK_TO = 0.5;
+
 interface Letter {
     el: HTMLSpanElement;
     bornAt: number;
+    x: number;
+    y: number;
 }
 
 interface TrailCursorProps {
@@ -79,10 +85,35 @@ export default function TrailCursor({
     const lastDropRef = useRef<{ x: number; y: number } | null>(null);
     const nextCharRef = useRef(0);
     const isInsideRef = useRef(false);
+    const frameRef = useRef<number | null>(null);
 
     useEffect(() => {
         const stage = stageRef.current;
         if (!stage || text.length === 0) return;
+
+        const drawFrame = (now: number) => {
+            const holdMs = lifeMs * HOLD_SHARE;
+
+            lettersRef.current = lettersRef.current.filter((letter) => {
+                const age = now - letter.bornAt;
+                if (age >= lifeMs) {
+                    letter.el.remove();
+                    return false;
+                }
+                if (age > holdMs) {
+                    const progress = (age - holdMs) / (lifeMs - holdMs);
+                    const eased = Math.pow(progress, 1 / FADE_CURVE);
+                    const scale = 1 - eased * (1 - SHRINK_TO);
+                    letter.el.style.opacity = String(strength * (1 - eased));
+                    letter.el.style.transform =
+                        `translate(${letter.x}px, ${letter.y}px) translate(-50%, -50%) scale(${scale})`;
+                }
+                return true;
+            });
+
+            frameRef.current =
+                lettersRef.current.length > 0 ? requestAnimationFrame(drawFrame) : null;
+        };
 
         const dropLetter = (x: number, y: number) => {
             const el = document.createElement("span");
@@ -92,7 +123,10 @@ export default function TrailCursor({
             el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
             stage.appendChild(el);
 
-            lettersRef.current.push({ el, bornAt: performance.now() });
+            lettersRef.current.push({ el, bornAt: performance.now(), x, y });
+            if (frameRef.current === null) {
+                frameRef.current = requestAnimationFrame(drawFrame);
+            }
             nextCharRef.current += 1;
             lastDropRef.current = { x, y };
 
@@ -135,12 +169,14 @@ export default function TrailCursor({
         window.addEventListener("pointermove", handlePointerMove, { passive: true });
 
         return () => {
+            if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+            frameRef.current = null;
             window.removeEventListener("pointermove", handlePointerMove);
             lettersRef.current.forEach((letter) => letter.el.remove());
             lettersRef.current = [];
             isInsideRef.current = false;
         };
-    }, [text, letterGapPx, wordGapPx, maxLetters, strength]);
+    }, [text, letterGapPx, wordGapPx, lifeMs, maxLetters, strength]);
 
     return <div ref={stageRef} className={styles.stage} aria-hidden="true" />;
 }
