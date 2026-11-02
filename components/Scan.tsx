@@ -239,7 +239,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     }
 
     return (
-        <div ref={scanRef} className={styles.scan} data-reading={reading}>
+        <div ref={scanRef} className={styles.scan} data-reading={reading} data-trail-zone>
             <div className={styles.field} aria-hidden="true">
                 {meteors.map((meteor, index) => (
                     <span
@@ -318,7 +318,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 </span>
             </div>
 
-            <aside className={styles.hud} data-reading={reading} aria-live="polite">
+            <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
                 {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
                 {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
