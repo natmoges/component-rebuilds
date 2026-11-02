@@ -10,6 +10,8 @@
     pointer-events: auto;
     opacity: 1;
     transition: opacity var(--fade) var(--ease);
+    /* if the code never arrives, clear the glass on our own */
+    animation: backstop var(--fade) var(--ease) var(--backstop) forwards;
 }
 
 .video {
@@ -21,32 +23,59 @@
 }
 
 .logo {
+    --travel: 1;
     position: relative;
     height: auto;
     max-width: 46vw;
     user-select: none;
-    opacity: 0;
-    transform: translateY(var(--lift));
-    transition:
-        transform var(--fade) var(--ease),
-        opacity var(--fade) var(--ease);
-}
-
-/* showing: logo settled in the centre */
-.stage[data-phase="showing"] .logo {
-    opacity: 1;
-    transform: translateY(0);
+    /* the entrance runs from first paint, no JavaScript needed */
+    animation: arrive var(--fade) var(--ease) var(--arrive-delay) both;
 }
 
 /* leaving: clicks pass through at once, logo lifts out, layer fades */
 .stage[data-phase="leaving"] {
     opacity: 0;
     pointer-events: none;
+    animation: none;
 }
 
 .stage[data-phase="leaving"] .logo {
-    opacity: 0;
-    transform: translateY(calc(var(--lift) * -1));
+    animation: depart var(--fade) var(--ease) forwards;
+}
+
+@keyframes arrive {
+    from {
+        opacity: 0;
+        transform: translateY(calc(var(--lift) * var(--travel)));
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes depart {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(calc(var(--lift) * var(--travel) * -1));
+    }
+}
+
+@keyframes backstop {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .logo {
+        --travel: 0;
+    }
 }
 
 @media (hover: none) and (pointer: coarse), (max-width: 809px) {

@@ -37,11 +37,13 @@
  * A REPEAT: a refresh plays it again from the start. A link click inside the
  * site does not.
  *
- * FAILURE: if the video or the logo fails to load, the clock still runs and
- * it still leaves on time. Nothing it waits on can trap a visitor.
+ * FAILURE: if the video or the logo fails to load, the clock still runs and it 
+ * still leaves on time. If the code itself never arrives, the HUD clears itself 
+ * about three seconds after it should have left. Nothing it waits on can trap a 
+ * visitor.
  *
- * PHONE AND TABLET: never shown, matching my Framer site, where it is desktop
- * only.
+ * PHONE AND TABLET: never shown, and the video is never downloaded, matching my
+ * Framer site, where it is desktop only.
  *
  * REDUCED MOTION: no travel. The logo appears in place, holds, and fades.
  */
@@ -52,8 +54,10 @@ import styles from "./LogoPreloader.module.css";
 const FADE_MS = 700;
 const LIFT_PX = 80;
 const EASE = "cubic-bezier(.7,.2,.2,1)";
+const ARRIVE_DELAY_MS = 50;
+const BACKSTOP_SLACK_MS = 3000;
 
-type PreloaderPhase = "armed" | "showing" | "leaving" | "gone";
+type PreloaderPhase = "armed" | "leaving" | "gone";
 
 interface LogoPreloaderProps {
     logoSrc: string;
@@ -71,20 +75,22 @@ export default function LogoPreloader({
     holdSeconds = 2.2,
 }: LogoPreloaderProps) {
     const [phase, setPhase] = useState<PreloaderPhase>("armed");
+    const holdMs = holdSeconds * 1000;
 
     useEffect(() => {
-        const holdMs = holdSeconds * 1000;
+        // The arrival already ran in CSS from first paint. Count the hold from
+        // the start of the visit, not from when this code woke up.
+        const leaveAt = ARRIVE_DELAY_MS + holdMs;
+        const leaveIn = Math.max(0, leaveAt - performance.now());
 
-        const showTimer = setTimeout(() => setPhase("showing"), 50);
-        const leaveTimer = setTimeout(() => setPhase("leaving"), 50 + holdMs);
-        const goneTimer = setTimeout(() => setPhase("gone"), 50 + holdMs + FADE_MS);
+        const leaveTimer = setTimeout(() => setPhase("leaving"), leaveIn);
+        const goneTimer = setTimeout(() => setPhase("gone"), leaveIn + FADE_MS);
 
         return () => {
-            clearTimeout(showTimer);
             clearTimeout(leaveTimer);
             clearTimeout(goneTimer);
         };
-    }, [holdSeconds]);
+    }, [holdMs]);
 
     if (phase === "gone") return null;
 
@@ -92,6 +98,8 @@ export default function LogoPreloader({
         "--fade": `${FADE_MS}ms`,
         "--lift": `${LIFT_PX}px`,
         "--ease": EASE,
+        "--arrive-delay": `${ARRIVE_DELAY_MS}ms`,
+        "--backstop": `${ARRIVE_DELAY_MS + holdMs + FADE_MS + BACKSTOP_SLACK_MS}ms`,
     } as CSSProperties;
 
     return (
@@ -104,14 +112,19 @@ export default function LogoPreloader({
         >
             <video
                 className={styles.video}
-                src={videoSrc}
                 poster={posterSrc}
                 autoPlay
                 muted
                 loop
                 playsInline
                 aria-hidden="true"
-            />
+            >
+                <source
+                    src={videoSrc}
+                    type="video/mp4"
+                    media="(min-width: 810px) and (hover: hover)"
+                />
+            </video>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
                 className={styles.logo}
