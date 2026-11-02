@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
 
 ## The method
 
@@ -24,7 +24,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 05 | [Motion Tiles](https://component-rebuilds.vercel.app/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
 | 06 | [SignalLocation](https://component-rebuilds.vercel.app/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
 | 07 | [Accretion](https://component-rebuilds.vercel.app) | None. My own | 2 |
-| 08 | Smooth Scroll | Framer University | 3 · Page-level behaviour |
+| 08 | [SmoothScroll](https://component-rebuilds.vercel.app) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
 | 09 | TrailCursor | Akın Gündoğan | 3 |
 | 10 | LogoPreloader | Sukoya Design | 3 |
 | 11 | StarCloud | Sabo Sugi (v1) | 4 · Drawing the pixels |
@@ -138,9 +138,28 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 **The artifacts are mine:** screenshots of my builds, my 2022 site, the NatFTP frame from Motion Tiles, my homelab diagram, the 56-Day and Recall posts, and my own YouTube thumbnail. They're served from this repo, not from Notion, whose file links expire. The satellite and the era icons are drawn in SVG for this page. Nothing private is published: the database has a Publish field, and only those rows are read.
 
+### 08 · SmoothScroll
+
+**Reference:** Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University, the component running on my Framer site. Read for behaviour only; none of its code is here. It wraps Lenis by darkroom.engineering (MIT), which is installed here as a library: wrapping a library I didn't write is this rung's idea.
+
+**Reused, with credit:** a single knob turned into a glide length, Lenis's ease-out curve, and Lenis's recommended stylesheet.
+
+**Net-new in mine:**
+- **One engine, one clock.** The reference runs its own animation loop and only ever cancels the first frame, so when its setting changes (or React mounts it twice in development), the old loop keeps driving the new engine. Mine lets Lenis run its own clock, and each run of the effect destroys exactly the engine it built.
+- **0 means off.** The reference falls back to its default when set to 0, so its slider can't turn smoothing off. Here 0 is native scroll, and 1–100 sets the weight: the glide lasts `smoothness ÷ 25` seconds.
+- **Reduced motion:** no glide, native scroll, and Accretion's plain list. The reference smooths everyone.
+- **A failed start leaves native scroll.** Nothing on the page depends on the engine.
+- **Accretion's page only.** It mounts with the page and is destroyed when you leave; `/before` and every other build keep the browser's own scroll. Touch stays native too.
+- **Cut what this page doesn't need:** the reference's jump-to-top (it runs before the engine exists, so it never fires), a watcher on every change in the page, a one-time sweep for scrollable boxes that misses `overflow: scroll` and anything added later, and an anchor-link sweep. Current Lenis has an option for each if a page needs it.
+- **Current Lenis (1.3)** instead of the 1.1.2 bundled inside the reference.
+
+**Tuned by eye, then measured** on localhost at 40: one wheel tick finishes 90% of its move in about half a second and settles by 1.3 s; a burst of five glides as one move with no bounce-back; flinging into the end of the record stops exactly at the end, with no overshoot. The scan still locks mid-glide.
+
+**Next:** Back2Top (build 03) rides the same engine, so its ride and the page's glide stop fighting. That needs the engine shared between components, which is its own idea.
+
 ## Credits
 
-Every reference is a component from the Framer Marketplace, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes.
+Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build.
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
 
