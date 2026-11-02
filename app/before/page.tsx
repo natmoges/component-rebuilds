@@ -32,7 +32,7 @@ const builds: Build[] = [
   { number: "07", name: "Accretion (was The Ladder)", reference: "My own — no reference", rung: 2, status: "shipped", href: "/" },
   { number: "08", name: "SmoothScroll", reference: "Smooth Scroll by Nandi Muzsik and Clément Roche (Framer University)", rung: 3, status: "shipped", href: "/" },
   { number: "09", name: "TrailCursor", reference: "Cursor Trail Text by Akın Gündoğan (@akn-gundogan)", rung: 3, status: "shipped", href: "/" },
-  { number: "10", name: "LogoPreloader", reference: "Sukoya Design", rung: 3, status: "planned" },
+  { number: "10", name: "LogoPreloader", reference: "Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design", rung: 3, status: "shipped", href: "/" },
   { number: "11", name: "StarCloud", reference: "Sabo Sugi (v1)", rung: 4, status: "planned" },
   { number: "12", name: "Gravity", reference: "Framer University", rung: 4, status: "planned" },
   { number: "13", name: "Retro Screen Effect", reference: "Blue Jackson (optional)", rung: 4, status: "planned" },

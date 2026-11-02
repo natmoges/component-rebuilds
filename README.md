@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; the index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page. The index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
 
 ## The method
 
@@ -26,7 +26,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 07 | [Accretion](https://component-rebuilds.vercel.app) | None. My own | 2 |
 | 08 | [SmoothScroll](https://component-rebuilds.vercel.app) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
 | 09 | [TrailCursor](https://component-rebuilds.vercel.app) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
-| 10 | LogoPreloader | Sukoya Design | 3 |
+| 10 | [LogoPreloader](https://component-rebuilds.vercel.app) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
 | 11 | StarCloud | Sabo Sugi (v1) | 4 · Drawing the pixels |
 | 12 | Gravity | Framer University | 4 |
 | 13 | Retro Screen Effect (optional) | Blue Jackson | 4 |
@@ -175,9 +175,30 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 **Measured** on localhost at 120 frames a second: a letter holds at full strength until about 490 ms, fades and shrinks over 27 frames, and is gone at 706 ms; with the mouse still, the trail books zero frames. Phrase: INSPECT OBJECTS, kept to 15 characters so a slow pass reads it whole.
 
+### 10 · LogoPreloader
+
+**Reference:** Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace, the component that opens my Framer site. Read for behaviour only; none of its code is here.
+
+**Reused, with credit:** the four-stop sequence (arrive, hold, leave, gone), the 50 ms beat before the rise, the 0.7 s moves on his curve `cubic-bezier(.7,.2,.2,1)`, the 80 px travel in and out, and my own settings from natmoges.com (a 2.2 s hold, my NatFTP HUD logo, my starfield screen recording).
+
+**Net-new in mine:**
+- **It lives in the layout.** This rung's idea: the frame around every page, so it plays on every refresh or first arrival on any route. The layout stays mounted while pages swap, so clicking between pages never replays it.
+- **It rises on first paint.** The server prints it into the page, and the entrance is a CSS animation, so nothing waits for JavaScript. My first cut ran the whole clock in React: on localhost it looked right, but live the logo appeared 1.2 s late, the time the JavaScript took to arrive. Now React only times the exit, and it counts from the start of the visit, so a late wake-up waits only for what's left.
+- **No ghost pane.** On my Framer site the component disappears after three seconds, but its frame stays over the hero, catching the mouse. Here, when it's done, it's removed; nothing is left on top.
+- **A HUD, not a card.** The logo is cut clear, the video is graded to true black, and the layer uses Screen blending, so only the HUD and the stars land on the page, and the fade changes no colours. On Framer I used Difference blending over the logo's black card; here the card is gone. (Cut and graded by Claude from my originals; 7.9 MB of video down to 1 MB.)
+- **Clicks:** blocked during the hold, released the moment it starts leaving.
+- **Pinned to the glass.** The reference scrolls away with the page; mine is fixed to the screen.
+- **Guards:** if the JavaScript never arrives, the HUD clears itself about 6 s in. With reduced motion it fades in place with no travel. On phones and tablets it's never shown and the video is never downloaded.
+- **"Desktop" means a mouse and 810 px or more.** My Framer site only shows it from 1510 px, so 13-inch laptops never see it there.
+- **Cut:** the reference's three easing menus and their custom fields, which aren't wired to anything (every move uses the one curve), and its background image and colour options.
+
+**Trade-off:** it covers `/before`'s text for its three seconds. I kept it on every route so Accretion's opening stays seamless.
+
+**Measured** on localhost: the rise is already running before React wakes, it starts leaving at 2251 ms (target 2250) and is gone at 2951 ms, and the backstop clears a JavaScript-less copy at 5.95 s. Live, it's gone at 3.0 s (4.6 s before the fix). At 700 px wide, zero video requests. Logo at 540 px, so the line under the wordmark reads.
+
 ## Credits
 
-Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build.
+Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 10's logo and starfield are my own artwork and screen recording.
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
 
