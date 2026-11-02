@@ -49,8 +49,13 @@
  * REDUCED MOTION: no trail. Accretion shows its plain list as before.
  */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import styles from "./TrailCursor.module.css";
+
+interface Letter {
+    el: HTMLSpanElement;
+    bornAt: number;
+}
 
 interface TrailCursorProps {
     text: string;
@@ -70,6 +75,72 @@ export default function TrailCursor({
     strength = 0.3,
 }: TrailCursorProps) {
     const stageRef = useRef<HTMLDivElement>(null);
+    const lettersRef = useRef<Letter[]>([]);
+    const lastDropRef = useRef<{ x: number; y: number } | null>(null);
+    const nextCharRef = useRef(0);
+    const isInsideRef = useRef(false);
+
+    useEffect(() => {
+        const stage = stageRef.current;
+        if (!stage || text.length === 0) return;
+
+        const dropLetter = (x: number, y: number) => {
+            const el = document.createElement("span");
+            el.className = styles.letter;
+            el.textContent = text[nextCharRef.current % text.length];
+            el.style.opacity = String(strength);
+            el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+            stage.appendChild(el);
+
+            lettersRef.current.push({ el, bornAt: performance.now() });
+            nextCharRef.current += 1;
+            lastDropRef.current = { x, y };
+
+            while (lettersRef.current.length > maxLetters) {
+                lettersRef.current.shift()?.el.remove();
+            }
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+            const target = event.target as Element | null;
+            const isInside =
+                !!target?.closest("[data-trail-zone]") &&
+                !target?.closest("[data-trail-off]");
+
+            if (!isInside) {
+                isInsideRef.current = false;
+                return;
+            }
+
+            if (!isInsideRef.current) {
+                isInsideRef.current = true;
+                nextCharRef.current = 0;
+                dropLetter(event.clientX, event.clientY);
+                return;
+            }
+
+            const last = lastDropRef.current;
+            if (!last) return;
+            const travelled = Math.hypot(event.clientX - last.x, event.clientY - last.y);
+
+            const charIndex = nextCharRef.current % text.length;
+            const isGap = text[charIndex] === " " || charIndex === 0;
+            const gapPx = isGap ? wordGapPx : letterGapPx;
+
+            if (travelled >= gapPx) {
+                dropLetter(event.clientX, event.clientY);
+            }
+        };
+
+        window.addEventListener("pointermove", handlePointerMove, { passive: true });
+
+        return () => {
+            window.removeEventListener("pointermove", handlePointerMove);
+            lettersRef.current.forEach((letter) => letter.el.remove());
+            lettersRef.current = [];
+            isInsideRef.current = false;
+        };
+    }, [text, letterGapPx, wordGapPx, maxLetters, strength]);
 
     return <div ref={stageRef} className={styles.stage} aria-hidden="true" />;
 }
