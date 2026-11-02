@@ -7,7 +7,9 @@
     justify-content: center;
     overflow: hidden;
     mix-blend-mode: screen;
-    pointer-events: none;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity var(--fade) var(--ease);
 }
 
 .video {
@@ -22,6 +24,28 @@
     position: relative;
     height: auto;
     user-select: none;
+    opacity: 0;
+    transform: translateY(var(--lift));
+    transition:
+        transform var(--fade) var(--ease),
+        opacity var(--fade) var(--ease);
+}
+
+/* showing: logo settled in the centre */
+.stage[data-phase="showing"] .logo {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* leaving: clicks pass through at once, logo lifts out, layer fades */
+.stage[data-phase="leaving"] {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stage[data-phase="leaving"] .logo {
+    opacity: 0;
+    transform: translateY(calc(var(--lift) * -1));
 }
 
 @media (hover: none) and (pointer: coarse), (max-width: 809px) {
