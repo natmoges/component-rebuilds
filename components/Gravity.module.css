@@ -8,6 +8,18 @@
     z-index: 1;
 }
 
+/* Grabbable only when the engine is on. The rest of the sky stays
+   click-through; on touch, only the satellite stops a scroll. */
+.satellite[data-engine="on"] {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+}
+
+.satellite[data-engine="on"][data-held] {
+    cursor: grabbing;
+}
+
 @media (max-width: 600px) {
     .satellite {
         width: 104px;

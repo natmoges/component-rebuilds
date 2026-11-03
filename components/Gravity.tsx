@@ -16,9 +16,12 @@
  * screen, spins, and slowly drifts to a stop where space leaves it.
  *
  * THE KNOBS, carried over from my natmoges.com settings: friction 0.08 ·
- * bounce (restitution) 0.69 · density 1, so it's heavy in the hand. Gravity
- * 0, 0: space, not my hero's 0.5. Framer University's numbers, credited:
- * a grab spring of stiffness 0.2 and walls 100 px thick just past the edges.
+ * bounce (restitution) 0.69 · density 1. Gravity 0, 0: space, not my
+ * hero's 0.5. Framer University's numbers, credited: walls 100 px thick
+ * just past the edges, and their grab spring, which I softened from 0.2 to
+ * 0.05 and damped (0.1). The weight is mine, and it isn't density: space
+ * drag that depends on speed, thick (0.09) when it's slow and thin (0.006)
+ * when it's fast, so effort is rewarded.
  *
  * BEFORE LOAD: the satellite at top centre with its beam straight down,
  * exactly as Accretion has it today.
@@ -30,15 +33,21 @@
  * It lags a little because it's heavy. The cursor shows grab, then
  * grabbing.
  *
- * THROWING: let go mid-move and it keeps your speed. It spins if you threw
- * it off-centre.
+ * THROWING: let go mid-move and it keeps your speed. A lazy flick barely
+ * moves it; only a hard one sends it bouncing around the screen. It spins
+ * if you threw it off-centre.
  *
  * HITTING AN EDGE: it bounces off the edges of the screen, keeping about
- * two thirds of its speed. It never leaves the screen, and it passes over
- * the HUD and the planet without touching them.
+ * two thirds of its speed. It never leaves the screen, however hard it's
+ * thrown, and it passes over the HUD and the planet without touching them.
  *
- * AFTER A THROW: space drag slows it gradually. It stops wherever it stops,
- * turned however it ended up. There's no pull home.
+ * AFTER A THROW: the drag thickens as it slows, so it settles like
+ * something heavy instead of gliding, wherever it ends up, turned however
+ * it landed. There's no pull home.
+ *
+ * AT REST: it's never quite still. A slow space current, about 15 px a
+ * second, wanders it around where it settled and tumbles it a few degrees,
+ * on top of its bob. It drifts; it doesn't travel.
  *
  * SCROLLING: the record's warp gives it a small push the way the record is
  * moving, so fast scrolling jostles it. Slow scrolling barely does.
@@ -70,7 +79,7 @@
  */
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { Bodies, Composite, Engine, type Body } from "matter-js";
+import { Bodies, Body, Composite, Constraint, Engine } from "matter-js";
 import styles from "./Gravity.module.css";
 
 // My natmoges.com Body settings, carried over.
@@ -78,12 +87,48 @@ const FRICTION = 0.08;
 const RESTITUTION = 0.69;
 const DENSITY = 1;
 
-// Framer University's walls, credited: 100 px thick, just past the edges.
+// Framer University's numbers, credited: walls 100 px thick just past the
+// edges, and a grab spring, theirs at 0.2, softened and damped so the
+// satellite trails the hand like something heavy.
 const WALL_PX = 100;
+const GRAB_STIFFNESS = 0.05;
+const GRAB_DAMPING = 0.1;
+
+// The weight: space drag that depends on speed (px per 1/60 s). Thick below
+// SLOW_SPEED, thin above FAST_SPEED, eased in between. Effort is rewarded.
+const DRAG_WHEN_SLOW = 0.09;
+const DRAG_WHEN_FAST = 0.006;
+const SLOW_SPEED = 10;
+const FAST_SPEED = 34;
+
+// The space current: at rest the drag pulls toward this slow, wandering drift
+// instead of toward zero, so the satellite is never quite still.
+const DRIFT_SPEED = 0.25; // px per 1/60 s, about 15 px a second
+const TUMBLE = 0.0008; // rad per 1/60 s at its strongest
+
+// The speed limit: never far enough in one step to cross a wall.
+const MAX_SPEED = 90;
 
 // One step of the world is never longer than 1/60 s, so a slow frame or a
 // return to the tab can't throw the satellite.
 const MAX_STEP_MS = 1000 / 60;
+
+// How thick space is at this speed: 0 → thick, 1 → thin, smoothly.
+function dragFor(speed: number) {
+    const t = Math.min(1, Math.max(0, (speed - SLOW_SPEED) / (FAST_SPEED - SLOW_SPEED)));
+    const eased = t * t * (3 - 2 * t);
+    return DRAG_WHEN_SLOW + (DRAG_WHEN_FAST - DRAG_WHEN_SLOW) * eased;
+}
+
+// Where space is pushing at this moment: a few slow waves layered so the
+// drift loops without ever repeating in a way you'd notice.
+function spaceCurrent(seconds: number) {
+    return {
+        x: (DRIFT_SPEED * (Math.sin(seconds * 0.21) + 0.5 * Math.sin(seconds * 0.53 + 1.3))) / 1.5,
+        y: (DRIFT_SPEED * 0.6 * (Math.cos(seconds * 0.17 + 0.4) + 0.5 * Math.sin(seconds * 0.41 + 2.1))) / 1.5,
+        spin: TUMBLE * Math.sin(seconds * 0.29 + 0.7),
+    };
+}
 
 interface GravityProps {
     children: ReactNode;
@@ -95,6 +140,7 @@ export default function Gravity({ children }: GravityProps) {
     const shadowRef = useRef<Body | null>(null);
     const wallsRef = useRef<Body[]>([]);
     const frameRef = useRef<number | null>(null);
+    const grabRef = useRef<Constraint | null>(null);
 
     useEffect(() => {
         const satellite = satelliteRef.current;
@@ -110,7 +156,12 @@ export default function Gravity({ children }: GravityProps) {
             home.top + home.height / 2,
             home.width,
             home.height,
-            { friction: FRICTION, restitution: RESTITUTION, density: DENSITY },
+            {
+                friction: FRICTION,
+                restitution: RESTITUTION,
+                density: DENSITY,
+                frictionAir: DRAG_WHEN_SLOW,
+            },
         );
         shadowRef.current = shadow;
         Composite.add(engine.world, shadow);
@@ -135,6 +186,37 @@ export default function Gravity({ children }: GravityProps) {
             Composite.add(engine.world, wallsRef.current);
         };
 
+        // The backstop: if the satellite is ever found past an edge, put it
+        // back inside and bounce it, at my 0.69.
+        const keepOnScreen = () => {
+            if (shadow.speed > MAX_SPEED) {
+                const scale = MAX_SPEED / shadow.speed;
+                Body.setVelocity(shadow, {
+                    x: shadow.velocity.x * scale,
+                    y: shadow.velocity.y * scale,
+                });
+            }
+
+            const { min, max } = shadow.bounds;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            let pushX = 0;
+            let pushY = 0;
+
+            if (min.x < 0) pushX = -min.x;
+            else if (max.x > width) pushX = width - max.x;
+            if (min.y < 0) pushY = -min.y;
+            else if (max.y > height) pushY = height - max.y;
+
+            if (pushX || pushY) {
+                Body.translate(shadow, { x: pushX, y: pushY });
+                Body.setVelocity(shadow, {
+                    x: pushX ? -shadow.velocity.x * RESTITUTION : shadow.velocity.x,
+                    y: pushY ? -shadow.velocity.y * RESTITUTION : shadow.velocity.y,
+                });
+            }
+        };
+
         let lastTime = performance.now();
 
         const stepWorld = (now: number) => {
@@ -142,6 +224,20 @@ export default function Gravity({ children }: GravityProps) {
             lastTime = now;
 
             Engine.update(engine, step);
+            keepOnScreen();
+            shadow.frictionAir = dragFor(shadow.speed);
+
+            // The drag removed a share of its motion; when it isn't held,
+            // give that share back as the space current.
+            if (!grabRef.current) {
+                const current = spaceCurrent(now / 1000);
+                const grip = shadow.frictionAir;
+                Body.setVelocity(shadow, {
+                    x: shadow.velocity.x + current.x * grip,
+                    y: shadow.velocity.y + current.y * grip,
+                });
+                Body.setAngularVelocity(shadow, shadow.angularVelocity + current.spin * grip);
+            }
 
             const { x, y } = shadow.position;
             satellite.style.translate = `${x - homeX}px ${y - homeY}px`;
@@ -150,17 +246,57 @@ export default function Gravity({ children }: GravityProps) {
             frameRef.current = requestAnimationFrame(stepWorld);
         };
 
+        const handlePointerDown = (event: PointerEvent) => {
+            satellite.setPointerCapture(event.pointerId);
+            satellite.dataset.held = "";
+
+            grabRef.current = Constraint.create({
+                pointA: { x: event.clientX, y: event.clientY },
+                bodyB: shadow,
+                pointB: {
+                    x: event.clientX - shadow.position.x,
+                    y: event.clientY - shadow.position.y,
+                },
+                stiffness: GRAB_STIFFNESS,
+                damping: GRAB_DAMPING,
+                length: 0,
+            });
+            Composite.add(engine.world, grabRef.current);
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+            if (!grabRef.current) return;
+            grabRef.current.pointA = { x: event.clientX, y: event.clientY };
+        };
+
+        const handlePointerUp = () => {
+            if (!grabRef.current) return;
+            Composite.remove(engine.world, grabRef.current);
+            grabRef.current = null;
+            delete satellite.dataset.held;
+        };
+
         placeWalls();
+        satellite.addEventListener("pointerdown", handlePointerDown);
+        satellite.addEventListener("pointermove", handlePointerMove);
+        satellite.addEventListener("pointerup", handlePointerUp);
+        satellite.addEventListener("pointercancel", handlePointerUp);
         satellite.dataset.engine = "on";
         frameRef.current = requestAnimationFrame(stepWorld);
 
         return () => {
             if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+            satellite.removeEventListener("pointerdown", handlePointerDown);
+            satellite.removeEventListener("pointermove", handlePointerMove);
+            satellite.removeEventListener("pointerup", handlePointerUp);
+            satellite.removeEventListener("pointercancel", handlePointerUp);
             delete satellite.dataset.engine;
+            delete satellite.dataset.held;
             Composite.clear(engine.world, false);
             Engine.clear(engine);
             engineRef.current = null;
             shadowRef.current = null;
+            grabRef.current = null;
             wallsRef.current = [];
         };
     }, []);
