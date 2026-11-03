@@ -66,6 +66,9 @@ import styles from "./StarCloud.module.css";
 const FOCAL_PX = 300;
 const MIN_OPACITY = 0.1;
 const DIVE_MULTIPLIER = 10;
+const DEAD_ZONE_PX = 50;
+const BLEND_RING_PX = 150;
+const STEER_PX = 1200;
 const SABO_FPS = 120;
 const FADE_IN_MS = 400;
 const MAX_STEP_S = 0.05;
@@ -94,12 +97,15 @@ export default function StarCloud({
 }: StarCloudProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const starsRef = useRef<Star[]>([]);
+    const pointerRef = useRef<{ x: number; y: number } | null>(null);
     const frameRef = useRef<number | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
         if (!canvas || !context) return;
+
+        const half = cloudSize / 2;
 
         starsRef.current = Array.from({ length: starCount }, () => ({
             x: (Math.random() - 0.5) * cloudSize,
@@ -121,16 +127,51 @@ export default function StarCloud({
             const step = Math.min((now - lastTime) / 1000, MAX_STEP_S);
             lastTime = now;
 
-            const moveZ = baseSpeed * DIVE_MULTIPLIER * SABO_FPS * step;
             const width = window.innerWidth;
             const height = window.innerHeight;
+            const perSecond = baseSpeed * SABO_FPS * step;
+
+            const pointer = pointerRef.current;
+            const dx = pointer ? pointer.x - width / 2 : 0;
+            const dy = pointer ? pointer.y - height / 2 : 0;
+            const distance = Math.hypot(dx, dy);
+
+            let dive = 1;
+            let drift = 0;
+            if (distance >= DEAD_ZONE_PX + BLEND_RING_PX) {
+                dive = 0;
+                drift = 1;
+            } else if (distance >= DEAD_ZONE_PX) {
+                const t = (distance - DEAD_ZONE_PX) / BLEND_RING_PX;
+                drift = t * t * (3 - 2 * t);
+                dive = 1 - drift;
+            }
+
+            const moveZ = DIVE_MULTIPLIER * dive * perSecond;
+            const steer = drift > 0 ? (STEER_PX / distance) * drift * perSecond : 0;
+            const moveX = drift > 0 ? (-dx / distance) * steer : 0;
+            const moveY = drift > 0 ? (-dy / distance) * steer : 0;
 
             context.clearRect(0, 0, width, height);
             context.fillStyle = starColor;
 
             for (const star of starsRef.current) {
+                star.x += moveX;
+                star.y += moveY;
                 star.z += moveZ;
-                if (star.z > cloudSize) respawnStar(star, now);
+
+                if (star.z > cloudSize) {
+                    respawnStar(star, now);
+                } else {
+                    if (star.x > half || star.x < -half) {
+                        star.x -= Math.sign(star.x) * cloudSize;
+                        star.bornAt = now;
+                    }
+                    if (star.y > half || star.y < -half) {
+                        star.y -= Math.sign(star.y) * cloudSize;
+                        star.bornAt = now;
+                    }
+                }
 
                 const scale = FOCAL_PX / (FOCAL_PX + star.z);
                 const radius = (starSize * scale) / 2;
@@ -160,14 +201,21 @@ export default function StarCloud({
             context.setTransform(ratio, 0, 0, ratio, 0, 0);
         };
 
+        const handlePointerMove = (event: PointerEvent) => {
+            if (event.pointerType !== "mouse") return;
+            pointerRef.current = { x: event.clientX, y: event.clientY };
+        };
+
         handleResize();
         window.addEventListener("resize", handleResize);
+        window.addEventListener("pointermove", handlePointerMove, { passive: true });
         frameRef.current = requestAnimationFrame(drawFrame);
 
         return () => {
             if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
             frameRef.current = null;
             window.removeEventListener("resize", handleResize);
+            window.removeEventListener("pointermove", handlePointerMove);
         };
     }, [starCount, starSize, starColor, cloudSize, baseSpeed]);
 
