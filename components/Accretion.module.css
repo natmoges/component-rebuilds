@@ -53,12 +53,9 @@
 /* ---------- The satellite: top centre, alive ---------- */
 
 .satellite {
-    position: fixed;
-    top: 6vh;
-    left: calc(50% - 75px);
-    width: 150px;
+    display: block;
+    width: 100%;
     color: #9aa0a8;
-    z-index: 1;
     animation:
         driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both,
         bob calc(var(--bar) * 4) ease-in-out calc(var(--bar) * 2) infinite alternate;
@@ -583,10 +580,6 @@
 /* ---------- Small screens ---------- */
 
 @media (max-width: 600px) {
-    .satellite {
-        width: 104px;
-        left: calc(50% - 52px);
-    }
     .beam {
         top: calc(6vh + 50px);
         height: calc(44vh - 50px - 40px);

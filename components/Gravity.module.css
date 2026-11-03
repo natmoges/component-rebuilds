@@ -1,0 +1,16 @@
+/* The satellite's own layer. Gravity moves this; the SVG inside keeps its
+   drift-in and bob. Home is where Accretion always had it. */
+.satellite {
+    position: fixed;
+    top: 6vh;
+    left: calc(50% - 75px);
+    width: 150px;
+    z-index: 1;
+}
+
+@media (max-width: 600px) {
+    .satellite {
+        width: 104px;
+        left: calc(50% - 52px);
+    }
+}
