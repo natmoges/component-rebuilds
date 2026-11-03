@@ -63,23 +63,80 @@
 import { useEffect, useRef } from "react";
 import styles from "./StarCloud.module.css";
 
-export default function StarCloud() {
+const FOCAL_PX = 300;
+const MIN_OPACITY = 0.1;
+
+interface Star {
+    x: number;
+    y: number;
+    z: number;
+}
+
+interface StarCloudProps {
+    starCount?: number;
+    starSize?: number;
+    starColor?: string;
+    cloudSize?: number;
+}
+
+export default function StarCloud({
+    starCount = 440,
+    starSize = 3,
+    starColor = "#FFFFFF",
+    cloudSize = 1800,
+}: StarCloudProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const starsRef = useRef<Star[]>([]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const context = canvas?.getContext("2d");
+        if (!canvas || !context) return;
+
+        starsRef.current = Array.from({ length: starCount }, () => ({
+            x: (Math.random() - 0.5) * cloudSize,
+            y: (Math.random() - 0.5) * cloudSize,
+            z: Math.random() * cloudSize,
+        }));
+
+        const drawFrame = () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            context.clearRect(0, 0, width, height);
+            context.fillStyle = starColor;
+
+            for (const star of starsRef.current) {
+                const scale = FOCAL_PX / (FOCAL_PX + star.z);
+                const radius = (starSize * scale) / 2;
+
+                context.globalAlpha = Math.max(MIN_OPACITY, 1 - star.z / cloudSize);
+                context.beginPath();
+                context.arc(
+                    width / 2 + star.x * scale,
+                    height / 2 + star.y * scale,
+                    radius,
+                    0,
+                    Math.PI * 2,
+                );
+                context.fill();
+            }
+
+            context.globalAlpha = 1;
+        };
 
         const handleResize = () => {
             const ratio = window.devicePixelRatio || 1;
             canvas.width = Math.round(window.innerWidth * ratio);
             canvas.height = Math.round(window.innerHeight * ratio);
+            context.setTransform(ratio, 0, 0, ratio, 0, 0);
+            drawFrame();
         };
 
         handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    }, [starCount, starSize, starColor, cloudSize]);
 
     return <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />;
 }
