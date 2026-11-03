@@ -27,7 +27,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 08 | [SmoothScroll](https://component-rebuilds.vercel.app) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
 | 09 | [TrailCursor](https://component-rebuilds.vercel.app) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
 | 10 | [LogoPreloader](https://component-rebuilds.vercel.app) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
-| 11 | StarCloud | Sabo Sugi (v1) | 4 · Drawing the pixels |
+| 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
 | 12 | Gravity | Framer University | 4 |
 | 13 | Retro Screen Effect (optional) | Blue Jackson | 4 |
 | 14 | The Orbit | Replaces a Spline embed on my site | 5 · 3D / WebGL |
@@ -195,6 +195,25 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **Trade-off:** it covers `/before`'s text for its three seconds. I kept it on every route so Accretion's opening stays seamless.
 
 **Measured** on localhost: the rise is already running before React wakes, it starts leaving at 2251 ms (target 2250) and is gone at 2951 ms, and the backstop clears a JavaScript-less copy at 5.95 s. Live, it's gone at 3.0 s (4.6 s before the fix). At 700 px wide, zero video requests. Logo at 540 px, so the line under the wordmark reads.
+
+### 11 · StarCloud
+
+- **Reference:** StarCloud by Sabo Sugi (v1), Framer Marketplace, read for behaviour and numbers only. None of its code is here.
+- **Reused, credited:** Sabo's 300 px focal length, 50 px dead zone, 150 px blend ring on a smoothstep, dive at 10×, steering at 1200 ÷ distance, and a 10% opacity floor. My settings from natmoges.com: 440 stars, 3 px, white, 1800 deep, base speed 0.7, Lighten blending. The handoff borrows Brett Jackson's 0.7 s fade and curve from build 10.
+- **The one new idea, drawing the pixels:** 440 particles painted on one canvas, kept in a ref. The reference kept every star in React state as its own div and re-rendered all 440 on every frame.
+- **Fixed from the reference:**
+  - It moves per second, not per frame, so it runs the same at 60 Hz and 120 Hz.
+  - No pop: a recycled star fades in over 0.4 s. The reference flashed far stars back at full size up close, and sideways wraps teleported across the screen.
+  - It dives on load. The reference read an unmoved mouse as the top-left corner.
+  - It steers from the screen's real centre. The reference measured that once, so scrolling bent it.
+  - It's sharp on Retina.
+  - Reduced motion shows a still frame. The reference had no reduced-motion option.
+  - One effect does the work of its four.
+- **Kept on purpose:** Sabo's direction (the dive falls away from you, matching my preloader recording) and his inverse steering (fastest just past the ring, slower toward the edges).
+- **The handoff:** under the HUD the cloud is already flying, but invisible. It fades in on the same 0.7 s that the preloader's starfield fades out, so the logo is the only thing you see leave. One CSS rule listens to the preloader's phase, without React.
+- **Speed:** Sabo's moves are per frame, and my MacBook draws 120 frames a second, so I converted them at ×120. I checked that against my preloader recording: it measures about 3 px per frame toward the centre, and the math predicts about 2.4.
+- **Layering:** Accretion's three twinkle layers and the meteors stay under the cloud.
+- **A bug I made and caught:** in the guards step, the loop's schedule line landed inside the steering block. Every frame in the ring booked two more frames, so the loop doubled until the page lagged. I caught it on localhost and fixed it before committing.
 
 ## Credits
 
