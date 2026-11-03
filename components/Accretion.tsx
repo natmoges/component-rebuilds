@@ -48,6 +48,7 @@
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import Scan from "./Scan";
+import StarCloud from "./StarCloud";
 import styles from "./Accretion.module.css";
 
 function starField(count: number, seed: number): string {
@@ -99,7 +100,9 @@ export default async function Accretion() {
                 <span className={styles.starLayer} style={{ boxShadow: starField(140, 7) }} />
                 <span className={styles.starLayer} style={{ boxShadow: starField(60, 23) }} />
                 <span className={styles.starLayer} style={{ boxShadow: starField(24, 41) }} />
+                <StarCloud />
             </div>
+
             <Satellite />
             <Scan entries={entries} source={source} keptCount={keptCount} debrisCount={debrisCount} />
 
