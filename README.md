@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page. The index it replaced is kept at [/before](https://component-rebuilds.vercel.app/before).
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity.
 
 ## The method
 
@@ -28,7 +28,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 09 | [TrailCursor](https://component-rebuilds.vercel.app) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
 | 10 | [LogoPreloader](https://component-rebuilds.vercel.app) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
 | 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
-| 12 | Gravity | Framer University | 4 |
+| 12 | [Gravity](https://component-rebuilds.vercel.app) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
 | 13 | Retro Screen Effect (optional) | Blue Jackson | 4 |
 | 14 | The Orbit | Replaces a Spline embed on my site | 5 · 3D / WebGL |
 
@@ -215,9 +215,37 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Layering:** Accretion's three twinkle layers and the meteors stay under the cloud.
 - **A bug I made and caught:** in the guards step, the loop's schedule line landed inside the steering block. Every frame in the ring booked two more frames, so the loop doubled until the page lagged. I caught it on localhost and fixed it before committing.
 
+### 12 · Gravity
+
+- **Reference:** Gravity Component by Nandi, David and Prianca, Framer University, the July 2025 version that runs on my natmoges.com hero. Read for behaviour and numbers only. None of its code is here.
+- **Reused, credited:** Framer University's walls (100 px thick, just past the edges) and their grab spring, which I softened from 0.2 to 0.05 and damped. My settings from natmoges.com: friction 0.08, bounce 0.69, density 1. Gravity is 0, 0 here: space, not my hero's 0.5.
+- **The one new idea, a physics engine driving a body:** a twin of Accretion's satellite lives in a Matter.js world, and every frame the satellite is moved onto its twin. The engine decides where it is; my code asks and draws.
+- **What I built around it, my calls:**
+  - The satellite is the body, so it's grabbed and thrown directly. Nothing covers the sky, and StarCloud keeps steering.
+  - The beam re-aims every frame from wherever the satellite is to the scan line, so it scans from any direction.
+  - Weight that rewards effort: space drag is thick when it's slow and thin when it's fast. A lazy flick dies within its own length; a hard one bounces around the screen.
+  - Alive at rest: the drag pulls toward a slow space current instead of zero, so it drifts and tumbles a little and is never quite still.
+  - An orbit around the lock, 185 px out, that its centre can never cross. Thrown at it, it glances off and slides around.
+  - Scrolling drives it around its own orbit: one lap per 2,400 px, clockwise going down. Round above the lock, flattened below so it turns back above the HUD.
+- **Fixed from the reference:**
+  - One body works. The reference's Evenly spread divides by zero with a single body, which is why my natmoges.com hero carries an invisible 1 × 1 px second one.
+  - No grab canvas over the page. The reference catches the mouse with a full-size invisible canvas, which is why my hero keeps it in a 47 px rail; its touch handling also blocks scrolling on phones.
+  - One loop instead of three. The reference runs Matter's Runner, a Render that draws an invisible canvas, and its own sync loop, then starts two of them again.
+  - Its listeners are removed. The reference added three more on every resize.
+  - Resizing keeps the satellite. The reference cleared its bodies on resize and never added them back; here the walls move, the twin is rescaled, and home is re-measured.
+  - Body Type is honoured. The reference never passed it to the engine.
+  - Reduced motion: no engine, the satellite stays home and the beam stays straight. The reference had no reduced-motion path.
+- **Can't be thrown off screen:** a speed limit (it never moves far enough in one step to cross a wall) and a backstop that puts it back inside. An early version of mine could be thrown into deep space.
+- **Measured:**
+  - Flicks with the same 300 px of hand travel: 87 px at 600 px/s, 1,384 px with one bounce at 3,000 px/s, 3,298 px with two bounces at 6,000 px/s.
+  - The orbit holds its size over ten laps; the space current wanders it about ±30 px.
+  - On a kept lock the readout can grow over the bottom of the orbit; the readout stays on top and the satellite passes behind it.
+- **A bug I made and caught:** the beam's four values first went on the page root, which restyled the whole page every frame (1,445 ms in 3 s) and made StarCloud stutter. Moved onto Scan's sight: 78 ms.
+- **Seen, not fixed here:** scrolling Accretion restyles about 1,800 elements a frame when only its drifts and meteors need it. That's build 07's code; it gets its own commit.
+
 ## Credits
 
-Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 10's logo and starfield are my own artwork and screen recording.
+Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 10's logo and starfield are my own artwork and screen recording.
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
 
