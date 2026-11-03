@@ -81,6 +81,10 @@ const DENSITY = 1;
 // Framer University's walls, credited: 100 px thick, just past the edges.
 const WALL_PX = 100;
 
+// One step of the world is never longer than 1/60 s, so a slow frame or a
+// return to the tab can't throw the satellite.
+const MAX_STEP_MS = 1000 / 60;
+
 interface GravityProps {
     children: ReactNode;
 }
@@ -90,6 +94,7 @@ export default function Gravity({ children }: GravityProps) {
     const engineRef = useRef<Engine | null>(null);
     const shadowRef = useRef<Body | null>(null);
     const wallsRef = useRef<Body[]>([]);
+    const frameRef = useRef<number | null>(null);
 
     useEffect(() => {
         const satellite = satelliteRef.current;
@@ -110,6 +115,9 @@ export default function Gravity({ children }: GravityProps) {
         shadowRef.current = shadow;
         Composite.add(engine.world, shadow);
 
+        const homeX = shadow.position.x;
+        const homeY = shadow.position.y;
+
         const placeWalls = () => {
             Composite.remove(engine.world, wallsRef.current);
 
@@ -127,10 +135,27 @@ export default function Gravity({ children }: GravityProps) {
             Composite.add(engine.world, wallsRef.current);
         };
 
+        let lastTime = performance.now();
+
+        const stepWorld = (now: number) => {
+            const step = Math.min(now - lastTime, MAX_STEP_MS);
+            lastTime = now;
+
+            Engine.update(engine, step);
+
+            const { x, y } = shadow.position;
+            satellite.style.translate = `${x - homeX}px ${y - homeY}px`;
+            satellite.style.rotate = `${shadow.angle}rad`;
+
+            frameRef.current = requestAnimationFrame(stepWorld);
+        };
+
         placeWalls();
         satellite.dataset.engine = "on";
+        frameRef.current = requestAnimationFrame(stepWorld);
 
         return () => {
+            if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
             delete satellite.dataset.engine;
             Composite.clear(engine.world, false);
             Engine.clear(engine);
