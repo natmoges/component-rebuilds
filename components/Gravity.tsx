@@ -69,8 +69,17 @@
  * straight.
  */
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { Bodies, Composite, Engine, type Body } from "matter-js";
 import styles from "./Gravity.module.css";
+
+// My natmoges.com Body settings, carried over.
+const FRICTION = 0.08;
+const RESTITUTION = 0.69;
+const DENSITY = 1;
+
+// Framer University's walls, credited: 100 px thick, just past the edges.
+const WALL_PX = 100;
 
 interface GravityProps {
     children: ReactNode;
@@ -78,6 +87,58 @@ interface GravityProps {
 
 export default function Gravity({ children }: GravityProps) {
     const satelliteRef = useRef<HTMLDivElement>(null);
+    const engineRef = useRef<Engine | null>(null);
+    const shadowRef = useRef<Body | null>(null);
+    const wallsRef = useRef<Body[]>([]);
+
+    useEffect(() => {
+        const satellite = satelliteRef.current;
+        if (!satellite) return;
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        const engine = Engine.create({ gravity: { x: 0, y: 0 } });
+        engineRef.current = engine;
+
+        const home = satellite.getBoundingClientRect();
+        const shadow = Bodies.rectangle(
+            home.left + home.width / 2,
+            home.top + home.height / 2,
+            home.width,
+            home.height,
+            { friction: FRICTION, restitution: RESTITUTION, density: DENSITY },
+        );
+        shadowRef.current = shadow;
+        Composite.add(engine.world, shadow);
+
+        const placeWalls = () => {
+            Composite.remove(engine.world, wallsRef.current);
+
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const half = WALL_PX / 2;
+            const wall = { isStatic: true, friction: 1 };
+
+            wallsRef.current = [
+                Bodies.rectangle(width / 2, -half, width + WALL_PX * 2, WALL_PX, wall),
+                Bodies.rectangle(width / 2, height + half, width + WALL_PX * 2, WALL_PX, wall),
+                Bodies.rectangle(-half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
+                Bodies.rectangle(width + half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
+            ];
+            Composite.add(engine.world, wallsRef.current);
+        };
+
+        placeWalls();
+        satellite.dataset.engine = "on";
+
+        return () => {
+            delete satellite.dataset.engine;
+            Composite.clear(engine.world, false);
+            Engine.clear(engine);
+            engineRef.current = null;
+            shadowRef.current = null;
+            wallsRef.current = [];
+        };
+    }, []);
 
     return (
         <div ref={satelliteRef} className={styles.satellite}>
