@@ -39,7 +39,7 @@
  *
  * HITTING AN EDGE: it bounces off the edges of the screen, keeping about
  * two thirds of its speed. It never leaves the screen, however hard it's
- * thrown, and it passes over the HUD and the planet without touching them.
+ * thrown, and it passes over the planet without touching it.
  *
  * KEEPING ITS DISTANCE: an invisible orbit, 185 px around the lock, is as
  * close as its centre can ever come to what it scans. Thrown at it, it glances off
@@ -53,8 +53,13 @@
  * second, wanders it around where it settled and tumbles it a few degrees,
  * on top of its bob. It drifts; it doesn't travel.
  *
- * SCROLLING: the record's warp gives it a small push the way the record is
- * moving, so fast scrolling jostles it. Slow scrolling barely does.
+ * SCROLLING: it travels its own orbit around the lock as you scroll,
+ * clockwise going down and back the other way going up, at whatever
+ * distance it's floating. The orbit is round above the lock and flattened
+ * below it, so it turns back above the HUD. When a lock opens the full
+ * readout, the readout stays on top and the satellite passes behind it.
+ * One lap every three screens or so: scroll faster and it circles faster;
+ * stop and it stops travelling.
  *
  * DURING A LOCK: it keeps drifting. The beam re-aims every frame from the
  * satellite to the scan line, and its hunting, locked and debris looks
@@ -113,6 +118,16 @@ const TUMBLE = 0.0008; // rad per 1/60 s at its strongest
 // The speed limit: never far enough in one step to cross a wall.
 const MAX_SPEED = 90;
 
+// Scrolling drives the satellite around its orbit: one lap per this much
+// scroll. Jumps count for at most SCROLL_MAX_PX a frame.
+const SCROLL_PER_LAP_PX = 2400;
+const SCROLL_MAX_PX = 120;
+
+// Below the lock the orbit flattens so it turns back above the HUD, whose top
+// sits at about this share of the screen's height when it shows an entry.
+const HUD_TOP_SHARE = 0.78;
+const HUD_CLEARANCE_PX = 16;
+
 // The orbit: as close as the satellite can come to the lock. Smaller on small
 // screens, never more than this share of the shorter side.
 const ORBIT_RADIUS_PX = 185;
@@ -142,6 +157,30 @@ function spaceCurrent(seconds: number) {
         y: (DRIFT_SPEED * 0.6 * (Math.cos(seconds * 0.17 + 0.4) + 0.5 * Math.sin(seconds * 0.41 + 2.1))) / 1.5,
         spin: TUMBLE * Math.sin(seconds * 0.29 + 0.7),
     };
+}
+
+// How far out the orbit through this point is (its radius above the lock).
+// Exact above the lock; below it, unsquashed while that's still reliable.
+function reachOf(awayX: number, awayY: number, floor: number) {
+    const straight = Math.hypot(awayX, awayY);
+    if (awayY > 0 && awayY < floor * 0.95 && straight > floor) {
+        return Math.abs(awayX) / Math.sqrt(1 - (awayY * awayY) / (floor * floor));
+    }
+    return straight;
+}
+
+// One frame of travel around the lock. Above the lock the path is a circle;
+// below it, a circle squashed so it never drops past `floor`. Works on the
+// offset from the lock and returns the new offset.
+function travelOrbit(awayX: number, awayY: number, turn: number, floor: number, reach: number) {
+    const squash = Math.min(1, floor / reach);
+
+    // Unsquash, turn on the circle, squash again.
+    const roundY = awayY > 0 ? awayY / squash : awayY;
+    const angle = Math.atan2(roundY, awayX) + turn;
+    const nextX = Math.cos(angle) * reach;
+    const nextY = Math.sin(angle) * reach;
+    return { x: nextX, y: nextY > 0 ? nextY * squash : nextY };
 }
 
 interface GravityProps {
@@ -282,6 +321,21 @@ export default function Gravity({ children }: GravityProps) {
             sight.style.setProperty("--beam-angle", `${Math.atan2(-dx, dy)}rad`);
         };
 
+        // Scrolling adds up here; the loop turns it into travel around the orbit.
+        let lastScrollY = window.scrollY;
+        let scrolled = 0;
+
+        const handleScroll = () => {
+            scrolled += window.scrollY - lastScrollY;
+            lastScrollY = window.scrollY;
+        };
+
+        // The orbit's size is remembered between frames, and re-measured only
+        // above the lock or after something other than scrolling moved it.
+        let orbitReach = 0;
+        let placedX = Number.NaN;
+        let placedY = Number.NaN;
+
         let lastTime = performance.now();
 
         const stepWorld = (now: number) => {
@@ -291,6 +345,32 @@ export default function Gravity({ children }: GravityProps) {
             Engine.update(engine, step);
             keepOnScreen();
             shadow.frictionAir = dragFor(shadow.speed);
+
+            // Scrolling: carry the twin around the lock at its own distance,
+            // clockwise going down. Its speed is left alone, so it's still
+            // physics: walls, the orbit and throws all still apply.
+            if (scrolled !== 0 && !grabRef.current) {
+                const turn =
+                    (Math.max(-SCROLL_MAX_PX, Math.min(SCROLL_MAX_PX, scrolled)) / SCROLL_PER_LAP_PX) *
+                    Math.PI *
+                    2;
+                const lockX = window.innerWidth / 2;
+                const lockY = window.innerHeight / 2;
+                const floor = Math.max(
+                    orbitRadius,
+                    window.innerHeight * HUD_TOP_SHARE - HUD_CLEARANCE_PX - twinHeight / 2 - lockY,
+                );
+                const awayX = shadow.position.x - lockX;
+                const awayY = shadow.position.y - lockY;
+                const moved = !(Math.hypot(shadow.position.x - placedX, shadow.position.y - placedY) < 3);
+                if (moved || awayY <= 0) orbitReach = reachOf(awayX, awayY, floor);
+
+                const next = travelOrbit(awayX, awayY, turn, floor, orbitReach);
+                placedX = lockX + next.x;
+                placedY = lockY + next.y;
+                Body.setPosition(shadow, { x: placedX, y: placedY });
+            }
+            scrolled = 0;
 
             // The drag removed a share of its motion; when it isn't held,
             // give that share back as the space current.
@@ -363,6 +443,7 @@ export default function Gravity({ children }: GravityProps) {
 
         placeWalls();
         window.addEventListener("resize", handleResize);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         satellite.addEventListener("pointerdown", handlePointerDown);
         satellite.addEventListener("pointermove", handlePointerMove);
         satellite.addEventListener("pointerup", handlePointerUp);
@@ -373,6 +454,7 @@ export default function Gravity({ children }: GravityProps) {
         return () => {
             if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
             window.removeEventListener("resize", handleResize);
+            window.removeEventListener("scroll", handleScroll);
             satellite.removeEventListener("pointerdown", handlePointerDown);
             satellite.removeEventListener("pointermove", handlePointerMove);
             satellite.removeEventListener("pointerup", handlePointerUp);
