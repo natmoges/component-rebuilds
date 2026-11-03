@@ -166,8 +166,10 @@ export default function Gravity({ children }: GravityProps) {
         shadowRef.current = shadow;
         Composite.add(engine.world, shadow);
 
-        const homeX = shadow.position.x;
-        const homeY = shadow.position.y;
+        let homeX = shadow.position.x;
+        let homeY = shadow.position.y;
+        let twinWidth = home.width;
+        let twinHeight = home.height;
 
         const placeWalls = () => {
             Composite.remove(engine.world, wallsRef.current);
@@ -276,7 +278,26 @@ export default function Gravity({ children }: GravityProps) {
             delete satellite.dataset.held;
         };
 
+        // The screen changed size: walls to the new edges, home re-measured
+        // (offset ignores the engine's translate), the twin resized if the
+        // satellite did. The satellite itself stays where it is on screen.
+        const handleResize = () => {
+            placeWalls();
+
+            const width = satellite.offsetWidth;
+            const height = satellite.offsetHeight;
+            homeX = satellite.offsetLeft + width / 2;
+            homeY = satellite.offsetTop + height / 2;
+
+            if (width !== twinWidth || height !== twinHeight) {
+                Body.scale(shadow, width / twinWidth, height / twinHeight);
+                twinWidth = width;
+                twinHeight = height;
+            }
+        };
+
         placeWalls();
+        window.addEventListener("resize", handleResize);
         satellite.addEventListener("pointerdown", handlePointerDown);
         satellite.addEventListener("pointermove", handlePointerMove);
         satellite.addEventListener("pointerup", handlePointerUp);
@@ -286,6 +307,7 @@ export default function Gravity({ children }: GravityProps) {
 
         return () => {
             if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+            window.removeEventListener("resize", handleResize);
             satellite.removeEventListener("pointerdown", handlePointerDown);
             satellite.removeEventListener("pointermove", handlePointerMove);
             satellite.removeEventListener("pointerup", handlePointerUp);
