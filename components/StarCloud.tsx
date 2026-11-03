@@ -36,9 +36,9 @@
  * STOPPING: the mouse stops, the cloud keeps flying the way it was told.
  * It never stops on its own.
  *
- * A STAR'S LIFE: each star starts far away, small and dim, and falls back
- * as it travels. When it reaches the far wall it starts over somewhere you
- * can't see it, so no star pops in.
+ * A STAR'S LIFE: each star falls back as it travels, shrinking and
+ * dimming toward the centre. When it reaches the far wall it starts over
+ * from nothing and fades in, so no star pops in.
  *
  * SCROLLING: the cloud belongs to the screen, not the page. The record
  * scrolls past in front of it.
@@ -65,11 +65,16 @@ import styles from "./StarCloud.module.css";
 
 const FOCAL_PX = 300;
 const MIN_OPACITY = 0.1;
+const DIVE_MULTIPLIER = 10;
+const SABO_FPS = 120;
+const FADE_IN_MS = 400;
+const MAX_STEP_S = 0.05;
 
 interface Star {
     x: number;
     y: number;
     z: number;
+    bornAt: number;
 }
 
 interface StarCloudProps {
@@ -77,6 +82,7 @@ interface StarCloudProps {
     starSize?: number;
     starColor?: string;
     cloudSize?: number;
+    baseSpeed?: number;
 }
 
 export default function StarCloud({
@@ -84,9 +90,11 @@ export default function StarCloud({
     starSize = 3,
     starColor = "#FFFFFF",
     cloudSize = 1800,
+    baseSpeed = 0.7,
 }: StarCloudProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const starsRef = useRef<Star[]>([]);
+    const frameRef = useRef<number | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -97,9 +105,23 @@ export default function StarCloud({
             x: (Math.random() - 0.5) * cloudSize,
             y: (Math.random() - 0.5) * cloudSize,
             z: Math.random() * cloudSize,
+            bornAt: -FADE_IN_MS,
         }));
 
-        const drawFrame = () => {
+        const respawnStar = (star: Star, now: number) => {
+            star.x = (Math.random() - 0.5) * cloudSize;
+            star.y = (Math.random() - 0.5) * cloudSize;
+            star.z = 0;
+            star.bornAt = now;
+        };
+
+        let lastTime = performance.now();
+
+        const drawFrame = (now: number) => {
+            const step = Math.min((now - lastTime) / 1000, MAX_STEP_S);
+            lastTime = now;
+
+            const moveZ = baseSpeed * DIVE_MULTIPLIER * SABO_FPS * step;
             const width = window.innerWidth;
             const height = window.innerHeight;
 
@@ -107,10 +129,15 @@ export default function StarCloud({
             context.fillStyle = starColor;
 
             for (const star of starsRef.current) {
+                star.z += moveZ;
+                if (star.z > cloudSize) respawnStar(star, now);
+
                 const scale = FOCAL_PX / (FOCAL_PX + star.z);
                 const radius = (starSize * scale) / 2;
+                const depthAlpha = Math.max(MIN_OPACITY, 1 - star.z / cloudSize);
+                const fadeIn = Math.min(1, (now - star.bornAt) / FADE_IN_MS);
 
-                context.globalAlpha = Math.max(MIN_OPACITY, 1 - star.z / cloudSize);
+                context.globalAlpha = depthAlpha * fadeIn;
                 context.beginPath();
                 context.arc(
                     width / 2 + star.x * scale,
@@ -123,6 +150,7 @@ export default function StarCloud({
             }
 
             context.globalAlpha = 1;
+            frameRef.current = requestAnimationFrame(drawFrame);
         };
 
         const handleResize = () => {
@@ -130,13 +158,18 @@ export default function StarCloud({
             canvas.width = Math.round(window.innerWidth * ratio);
             canvas.height = Math.round(window.innerHeight * ratio);
             context.setTransform(ratio, 0, 0, ratio, 0, 0);
-            drawFrame();
         };
 
         handleResize();
         window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [starCount, starSize, starColor, cloudSize]);
+        frameRef.current = requestAnimationFrame(drawFrame);
+
+        return () => {
+            if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+            frameRef.current = null;
+            window.removeEventListener("resize", handleResize);
+        };
+    }, [starCount, starSize, starColor, cloudSize, baseSpeed]);
 
     return <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />;
 }
