@@ -5,4 +5,20 @@
     height: 100%;
     pointer-events: none;
     mix-blend-mode: lighten;
+    opacity: 1;
+    /* the handoff: Brett's 0.7 s fade and curve, so the cloud rises as the
+       preloader's starfield falls */
+    transition: opacity 700ms cubic-bezier(.7, .2, .2, 1);
+}
+
+/* under the HUD: already flying, not yet seen */
+:root:has([role="status"][data-phase="armed"]) .canvas {
+    opacity: 0;
+}
+
+/* where the preloader never shows, the cloud doesn't wait for it */
+@media (hover: none) and (pointer: coarse), (max-width: 809px) {
+    :root:has([role="status"][data-phase="armed"]) .canvas {
+        opacity: 1;
+    }
 }

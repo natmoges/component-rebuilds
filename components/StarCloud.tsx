@@ -106,6 +106,7 @@ export default function StarCloud({
         if (!canvas || !context) return;
 
         const half = cloudSize / 2;
+        const isStill = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         starsRef.current = Array.from({ length: starCount }, () => ({
             x: (Math.random() - 0.5) * cloudSize,
@@ -124,7 +125,7 @@ export default function StarCloud({
         let lastTime = performance.now();
 
         const drawFrame = (now: number) => {
-            const step = Math.min((now - lastTime) / 1000, MAX_STEP_S);
+            const step = isStill ? 0 : Math.min((now - lastTime) / 1000, MAX_STEP_S);
             lastTime = now;
 
             const width = window.innerWidth;
@@ -191,7 +192,7 @@ export default function StarCloud({
             }
 
             context.globalAlpha = 1;
-            frameRef.current = requestAnimationFrame(drawFrame);
+            if (!isStill) frameRef.current = requestAnimationFrame(drawFrame);
         };
 
         const handleResize = () => {
@@ -199,6 +200,7 @@ export default function StarCloud({
             canvas.width = Math.round(window.innerWidth * ratio);
             canvas.height = Math.round(window.innerHeight * ratio);
             context.setTransform(ratio, 0, 0, ratio, 0, 0);
+            if (isStill) drawFrame(performance.now());
         };
 
         const handlePointerMove = (event: PointerEvent) => {
