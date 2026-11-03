@@ -41,6 +41,10 @@
  * two thirds of its speed. It never leaves the screen, however hard it's
  * thrown, and it passes over the HUD and the planet without touching them.
  *
+ * KEEPING ITS DISTANCE: an invisible orbit, 185 px around the lock, is as
+ * close as its centre can ever come to what it scans. Thrown at it, it glances off
+ * and slides around the curve, circling the lock instead of covering it.
+ *
  * AFTER A THROW: the drag thickens as it slows, so it settles like
  * something heavy instead of gliding, wherever it ends up, turned however
  * it landed. There's no pull home.
@@ -109,6 +113,16 @@ const TUMBLE = 0.0008; // rad per 1/60 s at its strongest
 // The speed limit: never far enough in one step to cross a wall.
 const MAX_SPEED = 90;
 
+// The orbit: as close as the satellite can come to the lock. Smaller on small
+// screens, never more than this share of the shorter side.
+const ORBIT_RADIUS_PX = 185;
+const ORBIT_SHARE = 0.3;
+
+// The beam leaves from just under the satellite's belly (this share of its
+// height below its centre) and stops short of the lock corners.
+const BEAM_START = 0.4;
+const BEAM_GAP_PX = 40;
+
 // One step of the world is never longer than 1/60 s, so a slow frame or a
 // return to the tab can't throw the satellite.
 const MAX_STEP_MS = 1000 / 60;
@@ -171,6 +185,8 @@ export default function Gravity({ children }: GravityProps) {
         let twinWidth = home.width;
         let twinHeight = home.height;
 
+        let orbitRadius = ORBIT_RADIUS_PX;
+
         const placeWalls = () => {
             Composite.remove(engine.world, wallsRef.current);
 
@@ -178,12 +194,19 @@ export default function Gravity({ children }: GravityProps) {
             const height = window.innerHeight;
             const half = WALL_PX / 2;
             const wall = { isStatic: true, friction: 1 };
+            orbitRadius = Math.min(ORBIT_RADIUS_PX, Math.min(width, height) * ORBIT_SHARE);
 
             wallsRef.current = [
                 Bodies.rectangle(width / 2, -half, width + WALL_PX * 2, WALL_PX, wall),
                 Bodies.rectangle(width / 2, height + half, width + WALL_PX * 2, WALL_PX, wall),
                 Bodies.rectangle(-half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
                 Bodies.rectangle(width + half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
+                // The orbit: sized so the satellite's centre stops on the line,
+                // and slippery, so it slides around instead of sticking.
+                Bodies.circle(width / 2, height / 2, orbitRadius - twinHeight / 2, {
+                    isStatic: true,
+                    friction: 0,
+                }),
             ];
             Composite.add(engine.world, wallsRef.current);
         };
@@ -217,6 +240,46 @@ export default function Gravity({ children }: GravityProps) {
                     y: pushY ? -shadow.velocity.y * RESTITUTION : shadow.velocity.y,
                 });
             }
+
+            // Inside the orbit (it should never be): out along the line from
+            // the lock, keeping only the speed that runs around the curve.
+            const awayX = shadow.position.x - width / 2;
+            const awayY = shadow.position.y - height / 2;
+            const distance = Math.hypot(awayX, awayY) || 1;
+            if (distance < orbitRadius) {
+                const outX = awayX / distance;
+                const outY = awayY / distance;
+                Body.translate(shadow, {
+                    x: outX * (orbitRadius - distance),
+                    y: outY * (orbitRadius - distance),
+                });
+                const inward = Math.min(0, shadow.velocity.x * outX + shadow.velocity.y * outY);
+                Body.setVelocity(shadow, {
+                    x: shadow.velocity.x - inward * outX,
+                    y: shadow.velocity.y - inward * outY,
+                });
+            }
+        };
+
+        // The beam: from the satellite to the scan line (the screen's centre),
+        // wherever the satellite is. The four values go on Scan's sight only:
+        // written on the page root, they made the browser restyle the whole
+        // page every frame, and StarCloud stuttered.
+        const sight = document.querySelector<HTMLElement>("[data-sight]");
+
+        const aimBeam = (x: number, y: number) => {
+            if (!sight) return;
+
+            const dx = window.innerWidth / 2 - x;
+            const dy = window.innerHeight / 2 - y;
+            const distance = Math.hypot(dx, dy) || 1;
+            const start = twinHeight * BEAM_START;
+            const length = Math.max(0, distance - start - BEAM_GAP_PX);
+
+            sight.style.setProperty("--beam-x", `${x + (dx / distance) * start}px`);
+            sight.style.setProperty("--beam-y", `${y + (dy / distance) * start}px`);
+            sight.style.setProperty("--beam-length", `${length}px`);
+            sight.style.setProperty("--beam-angle", `${Math.atan2(-dx, dy)}rad`);
         };
 
         let lastTime = performance.now();
@@ -244,6 +307,8 @@ export default function Gravity({ children }: GravityProps) {
             const { x, y } = shadow.position;
             satellite.style.translate = `${x - homeX}px ${y - homeY}px`;
             satellite.style.rotate = `${shadow.angle}rad`;
+
+            aimBeam(x, y);
 
             frameRef.current = requestAnimationFrame(stepWorld);
         };
@@ -313,6 +378,9 @@ export default function Gravity({ children }: GravityProps) {
             satellite.removeEventListener("pointerup", handlePointerUp);
             satellite.removeEventListener("pointercancel", handlePointerUp);
             delete satellite.dataset.engine;
+            for (const name of ["--beam-x", "--beam-y", "--beam-length", "--beam-angle"]) {
+                sight?.style.removeProperty(name);
+            }
             delete satellite.dataset.held;
             Composite.clear(engine.world, false);
             Engine.clear(engine);

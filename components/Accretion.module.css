@@ -109,11 +109,14 @@
 
 .beam {
     position: absolute;
-    left: 50%;
-    top: calc(6vh + 72px);
-    height: calc(44vh - 72px - 40px);
+    /* Gravity (build #12) aims these from wherever the satellite is; without
+       it, the beam falls straight down from home, as it always did. */
+    left: var(--beam-x, 50%);
+    top: var(--beam-y, calc(6vh + 72px));
+    height: var(--beam-length, calc(44vh - 72px - 40px));
     width: 18px;
     translate: -50% 0;
+    rotate: var(--beam-angle, 0rad);
     background: linear-gradient(
         to right,
         transparent,
@@ -581,8 +584,8 @@
 
 @media (max-width: 600px) {
     .beam {
-        top: calc(6vh + 50px);
-        height: calc(44vh - 50px - 40px);
+        top: var(--beam-y, calc(6vh + 50px));
+        height: var(--beam-length, calc(44vh - 50px - 40px));
     }
     .object {
         width: 44px;

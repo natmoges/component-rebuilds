@@ -291,7 +291,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 ))}
             </ol>
 
-            <div className={styles.sight} data-reading={reading} aria-hidden="true">
+            <div className={styles.sight} data-reading={reading} data-sight aria-hidden="true">
                 <span className={styles.beam} />
                 <span className={styles.lockOn} />
             </div>
