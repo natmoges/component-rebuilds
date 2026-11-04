@@ -88,9 +88,9 @@
  * today, so there's no planet to move.
  */
 
-import { useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Color } from "three";
+import { useMemo, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Color, type Mesh } from "three";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
@@ -100,6 +100,8 @@ const RADIUS = 137.5;
 const RIM = "#4CB2AF";
 const CONTOUR = "#22C55E";
 const BASE = "#0F1C19";
+const SPIN_SECONDS = 120;
+const MAX_STEP = 1 / 30;
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -152,7 +154,8 @@ export interface HeroOrbitProps {
     isTechnologistNamed: boolean;
 }
 
-export default function HeroOrbit({ mass }: HeroOrbitProps) {
+function Planet() {
+    const planetRef = useRef<Mesh>(null);
     const skin = useMemo(
         () => ({
             uRim: { value: new Color(RIM) },
@@ -162,6 +165,28 @@ export default function HeroOrbit({ mass }: HeroOrbitProps) {
         }),
         []
     );
+
+    useFrame((_, delta) => {
+        const planet = planetRef.current;
+        if (planet === null) return;
+        const step = Math.min(delta, MAX_STEP);
+        planet.rotation.y += (step / SPIN_SECONDS) * Math.PI * 2;
+    });
+
+    return (
+        <mesh ref={planetRef}>
+            <sphereGeometry args={[RADIUS, 64, 64]} />
+            <shaderMaterial
+                transparent
+                uniforms={skin}
+                vertexShader={SKIN_VERTEX}
+                fragmentShader={SKIN_FRAGMENT}
+            />
+        </mesh>
+    );
+}
+
+export default function HeroOrbit({ mass }: HeroOrbitProps) {
     return (
         <div className={styles.stage} aria-hidden="true">
             <Canvas
@@ -176,15 +201,7 @@ export default function HeroOrbit({ mass }: HeroOrbitProps) {
                 }}
             >
                 <group scale={START_SCALE}>
-                    <mesh>
-                        <sphereGeometry args={[RADIUS, 64, 64]} />
-                        <shaderMaterial
-                            transparent
-                            uniforms={skin}
-                            vertexShader={SKIN_VERTEX}
-                            fragmentShader={SKIN_FRAGMENT}
-                        />
-                    </mesh>
+                    <Planet />
                 </group>
             </Canvas>
         </div>
