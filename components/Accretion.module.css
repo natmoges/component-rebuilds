@@ -45,6 +45,7 @@
     from {
         opacity: 1;
     }
+
     to {
         opacity: 0.3;
     }
@@ -66,6 +67,7 @@
         transform: translate(40vw, -20vh) rotate(-12deg);
         opacity: 0;
     }
+
     to {
         transform: none;
         opacity: 1;
@@ -76,6 +78,7 @@
     from {
         translate: 0 0;
     }
+
     to {
         translate: 0 5px;
     }
@@ -94,6 +97,7 @@
     0% {
         opacity: 1;
     }
+
     12.5% {
         opacity: 0.15;
     }
@@ -117,14 +121,12 @@
     width: 18px;
     translate: -50% 0;
     rotate: var(--beam-angle, 0rad);
-    background: linear-gradient(
-        to right,
-        transparent,
-        color-mix(in srgb, var(--signal) 22%, transparent) 35%,
-        var(--signal) 50%,
-        color-mix(in srgb, var(--signal) 22%, transparent) 65%,
-        transparent
-    );
+    background: linear-gradient(to right,
+            transparent,
+            color-mix(in srgb, var(--signal) 22%, transparent) 35%,
+            var(--signal) 50%,
+            color-mix(in srgb, var(--signal) 22%, transparent) 65%,
+            transparent);
     opacity: 0;
     transform-origin: top;
     scale: 1 0;
@@ -152,6 +154,7 @@
     from {
         opacity: 1;
     }
+
     to {
         opacity: 0.45;
     }
@@ -205,6 +208,7 @@
     from {
         scale: 1.4;
     }
+
     to {
         scale: 1.1;
     }
@@ -263,8 +267,7 @@
     margin: -7px 0 0 -7px;
     color: var(--signal);
     opacity: 0.85;
-    transform: rotate(var(--angle)) translateX(calc(var(--size) / 2 + 14px))
-        rotate(calc(var(--angle) * -1));
+    transform: rotate(var(--angle)) translateX(calc(var(--size) / 2 + 14px)) rotate(calc(var(--angle) * -1));
     animation: arrive var(--bar) ease-out both;
 }
 
@@ -289,7 +292,7 @@
 
 .massLabel {
     position: absolute;
-    top: 100%;
+    left: calc(50% + var(--planet-shift, 0px));
     left: 50%;
     translate: -50% 0;
     margin-top: 26px;
@@ -419,9 +422,7 @@
     aspect-ratio: 1;
     color: #8a8f98;
     opacity: calc(0.1 + var(--depth) * 0.3);
-    transform: translateY(
-        calc((var(--scroll, 0) * 1px + 50vh - (60vh + var(--slot) * 90vh)) * (1 - var(--depth)) * 0.5)
-    );
+    transform: translateY(calc((var(--scroll, 0) * 1px + 50vh - (60vh + var(--slot) * 90vh)) * (1 - var(--depth)) * 0.5));
     transition: opacity calc(var(--bar) / 2);
     pointer-events: none;
 }
@@ -524,6 +525,7 @@
         filter: blur(12px) grayscale(1);
         opacity: 0.4;
     }
+
     to {
         filter: none;
         opacity: 1;
@@ -539,6 +541,7 @@
         opacity: 0;
         filter: blur(6px);
     }
+
     to {
         opacity: 1;
         filter: none;
@@ -643,6 +646,7 @@
         top: var(--beam-y, calc(6vh + 50px));
         height: var(--beam-length, calc(44vh - 50px - 40px));
     }
+
     .object {
         width: 44px;
         height: 44px;
@@ -653,6 +657,7 @@
 /* ---------- Reduced motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
+
     .starLayer,
     .satellite,
     .beacon,
@@ -665,14 +670,17 @@
     .readout {
         animation: none;
     }
+
     .scan,
     .sight,
     .field {
         display: none;
     }
+
     .record {
         display: grid;
     }
+
     .source,
     .seam {
         display: block;
