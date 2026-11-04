@@ -88,12 +88,62 @@
  * today, so there's no planet to move.
  */
 
+import { useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
+import { Color } from "three";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
 const DEGREE = Math.PI / 180;
 const START_SCALE = 0.45;
+const RADIUS = 137.5;
+const RIM = "#4CB2AF";
+const CONTOUR = "#22C55E";
+const BASE = "#0F1C19";
+
+const SKIN_VERTEX = /* glsl */ `
+varying vec3 vNormal;
+varying vec3 vLocal;
+
+void main() {
+    vLocal = position;
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const SKIN_FRAGMENT = /* glsl */ `
+uniform vec3 uRim;
+uniform vec3 uContour;
+uniform vec3 uBase;
+uniform float uRadius;
+
+varying vec3 vNormal;
+varying vec3 vLocal;
+
+const vec3 VIEW = vec3(0.0, 0.0, 1.0);
+const vec3 LIGHT = vec3(-0.4, 0.6, 0.7);
+const vec3 AXIS = vec3(0.7071, 0.7071, 0.0);
+const float RINGS = 11.0;
+
+void main() {
+    vec3 normal = normalize(vNormal);
+    float facing = max(dot(normal, VIEW), 0.0);
+    float rim = 0.2 + pow(1.0 - facing, 2.0);
+    float light = max(dot(normal, normalize(LIGHT)), 0.0);
+
+    float band = dot(vLocal, AXIS) / uRadius * RINGS;
+    float line = 1.0 - min(abs(fract(band - 0.5) - 0.5) / fwidth(band), 1.0);
+
+    vec3 color = uBase * (0.7 + 0.6 * light);
+    color += uContour * line * 0.35;
+    color += uRim * rim * 0.6;
+    float alpha = clamp(0.55 + rim * 0.5 + line * 0.2, 0.0, 1.0);
+
+    gl_FragColor = vec4(color, alpha);
+    #include <colorspace_fragment>
+}
+`;
 
 export interface HeroOrbitProps {
     mass: number;
@@ -103,6 +153,15 @@ export interface HeroOrbitProps {
 }
 
 export default function HeroOrbit({ mass }: HeroOrbitProps) {
+    const skin = useMemo(
+        () => ({
+            uRim: { value: new Color(RIM) },
+            uContour: { value: new Color(CONTOUR) },
+            uBase: { value: new Color(BASE) },
+            uRadius: { value: RADIUS },
+        }),
+        []
+    );
     return (
         <div className={styles.stage} aria-hidden="true">
             <Canvas
@@ -116,11 +175,15 @@ export default function HeroOrbit({ mass }: HeroOrbitProps) {
                     far: 100000,
                 }}
             >
-                <directionalLight position={[200, 300, 400]} intensity={1.2} />
                 <group scale={START_SCALE}>
                     <mesh>
-                        <sphereGeometry args={[137.5, 64, 64]} />
-                        <meshPhongMaterial color="#0F1C19" emissive="#4CB2AF" emissiveIntensity={0.2} shininess={5} />
+                        <sphereGeometry args={[RADIUS, 64, 64]} />
+                        <shaderMaterial
+                            transparent
+                            uniforms={skin}
+                            vertexShader={SKIN_VERTEX}
+                            fragmentShader={SKIN_FRAGMENT}
+                        />
                     </mesh>
                 </group>
             </Canvas>
