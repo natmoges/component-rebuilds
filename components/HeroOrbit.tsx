@@ -119,6 +119,8 @@ const DUST_MAX = 6000;
 const DUST_BASE = 800;
 const DUST_PER_KEPT = 150;
 const DUST_COLORS = ["#C4D1D6", "#19897C"];
+const ARRIVAL_MS = 3000;
+const SETTLE_RATE = 3;
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -170,6 +172,7 @@ uniform float uTime;
 uniform float uRadius;
 uniform float uShown;
 uniform float uPixelRatio;
+uniform float uBurst;
 
 attribute float aSeed;
 
@@ -189,13 +192,20 @@ void main() {
         cos(uTime * 0.5 + aSeed * 30.0),
         sin(uTime * 0.6 + aSeed * 20.0)
     );
-    vec3 grain = position * (uRadius * 1.02 + LIFT * rise) + drift * SWIRL * rise;
 
-    vAlpha = step(aSeed, uShown) * sin(3.14159 * life);
+    vec3 facingView = normalize(normalMatrix * position);
+    float towardLock = 1.0 - smoothstep(-0.8, 0.0, facingView.x);
+    float kick = uBurst * towardLock;
+
+    vec3 grain = position * (uRadius * 1.02 + LIFT * rise * (1.0 + 2.5 * kick))
+        + drift * SWIRL * rise * (1.0 + kick);
+
+    float isShown = max(step(aSeed, uShown), step(aSeed, uShown + 0.15) * kick);
+    vAlpha = isShown * sin(3.14159 * life) * (1.0 + kick);
     vTint = fract(aSeed * 13.7);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(grain, 1.0);
-    gl_PointSize = SIZE * uPixelRatio;
+    gl_PointSize = SIZE * uPixelRatio * (1.0 + 0.5 * kick);
 }
 `;
 
@@ -286,6 +296,7 @@ function Planet({ isOnline }: { isOnline: boolean }) {
 
 function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
     const dustRef = useRef<ShaderMaterial>(null);
+    const impactRef = useRef(mass);
     const grains = useMemo(() => grainsOf(DUST_MAX, 11), []);
     const air = useMemo(
         () => ({
@@ -294,6 +305,7 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
             uShown: { value: 0 },
             uPixelRatio: { value: 1 },
             uLit: { value: 0 },
+            uBurst: { value: 0 },
             uTintA: { value: new Color(DUST_COLORS[0]) },
             uTintB: { value: new Color(DUST_COLORS[1]) },
         }),
@@ -313,6 +325,10 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
 
         const shown = Math.min(DUST_BASE + mass * DUST_PER_KEPT, DUST_MAX) / DUST_MAX;
         knobs.uShown.value += (shown - knobs.uShown.value) * ease;
+
+        if (mass > impactRef.current) knobs.uBurst.value = 1;
+        impactRef.current = mass;
+        knobs.uBurst.value *= Math.exp(-step * SETTLE_RATE);
     });
 
     return (
@@ -363,7 +379,14 @@ function Body({ mass, fullMass, children }: { mass: number; fullMass: number; ch
 
 export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) {
     const [isDrawn, setIsDrawn] = useState(false);
+    const [landedMass, setLandedMass] = useState(mass);
     const stageRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (mass === landedMass) return;
+        const arrival = setTimeout(() => setLandedMass(mass), ARRIVAL_MS);
+        return () => clearTimeout(arrival);
+    }, [mass, landedMass]);
 
     useEffect(() => {
         function handleLeave() {
@@ -398,9 +421,9 @@ export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) 
                     far: 100000,
                 }}
             >
-                <Body mass={mass} fullMass={fullMass}>
+                <Body mass={landedMass} fullMass={fullMass}>
                     <Planet isOnline={isOnline} />
-                    <Dust mass={mass} isOnline={isOnline} />
+                    <Dust mass={landedMass} isOnline={isOnline} />
                 </Body>
             </Canvas>
         </div>
