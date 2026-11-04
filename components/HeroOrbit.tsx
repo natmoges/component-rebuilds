@@ -90,7 +90,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Color, Euler, Vector3, type Group, type Mesh } from "three";
+import { Color, Euler, Vector3, type Group, type Mesh, type ShaderMaterial } from "three";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
@@ -124,6 +124,7 @@ uniform vec3 uRim;
 uniform vec3 uContour;
 uniform vec3 uBase;
 uniform float uRadius;
+uniform float uLit;
 
 varying vec3 vNormal;
 varying vec3 vLocal;
@@ -143,9 +144,9 @@ void main() {
     float line = 1.0 - min(abs(fract(band - 0.5) - 0.5) / fwidth(band), 1.0);
 
     vec3 color = uBase * (0.7 + 0.6 * light);
-    color += uContour * line * 0.35;
-    color += uRim * rim * 0.6;
-    float alpha = clamp(0.55 + rim * 0.5 + line * 0.2, 0.0, 1.0);
+    color += uContour * line * 0.35 * uLit;
+    color += uRim * rim * 0.6 * mix(0.3, 1.0, uLit);
+    float alpha = clamp(0.55 + rim * 0.5 * mix(0.4, 1.0, uLit) + line * 0.2 * uLit, 0.0, 1.0);
 
     gl_FragColor = vec4(color, alpha);
     #include <colorspace_fragment>
@@ -160,29 +161,37 @@ export interface HeroOrbitProps {
     isTechnologistNamed: boolean;
 }
 
-function Planet() {
+function Planet({ isOnline }: { isOnline: boolean }) {
     const planetRef = useRef<Mesh>(null);
+    const skinRef = useRef<ShaderMaterial>(null);
     const skin = useMemo(
         () => ({
             uRim: { value: new Color(RIM) },
             uContour: { value: new Color(CONTOUR) },
             uBase: { value: new Color(BASE) },
             uRadius: { value: RADIUS },
+            uLit: { value: 0 },
         }),
         []
     );
 
     useFrame((_, delta) => {
         const planet = planetRef.current;
-        if (planet === null) return;
+        const material = skinRef.current;
+        if (planet === null || material === null) return;
         const step = Math.min(delta, MAX_STEP);
         planet.rotation.y += (step / SPIN_SECONDS) * Math.PI * 2;
+
+        const lit = material.uniforms.uLit;
+        const target = isOnline ? 1 : 0;
+        lit.value += (target - lit.value) * (1 - Math.exp(-step * GROW_RATE));
     });
 
     return (
         <mesh ref={planetRef}>
             <sphereGeometry args={[RADIUS, 64, 64]} />
             <shaderMaterial
+                ref={skinRef}
                 transparent
                 uniforms={skin}
                 vertexShader={SKIN_VERTEX}
@@ -219,7 +228,7 @@ function Body({ mass, fullMass, children }: { mass: number; fullMass: number; ch
     );
 }
 
-export default function HeroOrbit({ mass, fullMass }: HeroOrbitProps) {
+export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) {
     const [isDrawn, setIsDrawn] = useState(false);
     const stageRef = useRef<HTMLDivElement>(null);
 
@@ -243,7 +252,7 @@ export default function HeroOrbit({ mass, fullMass }: HeroOrbitProps) {
     }
 
     return (
-        <div ref={stageRef} className={styles.stage} data-drawn={isDrawn} aria-hidden="true">
+        <div ref={stageRef} className={styles.stage} data-orbit-drawn={isDrawn} aria-hidden="true">
             <Canvas
                 orthographic
                 dpr={[1, 2]}
@@ -257,7 +266,7 @@ export default function HeroOrbit({ mass, fullMass }: HeroOrbitProps) {
                 }}
             >
                 <Body mass={mass} fullMass={fullMass}>
-                    <Planet />
+                    <Planet isOnline={isOnline} />
                 </Body>
             </Canvas>
         </div>

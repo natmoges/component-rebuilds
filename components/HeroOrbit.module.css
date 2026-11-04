@@ -10,6 +10,6 @@
     transition: opacity 1s ease-out;
 }
 
-.stage[data-drawn="true"] {
+.stage[data-orbit-drawn="true"] {
     opacity: 1;
 }

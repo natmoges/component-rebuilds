@@ -304,7 +304,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 <span className={styles.lockOn} />
             </div>
 
-            <HeroOrbit mass={mass} fullMass={keptCount} isOnline={isOnline} isArchitectNamed={false} isTechnologistNamed={false} />
+            <HeroOrbit mass={mass} fullMass={keptCount} isOnline={bootStage === "gated" || bootStage === "online"} isArchitectNamed={false} isTechnologistNamed={false} />
 
             <div
                 className={styles.body}

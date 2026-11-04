@@ -237,6 +237,17 @@
     transition: box-shadow var(--bar);
 }
 
+/* Once HeroOrbit has drawn, the grey sphere hands over. It stays as the fallback. */
+.planet,
+.ring {
+    transition: opacity var(--bar);
+}
+
+.space:has([data-orbit-drawn="true"]) .planet,
+.space:has([data-orbit-drawn="true"]) .ring {
+    opacity: 0;
+}
+
 .ring {
     position: absolute;
     inset: 0;
