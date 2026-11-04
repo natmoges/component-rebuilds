@@ -81,15 +81,16 @@
  * FAILURE: if WebGL can't start, the grey sphere stays and grows the way
  * it does today, with its ring of moons.
  *
- * PHONE: the same planet with half the dust, sitting lower so it doesn't
- * fight the HUD.
+ * PHONE: the same planet with half the dust. It keeps clear of the
+ * scan's lane instead of the satellite's orbit, and bleeds further off
+ * the right edge.
  *
  * REDUCED MOTION: Accretion becomes the plain record list, as it is
  * today, so there's no planet to move.
  */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, type RootState } from "@react-three/fiber";
 import {
     AdditiveBlending,
     Color,
@@ -134,6 +135,7 @@ const SPOT = new Vector3();
 const CAMERA_RIGHT = new Vector3(1, 0, 0).applyEuler(CAMERA_ROTATION);
 const SATELLITE_CLEARANCE = 185 + 24;
 const NARROW_WIDTH = 700;
+const LANE_CLEARANCE = 22 + 16;
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -356,7 +358,8 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
         knobs.uPixelRatio.value = state.viewport.dpr;
         knobs.uLit.value += ((isOnline ? 1 : 0) - knobs.uLit.value) * ease;
 
-        const shown = Math.min(DUST_BASE + mass * DUST_PER_KEPT, DUST_MAX) / DUST_MAX;
+        const half = window.innerWidth < NARROW_WIDTH ? 0.5 : 1;
+        const shown = (Math.min(DUST_BASE + mass * DUST_PER_KEPT, DUST_MAX) / DUST_MAX) * half;
         knobs.uShown.value += (shown - knobs.uShown.value) * ease;
 
         if (mass > impactRef.current) knobs.uBurst.value = 1;
@@ -385,10 +388,10 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
 
 function Moon({
     index,
-    titleRefs,
+    titlesRef,
 }: {
     index: number;
-    titleRefs: RefObject<(HTMLSpanElement | null)[]>;
+    titlesRef: RefObject<(HTMLSpanElement | null)[]>;
 }) {
     const orbitRef = useRef<Group>(null);
     const moonRef = useRef<Mesh>(null);
@@ -410,7 +413,7 @@ function Moon({
         const step = Math.min(delta, MAX_STEP);
         orbit.rotation.y += (step / ORBIT_SECONDS[index]) * Math.PI * 2;
 
-        const title = titleRefs.current[index];
+        const title = titlesRef.current[index];
         if (title === null || title === undefined) return;
         moon.getWorldPosition(SPOT).project(state.camera);
         const x = ((SPOT.x + 1) / 2) * state.size.width;
@@ -478,8 +481,9 @@ function Body({
         const width = window.innerWidth;
         const lockX = width / 2;
         const stageX = lockX + Math.min(width * 0.3, 420);
-        const edgeX = lockX + SATELLITE_CLEARANCE + radiusPx;
-        const shiftPx = width < NARROW_WIDTH ? 0 : Math.max(0, edgeX - stageX);
+        const clearance = width < NARROW_WIDTH ? LANE_CLEARANCE : SATELLITE_CLEARANCE;
+        const edgeX = lockX + clearance + radiusPx;
+        const shiftPx = Math.max(0, edgeX - stageX);
         growth.position.copy(CAMERA_RIGHT).multiplyScalar(shiftPx / zoom);
 
         const host = stageRef.current?.parentElement;
@@ -501,6 +505,14 @@ function Body({
     );
 }
 
+function canDraw(): boolean {
+    try {
+        return document.createElement("canvas").getContext("webgl2") !== null;
+    } catch {
+        return false;
+    }
+}
+
 export default function HeroOrbit({
     mass,
     fullMass,
@@ -509,9 +521,10 @@ export default function HeroOrbit({
     isTechnologistNamed,
 }: HeroOrbitProps) {
     const [isDrawn, setIsDrawn] = useState(false);
+    const [hasFailed, setHasFailed] = useState(() => !canDraw());
     const [landed, setLanded] = useState({ mass, isArchitectNamed, isTechnologistNamed });
     const stageRef = useRef<HTMLDivElement>(null);
-    const titleRefs = useRef<(HTMLSpanElement | null)[]>([]);
+    const titlesRef = useRef<(HTMLSpanElement | null)[]>([]);
     const named = [landed.isArchitectNamed, landed.isTechnologistNamed];
 
     useEffect(() => {
@@ -542,9 +555,20 @@ export default function HeroOrbit({
         };
     }, []);
 
-    function handleCreated() {
+    function handleContextLost() {
+        const host = stageRef.current?.parentElement;
+        host?.style.removeProperty("--planet-radius");
+        host?.style.removeProperty("--planet-shift");
+        setIsDrawn(false);
+        setHasFailed(true);
+    }
+
+    function handleCreated(state: RootState) {
+        state.gl.domElement.addEventListener("webglcontextlost", handleContextLost, { once: true });
         requestAnimationFrame(() => requestAnimationFrame(() => setIsDrawn(true)));
     }
+
+    if (hasFailed) return null;
 
     return (
         <div ref={stageRef} className={styles.stage} data-orbit-drawn={isDrawn} aria-hidden="true">
@@ -564,7 +588,7 @@ export default function HeroOrbit({
                     <Planet isOnline={isOnline} />
                     <Dust mass={landed.mass} isOnline={isOnline} />
                     {TITLES.map((title, index) => (
-                        <Moon key={title} index={index} titleRefs={titleRefs} />
+                        <Moon key={title} index={index} titlesRef={titlesRef} />
                     ))}
                 </Body>
             </Canvas>
@@ -572,7 +596,7 @@ export default function HeroOrbit({
                 <span
                     key={title}
                     ref={(element) => {
-                        titleRefs.current[index] = element;
+                        titlesRef.current[index] = element;
                     }}
                     className={styles.title}
                 >
