@@ -248,7 +248,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Reference:** Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace, bought. On natmoges.com it's the Dossier's System Monitor: his screen, pinned in his photo of a Mac, which I ran in code mode as a boot terminal typing my four principles. Read for behaviour and numbers only. None of its code is here, and neither is his Mac.
 - **Reused, credited:** my natmoges.com settings on his component: line numbers on, glow 00FF41 at 0.1, Heavy scanlines (1 px, black at 0.3), band speed 0.8, inner shadow 1.2, reflection 0.1 at 0.8 in Overlay. His glitch colours, FF0000 and 00FFFF.
 - **The one new idea, layered visual effects:** one screen built as a stack (inner shadow, content, scanlines with a rising band, glass sheen), each its own layer that switches on its own. The effects are CSS; only the typing ticks.
-- **Carried from Rung 2's plan:** `children`. Cut from build 04 because those copies were instances, it lands here: Scan's readouts pass through the screen.
+- **Reused:** `children` as an insert slot, first used in build 12: Scan's readouts pass through the screen.
 - **What I built around it, my calls:**
   - No Mac. Accretion's HUD is the computer and the satellite is its antenna.
   - The log is written from the record it's about to read: SOURCE prints LIVE or CACHE, and the object count is read from Notion.
