@@ -90,7 +90,15 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Color, Euler, Vector3, type Group, type Mesh, type ShaderMaterial } from "three";
+import {
+    AdditiveBlending,
+    Color,
+    Euler,
+    Vector3,
+    type Group,
+    type Mesh,
+    type ShaderMaterial,
+} from "three";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
@@ -107,6 +115,10 @@ const GROW_RATE = 4;
 const REFERENCE_STAGE = 1294;
 const CAMERA_ROTATION = new Euler(-25.3 * DEGREE, 49.49 * DEGREE, 37.99 * DEGREE);
 const CAMERA_POSITION = new Vector3(0, 0, 1).applyEuler(CAMERA_ROTATION).multiplyScalar(500);
+const DUST_MAX = 6000;
+const DUST_BASE = 800;
+const DUST_PER_KEPT = 150;
+const DUST_COLORS = ["#C4D1D6", "#19897C"];
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -153,6 +165,77 @@ void main() {
 }
 `;
 
+const DUST_VERTEX = /* glsl */ `
+uniform float uTime;
+uniform float uRadius;
+uniform float uShown;
+uniform float uPixelRatio;
+
+attribute float aSeed;
+
+varying float vAlpha;
+varying float vTint;
+
+const float LIFE = 5.0;
+const float LIFT = 22.0;
+const float SWIRL = 6.0;
+const float SIZE = 1.6;
+
+void main() {
+    float life = fract(uTime / LIFE + fract(aSeed * 7.31));
+    float rise = 1.0 - (1.0 - life) * (1.0 - life);
+    vec3 drift = vec3(
+        sin(uTime * 0.7 + aSeed * 40.0),
+        cos(uTime * 0.5 + aSeed * 30.0),
+        sin(uTime * 0.6 + aSeed * 20.0)
+    );
+    vec3 grain = position * (uRadius * 1.02 + LIFT * rise) + drift * SWIRL * rise;
+
+    vAlpha = step(aSeed, uShown) * sin(3.14159 * life);
+    vTint = fract(aSeed * 13.7);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(grain, 1.0);
+    gl_PointSize = SIZE * uPixelRatio;
+}
+`;
+
+const DUST_FRAGMENT = /* glsl */ `
+uniform vec3 uTintA;
+uniform vec3 uTintB;
+uniform float uLit;
+
+varying float vAlpha;
+varying float vTint;
+
+void main() {
+    vec2 point = gl_PointCoord - 0.5;
+    if (dot(point, point) > 0.25) discard;
+    vec3 color = mix(uTintA, uTintB, step(0.5, vTint));
+    gl_FragColor = vec4(color, vAlpha * mix(0.15, 0.85, uLit));
+    #include <colorspace_fragment>
+}
+`;
+
+function grainsOf(count: number, seed: number) {
+    let state = seed;
+    const next = () => {
+        state = (state * 16807) % 2147483647;
+        return state / 2147483647;
+    };
+    const position = new Float32Array(count * 3);
+    const grainSeed = new Float32Array(count);
+    for (let index = 0; index < count; index++) {
+        const height = next() * 2 - 1;
+        const angle = next() * Math.PI * 2;
+        const ring = Math.sqrt(1 - height * height);
+        position[index * 3] = ring * Math.cos(angle);
+        position[index * 3 + 1] = height;
+        position[index * 3 + 2] = ring * Math.sin(angle);
+        grainSeed[index] = next();
+    }
+    return { position, seed: grainSeed };
+}
+
 export interface HeroOrbitProps {
     mass: number;
     fullMass: number;
@@ -198,6 +281,56 @@ function Planet({ isOnline }: { isOnline: boolean }) {
                 fragmentShader={SKIN_FRAGMENT}
             />
         </mesh>
+    );
+}
+
+function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
+    const dustRef = useRef<ShaderMaterial>(null);
+    const grains = useMemo(() => grainsOf(DUST_MAX, 11), []);
+    const air = useMemo(
+        () => ({
+            uTime: { value: 0 },
+            uRadius: { value: RADIUS },
+            uShown: { value: 0 },
+            uPixelRatio: { value: 1 },
+            uLit: { value: 0 },
+            uTintA: { value: new Color(DUST_COLORS[0]) },
+            uTintB: { value: new Color(DUST_COLORS[1]) },
+        }),
+        []
+    );
+
+    useFrame((state, delta) => {
+        const material = dustRef.current;
+        if (material === null) return;
+        const step = Math.min(delta, MAX_STEP);
+        const ease = 1 - Math.exp(-step * GROW_RATE);
+        const knobs = material.uniforms;
+
+        knobs.uTime.value += step;
+        knobs.uPixelRatio.value = state.viewport.dpr;
+        knobs.uLit.value += ((isOnline ? 1 : 0) - knobs.uLit.value) * ease;
+
+        const shown = Math.min(DUST_BASE + mass * DUST_PER_KEPT, DUST_MAX) / DUST_MAX;
+        knobs.uShown.value += (shown - knobs.uShown.value) * ease;
+    });
+
+    return (
+        <points>
+            <bufferGeometry>
+                <bufferAttribute attach="attributes-position" args={[grains.position, 3]} />
+                <bufferAttribute attach="attributes-aSeed" args={[grains.seed, 1]} />
+            </bufferGeometry>
+            <shaderMaterial
+                ref={dustRef}
+                transparent
+                depthWrite={false}
+                blending={AdditiveBlending}
+                uniforms={air}
+                vertexShader={DUST_VERTEX}
+                fragmentShader={DUST_FRAGMENT}
+            />
+        </points>
     );
 }
 
@@ -267,6 +400,7 @@ export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) 
             >
                 <Body mass={mass} fullMass={fullMass}>
                     <Planet isOnline={isOnline} />
+                    <Dust mass={mass} isOnline={isOnline} />
                 </Body>
             </Canvas>
         </div>
