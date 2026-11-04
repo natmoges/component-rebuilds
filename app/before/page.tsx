@@ -36,7 +36,7 @@ const builds: Build[] = [
   { number: "11", name: "StarCloud", reference: "StarCloud by Sabo Sugi (v1)", rung: 4, status: "shipped", href: "/" },
   { number: "12", name: "Gravity", reference: "Gravity Component by Framer University", rung: 4, status: "shipped", href: "/" },
   { number: "13", name: "BootScreen", reference: "Retro Screen Effect by Blue Jackson", rung: 4, status: "shipped", href: "/" },
-  { number: "14", name: "The Orbit", reference: "Replaces a Spline embed", rung: 5, status: "planned" },
+  { number: "14", name: "HeroOrbit", reference: "Orbital View of Arrakis by Tim Quirino", rung: 5, status: "shipped", href: "/" },
 ];
 
 export default function Home() {

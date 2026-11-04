@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity; and build 13, BootScreen, turns its HUD into the computer that brings it all online.
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity; build 13, BootScreen, turns its HUD into the computer that brings it all online; and build 14, HeroOrbit, is its planet, grown from what the record keeps.
 
 ## The method
 
@@ -30,7 +30,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
 | 12 | [Gravity](https://component-rebuilds.vercel.app) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
 | 13 | [BootScreen](https://component-rebuilds.vercel.app) (Accretion's HUD) | Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace (paid) | 4 |
-| 14 | The Orbit | Replaces a Spline embed on my site | 5 · 3D / WebGL |
+| 14 | [HeroOrbit](https://component-rebuilds.vercel.app) (Accretion's body) | Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz | 5 · 3D / WebGL |
 
 ## Build notes
 
@@ -268,9 +268,33 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Measured:** the boot types in about 7.2 s, 3.6 s with a scroll. On a phone it powers on about 0.6 s after load; on desktop it waits for the preloader. The screen holds one height from power-on to the end of the boot.
 - **Reduced motion:** Accretion shows its plain record list with no HUD, so nothing boots and nothing waits on it.
 
+### 14 · HeroOrbit
+
+- **Reference:** Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene and the masthead of timq.xyz. I remixed it for my natmoges.com hero. It's a Spline scene, not code, so it was read from its editor panels, the community viewer and both live sites, for numbers and behaviour only. No Spline file, export or runtime is in this repo.
+- **Reused, credited:** Tim's numbers: an orthographic camera at zoom 1.7, tilted −25.3°, 49.49°, 37.99° · a planet 275 across, one turn every 120 s · a Fresnel rim in 4CB2AF (bias 0.2, power 2) · contour rings in 22C55E · a base of 0F1C19 at half opacity · dust in C4D1D6 and 19897C with a 5 s life · two orbits at 120 s and 60 s, the second tilted −5° and a quarter turn behind, so the moons pass each other.
+- **The one new idea, scene · camera · mesh · light:** react-three-fiber on three.js. One scene, an orthographic camera, a sphere mesh with a shader I wrote by hand (the light is baked into it), a cloud of points for the dust, and two moons on spinning nulls. The loop is `useFrame`, the fifth time this ladder has written an animation loop.
+- **Reused:** client-only rendering (build 01) · `map` + `key` for the two moons (04) · the seeded starfield pattern for the dust (07) · refs at 60 fps, so each title follows its moon without React re-rendering (09) · TextScrambler decoding the titles (02) · BootScreen's GATE line (13).
+- **What I built around it, my calls:**
+  - Not a backdrop: it's Accretion's body. Every kept object falls into its skin and becomes dust, and the planet grows from medium to hero size as the record is read.
+  - The moons are named late. Each carries a blank label until the record proves it: SYSTEMS ARCHITECT when The substrate's last kept object lands, CREATIVE TECHNOLOGIST when The middle floor's does. They're titles no degree, certificate or mentor gave me, so they arrive after the evidence, not before.
+  - The orb stays muted, as it is on natmoges.com: StarCloud and the trail already own the pointer.
+  - It arrives dim and comes online on the GATE line, the same tick the count lights.
+  - It lands on arrival: the growth and the burst wait for the object's fall (one bar of hold plus two of flight), and the burst kicks from the side facing the lock.
+  - It keeps its left edge clear of the satellite's orbit (on a phone, the scan's lane) and bleeds off the right edge instead, the way my planet bleeds on natmoges.com.
+- **Fixed from the reference and from my embed:**
+  - No iframe and no badge. My natmoges.com framing (a 1397 × 576 embed at 1.3 scale, bled past a clipped hero to keep the badge out of view) is retired.
+  - No stretched first frame. The planet draws hidden, then fades in over the grey sphere.
+  - No dead interaction. On natmoges.com the moon reveals were still wired to the hidden orb, and one of their transitions had no target.
+  - A fixed 6,000 grains moved on the GPU, instead of 8,000 new particles a second (about 40,000 alive at once).
+  - No white flash on reload: the stage hides itself before the page is torn down.
+  - A fallback: if WebGL can't start, or the GPU drops the scene mid-visit, the grey sphere and its ring of moons come back.
+- **Honest differences:** Tim's dust drifts on curl noise; mine drifts on three slow sine waves per grain. His bloom is a post-processing pass; mine is glow inside the materials and additive dust.
+- **How it was made:** Claude wrote the code from my paragraph, step by step, as whole files I pasted in. I made the design calls and caught by eye the starting size, the white flash on reload, the oversized titles, the overlap with the satellite and the HUD's overflowing code.
+- **Reduced motion:** Accretion shows its plain record list, so there's no planet to move.
+
 ## Credits
 
-Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 13's boot log is my own text, read from the record. Build 10's logo and starfield are my own artwork and screen recording.
+Every reference is a component from the Framer Marketplace or Framer University, credited above by its author, except build 14's, a Spline community scene by Tim Quirino. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 14 installs three.js and react-three-fiber (both MIT) to draw its scene. Build 13's boot log is my own text, read from the record. Build 10's logo and starfield are my own artwork and screen recording.
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
 
