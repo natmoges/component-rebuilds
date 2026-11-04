@@ -6,6 +6,9 @@ import TextScrambler from "./TextScrambler";
 import BootScreen, { type BootStage } from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
+import dynamic from "next/dynamic";
+
+const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
 const BAR_MS = 1000;
 const HUNT_MS = 2 * BAR_MS;
@@ -300,6 +303,8 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 <span className={styles.beam} />
                 <span className={styles.lockOn} />
             </div>
+
+            <HeroOrbit mass={mass} isOnline={isOnline} isArchitectNamed={false} isTechnologistNamed={false} />
 
             <div
                 className={styles.body}

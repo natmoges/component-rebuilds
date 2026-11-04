@@ -1,0 +1,9 @@
+.stage {
+    position: fixed;
+    left: calc(50% + var(--orbit));
+    top: 50vh;
+    width: 160vmin;
+    height: 160vmin;
+    translate: -50% -50%;
+    pointer-events: none;
+}
