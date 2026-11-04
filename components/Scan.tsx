@@ -320,7 +320,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             </div>
 
             <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
-                <BootScreen reading={reading}>
+                <BootScreen objectCount={entries.length} source={source} reading={reading}>
                     {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
                     {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}

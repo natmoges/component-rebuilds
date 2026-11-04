@@ -76,3 +76,61 @@
         rgba(255, 255, 255, 0.053) 100%
     );
 }
+
+
+/* ---------- The boot log: line numbers, phosphor text, the cursor ---------- */
+
+.log {
+    margin: 0 0 0.6rem;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--signal);
+    /* Glow 00FF41 at 0.1: four stacked halos, 0.3 to 1.2 px */
+    text-shadow:
+        0 0 0.3px #00ff41,
+        0 0 0.6px #00ff41,
+        0 0 0.9px #00ff41,
+        0 0 1.2px #00ff41;
+}
+
+/* Each line is its own row, so a wrapped line keeps its number beside it. */
+.line {
+    display: grid;
+    grid-template-columns: 1.6rem 1fr;
+    min-height: 1.5em;
+}
+
+.lineNumber {
+    color: color-mix(in srgb, var(--signal) 50%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--signal) 25%, transparent);
+    margin-right: 0.5rem;
+    padding-right: 0.4rem;
+    text-align: right;
+    text-shadow: none;
+}
+
+.lineText {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.cursor {
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 1px;
+    vertical-align: text-bottom;
+    background: var(--signal);
+    animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
