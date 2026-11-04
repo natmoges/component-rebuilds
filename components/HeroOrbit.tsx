@@ -121,6 +121,13 @@ const DUST_PER_KEPT = 150;
 const DUST_COLORS = ["#C4D1D6", "#19897C"];
 const ARRIVAL_MS = 3000;
 const SETTLE_RATE = 3;
+const ORBIT_SECONDS = [120, 60];
+const ORBIT_TILT = [0, -5 * DEGREE];
+const ORBIT_PHASE = [0, -90 * DEGREE];
+const ORBIT_RADIUS = RADIUS * 1.6;
+const MOON_RADIUS = 10;
+const MOON_WHITE = "#F2F5F4";
+const MOON_DARK = "#1A1F1E";
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -222,6 +229,26 @@ void main() {
     if (dot(point, point) > 0.25) discard;
     vec3 color = mix(uTintA, uTintB, step(0.5, vTint));
     gl_FragColor = vec4(color, vAlpha * mix(0.15, 0.85, uLit));
+    #include <colorspace_fragment>
+}
+`;
+
+const TRAIL_VERTEX = /* glsl */ `
+varying float vAngle;
+
+void main() {
+    vAngle = atan(position.y, position.x);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const TRAIL_FRAGMENT = /* glsl */ `
+varying float vAngle;
+
+void main() {
+    float behind = fract(vAngle / 6.28318);
+    float alpha = pow(1.0 - behind, 3.0) * 0.9;
+    gl_FragColor = vec4(vec3(1.0), alpha);
     #include <colorspace_fragment>
 }
 `;
@@ -350,6 +377,53 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
     );
 }
 
+function Moon({ seconds, tilt, phase }: { seconds: number; tilt: number; phase: number }) {
+    const orbitRef = useRef<Group>(null);
+    const skin = useMemo(
+        () => ({
+            uRim: { value: new Color(MOON_WHITE) },
+            uContour: { value: new Color(MOON_WHITE) },
+            uBase: { value: new Color(MOON_DARK) },
+            uRadius: { value: MOON_RADIUS },
+            uLit: { value: 1 },
+        }),
+        []
+    );
+
+    useFrame((_, delta) => {
+        const orbit = orbitRef.current;
+        if (orbit === null) return;
+        const step = Math.min(delta, MAX_STEP);
+        orbit.rotation.y += (step / seconds) * Math.PI * 2;
+    });
+
+    return (
+        <group rotation={[tilt, 0, 0]}>
+            <group ref={orbitRef} rotation={[0, phase, 0]}>
+                <mesh position={[ORBIT_RADIUS, 0, 0]}>
+                    <sphereGeometry args={[MOON_RADIUS, 32, 32]} />
+                    <shaderMaterial
+                        transparent
+                        uniforms={skin}
+                        vertexShader={SKIN_VERTEX}
+                        fragmentShader={SKIN_FRAGMENT}
+                    />
+                </mesh>
+                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                    <torusGeometry args={[ORBIT_RADIUS, 1.4, 6, 256]} />
+                    <shaderMaterial
+                        transparent
+                        depthWrite={false}
+                        blending={AdditiveBlending}
+                        vertexShader={TRAIL_VERTEX}
+                        fragmentShader={TRAIL_FRAGMENT}
+                    />
+                </mesh>
+            </group>
+        </group>
+    );
+}
+
 function Body({ mass, fullMass, children }: { mass: number; fullMass: number; children: ReactNode }) {
     const growthRef = useRef<Group>(null);
 
@@ -424,6 +498,14 @@ export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) 
                 <Body mass={landedMass} fullMass={fullMass}>
                     <Planet isOnline={isOnline} />
                     <Dust mass={landedMass} isOnline={isOnline} />
+                    {ORBIT_SECONDS.map((seconds, index) => (
+                        <Moon
+                            key={seconds}
+                            seconds={seconds}
+                            tilt={ORBIT_TILT[index]}
+                            phase={ORBIT_PHASE[index]}
+                        />
+                    ))}
                 </Body>
             </Canvas>
         </div>
