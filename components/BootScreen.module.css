@@ -42,14 +42,20 @@
     );
 }
 
-/* One bright band, rising bottom to top every 2.5 s (speed 0.8) */
+/* One soft band of light, rising bottom to top every 2.5 s (speed 0.8) */
 .band {
     position: absolute;
     left: 0;
     right: 0;
     top: 100%;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.15);
+    height: 14px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 255, 255, 0.06) 50%,
+        transparent
+    );
+    mix-blend-mode: screen;
     animation: rise 2.5s linear infinite;
 }
 
@@ -58,7 +64,7 @@
         top: 100%;
     }
     to {
-        top: -2px;
+        top: -14px;
     }
 }
 
@@ -89,13 +95,7 @@
     font-size: 0.68rem;
     line-height: 1.5;
     letter-spacing: 0.02em;
-    color: var(--signal);
-    /* Glow 00FF41 at 0.1: four stacked halos, 0.3 to 1.2 px */
-    text-shadow:
-        0 0 0.3px #00ff41,
-        0 0 0.6px #00ff41,
-        0 0 0.9px #00ff41,
-        0 0 1.2px #00ff41;
+    color: #d9d9d9;
 }
 
 /* Each line is its own row, so a wrapped line keeps its number beside it. */
@@ -119,18 +119,128 @@
     word-break: break-word;
 }
 
+/* On a phone the log steps down a size, and a reading never breaks in two */
+@media (max-width: 480px) {
+    .log {
+        font-size: 0.6rem;
+    }
+}
+
+.status {
+    min-height: calc(0.72rem * 1.2);
+}
+
+/* ---------- One accent: grey for the words, green only for signals ---------- */
+
+.comment,
+.dots {
+    color: var(--muted);
+}
+
+.label {
+    color: #b8b8bd;
+}
+
+.value {
+    color: #d9d9d9;
+    white-space: nowrap;
+}
+
+/* Glow 00FF41 at 0.1: four stacked halos, 0.3 to 1.2 px, on signal only */
+.signal {
+    color: var(--signal);
+    white-space: nowrap;
+    text-shadow:
+        0 0 0.3px #00ff41,
+        0 0 0.6px #00ff41,
+        0 0 0.9px #00ff41,
+        0 0 1.2px #00ff41;
+}
+
+.debris {
+    color: #8a8f98;
+}
+
+/* Not typed yet: already in place, so the screen is its final size from the start */
+.untyped {
+    opacity: 0;
+}
+
+/* NOT / NAT: the word reads in and out on every bar.
+   NOT is bright white: the thinking, not from this planet.
+   NAT is Signal green, glowing: the name, and the systems. */
+.word {
+    display: inline-block;
+    color: #f2f2f2;
+    font-weight: 700;
+}
+
+.screen[data-word="nat"] .word {
+    color: var(--signal);
+    text-shadow:
+        0 0 2px #00ff41,
+        0 0 6px color-mix(in srgb, #00ff41 60%, transparent);
+}
+
+/* the split tick between them: his glitch colours, torn apart and jolted */
+.screen[data-word="split"] .word {
+    color: #ffffff;
+    text-shadow:
+        -2px 0 #ff0000,
+        2px 0 #00ffff;
+    transform: translateX(1px) skewX(-8deg);
+}
+
 .cursor {
     display: inline-block;
     width: 0.5em;
     height: 1em;
     margin-left: 1px;
     vertical-align: text-bottom;
-    background: var(--signal);
+    background: #d9d9d9;
     animation: blink 1s steps(1) infinite;
 }
 
 @keyframes blink {
     50% {
         opacity: 0;
+    }
+}
+/* ---------- Locked in: the CRT settles. Debris: it stays, with static ---------- */
+
+.shadow,
+.scanlines,
+.sheen {
+    transition: opacity calc(var(--bar, 1000ms) / 2);
+}
+
+.screen[data-reading="kept"] .shadow,
+.screen[data-reading="kept"] .scanlines,
+.screen[data-reading="kept"] .sheen {
+    opacity: 0;
+}
+
+.screen[data-reading="debris"] .scanlines {
+    animation: static calc(var(--bar, 1000ms) / 4) steps(2) infinite;
+}
+
+@keyframes static {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.55;
+    }
+}
+
+/* ---------- Failure: if the code never arrives, the log is printed anyway ---------- */
+
+.screen[data-power="off"] .untyped {
+    animation: printed 1ms 8s forwards;
+}
+
+@keyframes printed {
+    to {
+        opacity: 1;
     }
 }

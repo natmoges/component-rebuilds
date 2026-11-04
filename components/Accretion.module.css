@@ -534,6 +534,51 @@
     }
 }
 
+/* ---------- Build 13 · BootScreen: the HUD is a tube, and the scene comes online with it ---------- */
+
+/* Off and power-cycling: the tube squashes to one bright line; on, it opens in a tick */
+.hud {
+    transition:
+        scale calc(var(--bar) / 8) ease-in,
+        filter calc(var(--bar) / 8),
+        opacity calc(var(--bar) / 8);
+}
+
+.hud:has([data-power="off"]),
+.hud:has([data-power="cycling"]) {
+    scale: 1 0.02;
+    filter: brightness(3);
+}
+
+.hud:has([data-power="off"]) {
+    opacity: 0.35;
+    /* the backstop: if the code never arrives, the tube opens on its own */
+    animation: tubeBackstop 1ms 8s forwards;
+}
+
+@keyframes tubeBackstop {
+    to {
+        scale: 1;
+        filter: none;
+        opacity: 1;
+    }
+}
+
+/* Before LINK: the satellite's beacon is dark. Before GATE: the body's count is unlit. */
+.space:has(.scan[data-boot-stage="off"]) .beacon {
+    animation: none;
+    opacity: 0.15;
+}
+
+.massLabel {
+    transition: opacity var(--bar);
+}
+
+.space:has(.scan[data-boot-stage="off"]) .massLabel,
+.space:has(.scan[data-boot-stage="linked"]) .massLabel {
+    opacity: 0;
+}
+
 /* ---------- The record (the reduced-motion view) ---------- */
 
 .record {

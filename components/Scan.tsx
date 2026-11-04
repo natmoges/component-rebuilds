@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import TextScrambler from "./TextScrambler";
-import BootScreen from "./BootScreen";
+import BootScreen, { type BootStage } from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 
@@ -137,6 +137,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
     const [dissolvedId, setDissolvedId] = useState<string | null>(null);
     const [failedImages, setFailedImages] = useState<string[]>([]);
+    const [bootStage, setBootStage] = useState<BootStage>("off");
     const scanRef = useRef<HTMLDivElement | null>(null);
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const drifts = useMemo(() => driftOf(entries), [entries]);
@@ -203,8 +204,10 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
         };
     }, [entries]);
 
+    const isOnline = bootStage === "online";
+
     useEffect(() => {
-        if (heldId === null || decisions[heldId] !== undefined) return;
+        if (!isOnline || heldId === null || decisions[heldId] !== undefined) return;
         const entry = entries.find((candidate) => candidate.id === heldId);
         if (entry === undefined) return;
         const hunt = setTimeout(() => {
@@ -214,12 +217,13 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             }));
         }, HUNT_MS);
         return () => clearTimeout(hunt);
-    }, [heldId, decisions, entries]);
+    }, [isOnline, heldId, decisions, entries]);
 
     const held = entries.find((entry) => entry.id === heldId) ?? null;
     const decision: Decision | undefined = held !== null ? decisions[held.id] : undefined;
     let reading: Reading;
-    if (phase === "held" && held !== null) reading = decision ?? "hunting";
+    if (!isOnline) reading = "rest";
+    else if (phase === "held" && held !== null) reading = decision ?? "hunting";
     else if (phase === "travelling") reading = "searching";
     else if (phase === "end") reading = "end";
     else reading = "rest";
@@ -240,7 +244,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     }
 
     return (
-        <div ref={scanRef} className={styles.scan} data-reading={reading} data-trail-zone>
+        <div ref={scanRef} className={styles.scan} data-reading={reading} data-boot-stage={bootStage} data-trail-zone>
             <div className={styles.field} aria-hidden="true">
                 {meteors.map((meteor, index) => (
                     <span
@@ -320,7 +324,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             </div>
 
             <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
-                <BootScreen objectCount={entries.length} source={source} reading={reading}>
+                <BootScreen objectCount={entries.length} source={source} reading={reading} onBootStage={setBootStage}>
                     {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
                     {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
