@@ -35,7 +35,7 @@ const builds: Build[] = [
   { number: "10", name: "LogoPreloader", reference: "Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design", rung: 3, status: "shipped", href: "/" },
   { number: "11", name: "StarCloud", reference: "StarCloud by Sabo Sugi (v1)", rung: 4, status: "shipped", href: "/" },
   { number: "12", name: "Gravity", reference: "Gravity Component by Framer University", rung: 4, status: "shipped", href: "/" },
-  { number: "13", name: "Retro Screen Effect", reference: "Blue Jackson (optional)", rung: 4, status: "planned" },
+  { number: "13", name: "BootScreen", reference: "Retro Screen Effect by Blue Jackson", rung: 4, status: "shipped", href: "/" },
   { number: "14", name: "The Orbit", reference: "Replaces a Spline embed", rung: 5, status: "planned" },
 ];
 

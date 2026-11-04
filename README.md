@@ -1,6 +1,6 @@
 # component-rebuilds
 
-The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity.
+The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity; and build 13, BootScreen, turns its HUD into the computer that brings it all online.
 
 ## The method
 
@@ -29,7 +29,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 10 | [LogoPreloader](https://component-rebuilds.vercel.app) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
 | 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
 | 12 | [Gravity](https://component-rebuilds.vercel.app) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
-| 13 | Retro Screen Effect (optional) | Blue Jackson | 4 |
+| 13 | [BootScreen](https://component-rebuilds.vercel.app) (Accretion's HUD) | Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace (paid) | 4 |
 | 14 | The Orbit | Replaces a Spline embed on my site | 5 · 3D / WebGL |
 
 ## Build notes
@@ -243,9 +243,34 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **A bug I made and caught:** the beam's four values first went on the page root, which restyled the whole page every frame (1,445 ms in 3 s) and made StarCloud stutter. Moved onto Scan's sight: 78 ms.
 - **Seen, not fixed here:** scrolling Accretion restyles about 1,800 elements a frame when only its drifts and meteors need it. That's build 07's code; it gets its own commit.
 
+### 13 · BootScreen
+
+- **Reference:** Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace, bought. On natmoges.com it's the Dossier's System Monitor: his screen, pinned in his photo of a Mac, which I ran in code mode as a boot terminal typing my four principles. Read for behaviour and numbers only. None of its code is here, and neither is his Mac.
+- **Reused, credited:** my natmoges.com settings on his component: line numbers on, glow 00FF41 at 0.1, Heavy scanlines (1 px, black at 0.3), band speed 0.8, inner shadow 1.2, reflection 0.1 at 0.8 in Overlay. His glitch colours, FF0000 and 00FFFF.
+- **The one new idea, layered visual effects:** one screen built as a stack (inner shadow, content, scanlines with a rising band, glass sheen), each its own layer that switches on its own. The effects are CSS; only the typing ticks.
+- **Carried from Rung 2's plan:** `children`. Cut from build 04 because those copies were instances, it lands here: Scan's readouts pass through the screen.
+- **What I built around it, my calls:**
+  - No Mac. Accretion's HUD is the computer and the satellite is its antenna.
+  - The log is written from the record it's about to read: SOURCE prints LIVE or CACHE, and the object count is read from Notion.
+  - The boot brings the scene online: the beacon stays dark until LINK reads OK, the body's count lights on the GATE line, and nothing hunts or locks until AWAITING SIGNAL.
+  - Quantized: lines start on SignalLocation's tick, and each reading drops whole on the next one.
+  - One accent: grey words, Signal green only on readings that are signals.
+  - A tube, not a list: it opens from a line at its final size, power-cycles into the scan on the first move off rest, settles clean on a kept lock, and stutters on debris.
+  - NOT / NAT: the word reads in and out every bar. NOT, white, is the thinking; NAT, in Signal green, is the name and the systems.
+  - Every refresh boots it, and a scroll mid-boot doubles the pace.
+- **Fixed from the reference:**
+  - No eval. The reference runs its code text through `new Function()` on every load, whatever Execute Code says. My boot text isn't JavaScript, so it throws and leaves `console.log` replaced for the whole page; that's live on natmoges.com today.
+  - No dead knobs. Syntax Highlight, Line Numbers, Screen Background, Scanline Colour and Scanline Blur do nothing in the reference.
+  - No re-render every frame. With scanlines on, the reference re-renders all 3,300 lines every frame to move one stripe; here the band is a CSS animation.
+  - It loops by design. The reference's typing never repeats, which is why my natmoges.com log is pasted three times.
+  - Line numbers stay beside wrapped lines; the reference counts line breaks, so a wrapped line knocks every later number out of place.
+  - The screen doesn't swap itself out while you're reading beside it; the reference's screensaver only counts mouse movement over the screen.
+- **Measured:** the boot types in about 7.2 s, 3.6 s with a scroll. On a phone it powers on about 0.6 s after load; on desktop it waits for the preloader. The screen holds one height from power-on to the end of the boot.
+- **Reduced motion:** Accretion shows its plain record list with no HUD, so nothing boots and nothing waits on it.
+
 ## Credits
 
-Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 10's logo and starfield are my own artwork and screen recording.
+Every reference is a component from the Framer Marketplace or Framer University, credited above by its author. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 13's boot log is my own text, read from the record. Build 10's logo and starfield are my own artwork and screen recording.
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
 
