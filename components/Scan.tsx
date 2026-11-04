@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import TextScrambler from "./TextScrambler";
+import BootScreen from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 
@@ -319,90 +320,92 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             </div>
 
             <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
-                {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
+                <BootScreen reading={reading}>
+                    {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
-                {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
+                    {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
 
-                {reading === "hunting" && held !== null && (
-                    <TextScrambler
-                        key={`${held.id}-hunting`}
-                        text="Decoding"
-                        className={styles.hudTitle}
-                        textColor="var(--muted)"
-                        scrambleColor="var(--muted)"
-                        durationMs={HUNT_MS}
-                    />
-                )}
-
-                {(reading === "kept" || reading === "debris") && held !== null && (
-                    <>
-                        <span className={styles.hudWhen}>{held.when}</span>
+                    {reading === "hunting" && held !== null && (
                         <TextScrambler
-                            key={`${held.id}-${reading}`}
-                            text={held.title}
+                            key={`${held.id}-hunting`}
+                            text="Decoding"
                             className={styles.hudTitle}
-                            textColor={reading === "debris" ? "var(--muted)" : "var(--signal)"}
+                            textColor="var(--muted)"
                             scrambleColor="var(--muted)"
-                            durationMs={BAR_MS}
+                            durationMs={HUNT_MS}
                         />
+                    )}
 
-                        {reading === "kept" && !isDissolved && (
-                            <button
-                                key={`${held.id}-artifact`}
-                                type="button"
-                                className={styles.artifactButton}
-                                onClick={handleDissolve}
-                                aria-label={`${held.title}: read the record`}
-                            >
-                                {hasImage ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
-                                        src={held.image ?? ""}
-                                        alt=""
-                                        className={styles.artifact}
-                                        onError={() => handleImageError(held.id)}
-                                    />
-                                ) : (
-                                    <pre className={styles.snippet}>{held.snippet}</pre>
-                                )}
-                                <span className={styles.hudHint}>Tap to read</span>
-                            </button>
-                        )}
+                    {(reading === "kept" || reading === "debris") && held !== null && (
+                        <>
+                            <span className={styles.hudWhen}>{held.when}</span>
+                            <TextScrambler
+                                key={`${held.id}-${reading}`}
+                                text={held.title}
+                                className={styles.hudTitle}
+                                textColor={reading === "debris" ? "var(--muted)" : "var(--signal)"}
+                                scrambleColor="var(--muted)"
+                                durationMs={BAR_MS}
+                            />
 
-                        {(isDissolved || reading === "debris") && (
-                            <div key={`${held.id}-readout`} className={styles.readout}>
-                                <p>{held.whatChanged}</p>
-                                {reading === "kept" && held.credit && (
-                                    <p className={styles.hudCredit}>{held.credit}</p>
-                                )}
-                                {reading === "kept" && held.link && (
-                                    <a href={held.link} className={styles.hudLink}>
-                                        Open →
-                                    </a>
-                                )}
-                                {reading === "debris" && (
-                                    <p className={styles.hudLock}>
-                                        Signal lost. Locks when: {held.lockCondition}
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </>
-                )}
+                            {reading === "kept" && !isDissolved && (
+                                <button
+                                    key={`${held.id}-artifact`}
+                                    type="button"
+                                    className={styles.artifactButton}
+                                    onClick={handleDissolve}
+                                    aria-label={`${held.title}: read the record`}
+                                >
+                                    {hasImage ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={held.image ?? ""}
+                                            alt=""
+                                            className={styles.artifact}
+                                            onError={() => handleImageError(held.id)}
+                                        />
+                                    ) : (
+                                        <pre className={styles.snippet}>{held.snippet}</pre>
+                                    )}
+                                    <span className={styles.hudHint}>Tap to read</span>
+                                </button>
+                            )}
 
-                {reading === "end" && (
-                    <>
-                        <span className={styles.hudHint}>End of record</span>
-                        <p>
-                            Read from {source === "substrate" ? "the substrate" : "cache"} ·{" "}
-                            {keptCount} kept · {debrisCount} debris
-                        </p>
-                        <Link href="/before" className={styles.hudLink}>
-                            The index this page grew out of →
-                        </Link>
-                    </>
-                )}
+                            {(isDissolved || reading === "debris") && (
+                                <div key={`${held.id}-readout`} className={styles.readout}>
+                                    <p>{held.whatChanged}</p>
+                                    {reading === "kept" && held.credit && (
+                                        <p className={styles.hudCredit}>{held.credit}</p>
+                                    )}
+                                    {reading === "kept" && held.link && (
+                                        <a href={held.link} className={styles.hudLink}>
+                                            Open →
+                                        </a>
+                                    )}
+                                    {reading === "debris" && (
+                                        <p className={styles.hudLock}>
+                                            Signal lost. Locks when: {held.lockCondition}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {reading === "end" && (
+                        <>
+                            <span className={styles.hudHint}>End of record</span>
+                            <p>
+                                Read from {source === "substrate" ? "the substrate" : "cache"} ·{" "}
+                                {keptCount} kept · {debrisCount} debris
+                            </p>
+                            <Link href="/before" className={styles.hudLink}>
+                                The index this page grew out of →
+                            </Link>
+                        </>
+                    )}
+                </BootScreen>
             </aside>
-        </div>
+        </div >
     );
 }

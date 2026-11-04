@@ -1,0 +1,78 @@
+/* BootScreen: the CRT layers over Accretion's HUD card, bottom to top. */
+
+.screen {
+    position: relative;
+    margin: -1rem -1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+}
+
+/* Every layer covers the whole HUD card and follows its corners. */
+.shadow,
+.scanlines,
+.sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+}
+
+/* Layer 1 · inner shadow, 1.2 */
+.shadow {
+    z-index: 0;
+    box-shadow: inset 0 0 24px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Layer 2 · the readings */
+.content {
+    position: relative;
+    z-index: 1;
+}
+
+/* Layer 3 · scanlines, Heavy: a 1 px black line every 5 px at 0.3 */
+.scanlines {
+    z-index: 2;
+    overflow: hidden;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.3) 0px,
+        rgba(0, 0, 0, 0.3) 1px,
+        transparent 1px,
+        transparent 5px
+    );
+}
+
+/* One bright band, rising bottom to top every 2.5 s (speed 0.8) */
+.band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.15);
+    animation: rise 2.5s linear infinite;
+}
+
+@keyframes rise {
+    from {
+        top: 100%;
+    }
+    to {
+        top: -2px;
+    }
+}
+
+/* Layer 4 · glass sheen, 0.1 at 0.8, Overlay */
+.sheen {
+    z-index: 3;
+    opacity: 0.8;
+    mix-blend-mode: overlay;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.033) 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.013) 75%,
+        rgba(255, 255, 255, 0.053) 100%
+    );
+}
