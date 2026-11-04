@@ -88,9 +88,9 @@
  * today, so there's no planet to move.
  */
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Color, type Mesh } from "three";
+import { Color, Euler, Vector3, type Group, type Mesh } from "three";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
@@ -102,6 +102,11 @@ const CONTOUR = "#22C55E";
 const BASE = "#0F1C19";
 const SPIN_SECONDS = 120;
 const MAX_STEP = 1 / 30;
+const HERO_SCALE = 1;
+const GROW_RATE = 4;
+const REFERENCE_STAGE = 1294;
+const CAMERA_ROTATION = new Euler(-25.3 * DEGREE, 49.49 * DEGREE, 37.99 * DEGREE);
+const CAMERA_POSITION = new Vector3(0, 0, 1).applyEuler(CAMERA_ROTATION).multiplyScalar(500);
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -149,6 +154,7 @@ void main() {
 
 export interface HeroOrbitProps {
     mass: number;
+    fullMass: number;
     isOnline: boolean;
     isArchitectNamed: boolean;
     isTechnologistNamed: boolean;
@@ -186,23 +192,73 @@ function Planet() {
     );
 }
 
-export default function HeroOrbit({ mass }: HeroOrbitProps) {
+function Body({ mass, fullMass, children }: { mass: number; fullMass: number; children: ReactNode }) {
+    const growthRef = useRef<Group>(null);
+
+    useFrame((state, delta) => {
+        const growth = growthRef.current;
+        if (growth === null) return;
+
+        const zoom = ZOOM * (state.size.height / REFERENCE_STAGE);
+        if (state.camera.zoom !== zoom) {
+            state.camera.zoom = zoom;
+            state.camera.updateProjectionMatrix();
+        }
+
+        const share = fullMass > 0 ? Math.min(mass / fullMass, 1) : 0;
+        const target = START_SCALE + (HERO_SCALE - START_SCALE) * share;
+        const step = Math.min(delta, MAX_STEP);
+        const current = growth.scale.x;
+        growth.scale.setScalar(current + (target - current) * (1 - Math.exp(-step * GROW_RATE)));
+    });
+
     return (
-        <div className={styles.stage} aria-hidden="true">
+        <group ref={growthRef} scale={START_SCALE}>
+            {children}
+        </group>
+    );
+}
+
+export default function HeroOrbit({ mass, fullMass }: HeroOrbitProps) {
+    const [isDrawn, setIsDrawn] = useState(false);
+    const stageRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleLeave() {
+            const stage = stageRef.current;
+            if (stage === null) return;
+            stage.style.transition = "none";
+            stage.style.visibility = "hidden";
+        }
+        window.addEventListener("beforeunload", handleLeave);
+        window.addEventListener("pagehide", handleLeave);
+        return () => {
+            window.removeEventListener("beforeunload", handleLeave);
+            window.removeEventListener("pagehide", handleLeave);
+        };
+    }, []);
+
+    function handleCreated() {
+        requestAnimationFrame(() => requestAnimationFrame(() => setIsDrawn(true)));
+    }
+
+    return (
+        <div ref={stageRef} className={styles.stage} data-drawn={isDrawn} aria-hidden="true">
             <Canvas
                 orthographic
                 dpr={[1, 2]}
+                onCreated={handleCreated}
                 camera={{
                     zoom: ZOOM,
-                    position: [365.7, 189.8, 307],
-                    rotation: [-25.3 * DEGREE, 49.49 * DEGREE, 37.99 * DEGREE],
+                    position: CAMERA_POSITION.toArray(),
+                    rotation: CAMERA_ROTATION.toArray().slice(0, 3) as [number, number, number],
                     near: -100000,
                     far: 100000,
                 }}
             >
-                <group scale={START_SCALE}>
+                <Body mass={mass} fullMass={fullMass}>
                     <Planet />
-                </group>
+                </Body>
             </Canvas>
         </div>
     );

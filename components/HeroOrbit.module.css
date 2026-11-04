@@ -6,4 +6,10 @@
     height: 160vmin;
     translate: -50% -50%;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease-out;
+}
+
+.stage[data-drawn="true"] {
+    opacity: 1;
 }
