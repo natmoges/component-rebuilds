@@ -13,3 +13,28 @@
 .stage[data-orbit-drawn="true"] {
     opacity: 1;
 }
+
+.title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 6px 0 0 14px;
+    white-space: nowrap;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+}
+
+.slot {
+    display: block;
+    width: 44px;
+    height: 0.62rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+}
+
+.title .titleText {
+    font-size: inherit;
+    font-weight: 400;
+    letter-spacing: inherit;
+}

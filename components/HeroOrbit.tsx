@@ -88,7 +88,7 @@
  * today, so there's no planet to move.
  */
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
     AdditiveBlending,
@@ -99,6 +99,7 @@ import {
     type Mesh,
     type ShaderMaterial,
 } from "three";
+import TextScrambler from "./TextScrambler";
 import styles from "./HeroOrbit.module.css";
 
 const ZOOM = 1.7;
@@ -128,6 +129,11 @@ const ORBIT_RADIUS = RADIUS * 1.6;
 const MOON_RADIUS = 10;
 const MOON_WHITE = "#F2F5F4";
 const MOON_DARK = "#1A1F1E";
+const TITLES = ["SYSTEMS ARCHITECT", "CREATIVE TECHNOLOGIST"];
+const SPOT = new Vector3();
+const CAMERA_RIGHT = new Vector3(1, 0, 0).applyEuler(CAMERA_ROTATION);
+const SATELLITE_CLEARANCE = 185 + 24;
+const NARROW_WIDTH = 700;
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -377,8 +383,15 @@ function Dust({ mass, isOnline }: { mass: number; isOnline: boolean }) {
     );
 }
 
-function Moon({ seconds, tilt, phase }: { seconds: number; tilt: number; phase: number }) {
+function Moon({
+    index,
+    titleRefs,
+}: {
+    index: number;
+    titleRefs: RefObject<(HTMLSpanElement | null)[]>;
+}) {
     const orbitRef = useRef<Group>(null);
+    const moonRef = useRef<Mesh>(null);
     const skin = useMemo(
         () => ({
             uRim: { value: new Color(MOON_WHITE) },
@@ -390,17 +403,25 @@ function Moon({ seconds, tilt, phase }: { seconds: number; tilt: number; phase: 
         []
     );
 
-    useFrame((_, delta) => {
+    useFrame((state, delta) => {
         const orbit = orbitRef.current;
-        if (orbit === null) return;
+        const moon = moonRef.current;
+        if (orbit === null || moon === null) return;
         const step = Math.min(delta, MAX_STEP);
-        orbit.rotation.y += (step / seconds) * Math.PI * 2;
+        orbit.rotation.y += (step / ORBIT_SECONDS[index]) * Math.PI * 2;
+
+        const title = titleRefs.current[index];
+        if (title === null || title === undefined) return;
+        moon.getWorldPosition(SPOT).project(state.camera);
+        const x = ((SPOT.x + 1) / 2) * state.size.width;
+        const y = ((1 - SPOT.y) / 2) * state.size.height;
+        title.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
     });
 
     return (
-        <group rotation={[tilt, 0, 0]}>
-            <group ref={orbitRef} rotation={[0, phase, 0]}>
-                <mesh position={[ORBIT_RADIUS, 0, 0]}>
+        <group rotation={[ORBIT_TILT[index], 0, 0]}>
+            <group ref={orbitRef} rotation={[0, ORBIT_PHASE[index], 0]}>
+                <mesh ref={moonRef} position={[ORBIT_RADIUS, 0, 0]}>
                     <sphereGeometry args={[MOON_RADIUS, 32, 32]} />
                     <shaderMaterial
                         transparent
@@ -424,7 +445,17 @@ function Moon({ seconds, tilt, phase }: { seconds: number; tilt: number; phase: 
     );
 }
 
-function Body({ mass, fullMass, children }: { mass: number; fullMass: number; children: ReactNode }) {
+function Body({
+    mass,
+    fullMass,
+    stageRef,
+    children,
+}: {
+    mass: number;
+    fullMass: number;
+    stageRef: RefObject<HTMLDivElement | null>;
+    children: ReactNode;
+}) {
     const growthRef = useRef<Group>(null);
 
     useFrame((state, delta) => {
@@ -442,6 +473,25 @@ function Body({ mass, fullMass, children }: { mass: number; fullMass: number; ch
         const step = Math.min(delta, MAX_STEP);
         const current = growth.scale.x;
         growth.scale.setScalar(current + (target - current) * (1 - Math.exp(-step * GROW_RATE)));
+
+        const radiusPx = RADIUS * growth.scale.x * zoom;
+        const width = window.innerWidth;
+        const lockX = width / 2;
+        const stageX = lockX + Math.min(width * 0.3, 420);
+        const edgeX = lockX + SATELLITE_CLEARANCE + radiusPx;
+        const shiftPx = width < NARROW_WIDTH ? 0 : Math.max(0, edgeX - stageX);
+        growth.position.copy(CAMERA_RIGHT).multiplyScalar(shiftPx / zoom);
+
+        const host = stageRef.current?.parentElement;
+        if (host === null || host === undefined) return;
+        const radius = `${Math.round(radiusPx)}px`;
+        const shift = `${Math.round(shiftPx)}px`;
+        if (host.style.getPropertyValue("--planet-radius") !== radius) {
+            host.style.setProperty("--planet-radius", radius);
+        }
+        if (host.style.getPropertyValue("--planet-shift") !== shift) {
+            host.style.setProperty("--planet-shift", shift);
+        }
     });
 
     return (
@@ -451,16 +501,31 @@ function Body({ mass, fullMass, children }: { mass: number; fullMass: number; ch
     );
 }
 
-export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) {
+export default function HeroOrbit({
+    mass,
+    fullMass,
+    isOnline,
+    isArchitectNamed,
+    isTechnologistNamed,
+}: HeroOrbitProps) {
     const [isDrawn, setIsDrawn] = useState(false);
-    const [landedMass, setLandedMass] = useState(mass);
+    const [landed, setLanded] = useState({ mass, isArchitectNamed, isTechnologistNamed });
     const stageRef = useRef<HTMLDivElement>(null);
+    const titleRefs = useRef<(HTMLSpanElement | null)[]>([]);
+    const named = [landed.isArchitectNamed, landed.isTechnologistNamed];
 
     useEffect(() => {
-        if (mass === landedMass) return;
-        const arrival = setTimeout(() => setLandedMass(mass), ARRIVAL_MS);
+        const isSame =
+            mass === landed.mass &&
+            isArchitectNamed === landed.isArchitectNamed &&
+            isTechnologistNamed === landed.isTechnologistNamed;
+        if (isSame) return;
+        const arrival = setTimeout(
+            () => setLanded({ mass, isArchitectNamed, isTechnologistNamed }),
+            ARRIVAL_MS
+        );
         return () => clearTimeout(arrival);
-    }, [mass, landedMass]);
+    }, [mass, isArchitectNamed, isTechnologistNamed, landed]);
 
     useEffect(() => {
         function handleLeave() {
@@ -495,19 +560,35 @@ export default function HeroOrbit({ mass, fullMass, isOnline }: HeroOrbitProps) 
                     far: 100000,
                 }}
             >
-                <Body mass={landedMass} fullMass={fullMass}>
+                <Body mass={landed.mass} fullMass={fullMass} stageRef={stageRef}>
                     <Planet isOnline={isOnline} />
-                    <Dust mass={landedMass} isOnline={isOnline} />
-                    {ORBIT_SECONDS.map((seconds, index) => (
-                        <Moon
-                            key={seconds}
-                            seconds={seconds}
-                            tilt={ORBIT_TILT[index]}
-                            phase={ORBIT_PHASE[index]}
-                        />
+                    <Dust mass={landed.mass} isOnline={isOnline} />
+                    {TITLES.map((title, index) => (
+                        <Moon key={title} index={index} titleRefs={titleRefs} />
                     ))}
                 </Body>
             </Canvas>
+            {TITLES.map((title, index) => (
+                <span
+                    key={title}
+                    ref={(element) => {
+                        titleRefs.current[index] = element;
+                    }}
+                    className={styles.title}
+                >
+                    {named[index] ? (
+                        <TextScrambler
+                            text={title}
+                            className={styles.titleText}
+                            textColor="var(--fg)"
+                            scrambleColor="var(--muted)"
+                            durationMs={2000}
+                        />
+                    ) : (
+                        <span className={styles.slot} />
+                    )}
+                </span>
+            ))}
         </div>
     );
 }

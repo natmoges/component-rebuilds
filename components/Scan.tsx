@@ -134,6 +134,11 @@ export interface ScanProps {
     debrisCount: number;
 }
 
+function isStratumProven(entries: Entry[], decisions: Record<string, Decision>, era: string): boolean {
+    const kept = entries.filter((entry) => eraOf(entry.stratum) === era && entry.state === "Kept");
+    return kept.length > 0 && kept.every((entry) => decisions[entry.id] === "kept");
+}
+
 export default function Scan({ entries, source, keptCount, debrisCount }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
@@ -304,7 +309,13 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 <span className={styles.lockOn} />
             </div>
 
-            <HeroOrbit mass={mass} fullMass={keptCount} isOnline={bootStage === "gated" || bootStage === "online"} isArchitectNamed={false} isTechnologistNamed={false} />
+            <HeroOrbit
+                mass={mass}
+                fullMass={keptCount}
+                isOnline={bootStage === "gated" || bootStage === "online"}
+                isArchitectNamed={isStratumProven(entries, decisions, "3")}
+                isTechnologistNamed={isStratumProven(entries, decisions, "5")}
+            />
 
             <div
                 className={styles.body}
