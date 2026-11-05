@@ -1,5 +1,5 @@
 .space {
-    /* --bar, --hold and --flight come from lib/tempo.ts, set on this element. */
+    /* --bar, --lock, --hold and --flight come from lib/tempo.ts, set on this element. */
     --orbit: min(30vw, 420px);
     min-height: 100vh;
     background: #000;
@@ -187,15 +187,20 @@
         background-color calc(var(--bar) / 2);
 }
 
+/* The brackets close in once and land where the kept lock sits. The hunt ends as they
+   land, so the green fill arrives on brackets that have already arrived. */
 .sight[data-reading="hunting"] .lockOn {
     opacity: 1;
-    animation: lockHunt calc(var(--bar) / 2) ease-in-out infinite alternate;
+    animation: lockClose var(--lock) cubic-bezier(0.3, 0, 0.2, 1) forwards;
 }
 
+/* Kept carries the same close-in on, so the brackets finish their last few pixels
+   under the green fill instead of snapping to size when the reading changes. */
 .sight[data-reading="kept"] .lockOn {
     opacity: 1;
     scale: 1;
     background-color: color-mix(in srgb, var(--signal) 14%, transparent);
+    animation: lockClose var(--lock) cubic-bezier(0.3, 0, 0.2, 1) forwards;
 }
 
 .sight[data-reading="debris"] .lockOn {
@@ -204,13 +209,13 @@
     color: #c9ced6;
 }
 
-@keyframes lockHunt {
+@keyframes lockClose {
     from {
-        scale: 1.4;
+        scale: 1.8;
     }
 
     to {
-        scale: 1.1;
+        scale: 1;
     }
 }
 
@@ -509,6 +514,7 @@
 
 .artifactButton {
     display: block;
+    width: 100%;
     margin: 0.6rem auto 0;
     padding: 0;
     border: 0;
@@ -533,6 +539,9 @@
     text-align: left;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 0.78rem;
+    /* Long lines wrap inside the HUD instead of running past its edge. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     color: var(--signal);
     border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
     border-radius: 6px;

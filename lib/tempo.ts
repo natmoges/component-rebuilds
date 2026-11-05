@@ -18,10 +18,13 @@
  * your scan, not the record, so it only grows from the kept objects you've
  * decoded, and its label says so.
  *
- * THE KNOBS: the bar at 1000 ms (unchanged here, so nothing moves) · the
- * hunt, two bars · the absorb, one bar of hold and two of flight · the
+ * THE KNOBS: the bar at 1000 ms · the lock's brackets close in over one
+ * bar · the hunt, three quarters of a bar, so the record decides the moment
+ * the brackets land · the absorb, one bar of hold and one of flight · the
  * planet's arrival, the absorb's length · the boot's tick, an eighth of a
- * bar. The CSS bar is set from the same number.
+ * bar. The CSS bar is set from the same number. (Nov 5: the hunt and the
+ * flight were two bars each, then one; the hunt is now matched to the
+ * brackets, which are within 3 px of the lock at 750 ms on their curve.)
  *
  * BEFORE LOAD: nothing counts yet. The server prints the record's totals
  * with the page.
@@ -60,12 +63,15 @@ export const BAR_MS = 1000;
 // The boot types on a tick: an eighth of a bar.
 export const TICK_MS = BAR_MS / 8;
 
-// The crosshair hunts for two bars before the record decides.
-export const HUNT_MS = 2 * BAR_MS;
+// The lock's brackets close in over one bar, easing out, so they land early.
+export const LOCK_MS = BAR_MS;
 
-// A kept object holds in the beam for one bar, then flies into the planet for two.
+// The record decides when the brackets land: 750 ms into their close, they're within 3 px.
+export const HUNT_MS = 0.75 * BAR_MS;
+
+// A kept object holds in the beam for one bar, then flies into the planet for one.
 export const HOLD_MS = BAR_MS;
-export const FLIGHT_MS = 2 * BAR_MS;
+export const FLIGHT_MS = BAR_MS;
 export const ABSORB_MS = HOLD_MS + FLIGHT_MS;
 
 // The planet grows when the object lands: after exactly the absorb, read, not copied.
@@ -74,6 +80,7 @@ export const ARRIVAL_MS = ABSORB_MS;
 // The same numbers, handed to the CSS on Accretion's page.
 export const tempoStyle = {
     "--bar": `${BAR_MS}ms`,
+    "--lock": `${LOCK_MS}ms`,
     "--hold": `${HOLD_MS}ms`,
     "--flight": `${FLIGHT_MS}ms`,
 } as CSSProperties;
