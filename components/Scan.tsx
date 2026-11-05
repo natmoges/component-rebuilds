@@ -351,6 +351,7 @@ export default function Scan({ entries, source }: ScanProps) {
             <div
                 className={styles.body}
                 style={{ "--mass": mass } as CSSProperties}
+                data-planet-body
                 aria-hidden="true"
             >
                 <span className={styles.planet} />

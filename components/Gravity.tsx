@@ -41,7 +41,9 @@
  * two thirds of its speed. It never leaves the screen, however hard it's
  * thrown, and it passes over the planet without touching it.
  *
- * KEEPING ITS DISTANCE: an invisible orbit, 185 px around the lock, is as
+ * KEEPING ITS DISTANCE (and, since integration item 4, a second ring around
+ * the planet, its radius plus 32 px: it glances off that one too, so it
+ * never crosses the body): an invisible orbit, 185 px around the lock, is as
  * close as its centre can ever come to what it scans. Thrown at it, it glances off
  * and slides around the curve, circling the lock instead of covering it.
  *
@@ -134,6 +136,10 @@ const HUD_CLEARANCE_PX = 16;
 // screens, never more than this share of the shorter side.
 const ORBIT_RADIUS_PX = 185;
 const ORBIT_SHARE = 0.3;
+
+// The planet's ring (integration item 4): as close as the satellite's centre can
+// come to the planet's edge. The planet's size and place come from HeroOrbit.
+const PLANET_MARGIN_PX = 32;
 
 // The beam leaves from just under the satellite's belly (this share of its
 // height below its centre) and stops short of the lock corners.
@@ -300,6 +306,52 @@ export default function Gravity({ children }: GravityProps) {
                     y: shadow.velocity.y - inward * outY,
                 });
             }
+
+            keepClearOfPlanet();
+        };
+
+        // The planet's ring: where the planet is and how big, as HeroOrbit publishes it
+        // on Scan (--planet-radius, --planet-shift). If WebGL never started, the grey
+        // sphere's own size stands in.
+        const scanHost = document.querySelector<HTMLElement>("[data-sight]")?.parentElement ?? null;
+        const planetRing = () => {
+            const width = window.innerWidth;
+            const centerY = window.innerHeight / 2;
+            const published = parseFloat(scanHost?.style.getPropertyValue("--planet-radius") ?? "");
+            if (published > 0) {
+                const shift = parseFloat(scanHost?.style.getPropertyValue("--planet-shift") ?? "") || 0;
+                const centerX = width / 2 + Math.min(width * 0.3, 420) + shift;
+                return { x: centerX, y: centerY, radius: published + PLANET_MARGIN_PX + twinHeight / 2 };
+            }
+            const sphere = document.querySelector<HTMLElement>("[data-planet-body]")?.getBoundingClientRect();
+            if (!sphere || sphere.width === 0) return null;
+            return {
+                x: sphere.left + sphere.width / 2,
+                y: sphere.top + sphere.height / 2,
+                radius: sphere.width / 2 + PLANET_MARGIN_PX + twinHeight / 2,
+            };
+        };
+
+        // Inside the planet's ring: out along the line from the planet's centre,
+        // keeping only the speed that runs around the curve, like the lock's ring.
+        const keepClearOfPlanet = () => {
+            const ring = planetRing();
+            if (ring === null) return;
+            const awayX = shadow.position.x - ring.x;
+            const awayY = shadow.position.y - ring.y;
+            const distance = Math.hypot(awayX, awayY) || 1;
+            if (distance >= ring.radius) return;
+            const outX = awayX / distance;
+            const outY = awayY / distance;
+            Body.translate(shadow, {
+                x: outX * (ring.radius - distance),
+                y: outY * (ring.radius - distance),
+            });
+            const inward = Math.min(0, shadow.velocity.x * outX + shadow.velocity.y * outY);
+            Body.setVelocity(shadow, {
+                x: shadow.velocity.x - inward * outX,
+                y: shadow.velocity.y - inward * outY,
+            });
         };
 
         // The beam: from the satellite to the scan line (the screen's centre),
@@ -375,6 +427,7 @@ export default function Gravity({ children }: GravityProps) {
                 placedX = lockX + next.x;
                 placedY = lockY + next.y;
                 Body.setPosition(shadow, { x: placedX, y: placedY });
+                keepClearOfPlanet();
             }
             scrolled = 0;
 
