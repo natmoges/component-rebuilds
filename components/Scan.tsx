@@ -146,6 +146,8 @@ export default function Scan({ entries, source }: ScanProps) {
     const fieldRef = useRef<HTMLDivElement | null>(null);
     const driftRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
+    const decisionsRef = useRef<Record<string, Decision>>({});
+    const heldRef = useRef<string | null>(null);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
 
@@ -160,10 +162,15 @@ export default function Scan({ entries, source }: ScanProps) {
             frame = null;
             const scanLine = window.innerHeight / 2;
 
+            // An object you've already scanned is gone into the planet (or tumbled away),
+            // so it never locks again. The one you're on stays held until you move off it.
+            const decided = decisionsRef.current;
             let held: string | null = null;
             for (let index = 0; index < entries.length; index++) {
                 const object = objectRefs.current[index];
                 if (!object) continue;
+                const id = entries[index].id;
+                if (decided[id] !== undefined && id !== heldRef.current) continue;
                 const box = object.getBoundingClientRect();
                 const middle = box.top + box.height / 2;
                 if (Math.abs(middle - scanLine) <= HOLD_TOLERANCE_PX) {
@@ -175,6 +182,8 @@ export default function Scan({ entries, source }: ScanProps) {
             const last = objectRefs.current[entries.length - 1];
             const isPastLast =
                 !!last && last.getBoundingClientRect().bottom < scanLine - HOLD_TOLERANCE_PX;
+            // Once every object is scanned, the rest of the ride is the end: no hunting, anywhere.
+            const isAllScanned = entries.every((entry) => decided[entry.id] !== undefined);
 
             // Writes come after every read, so the browser lays the page out once per frame.
             // Each value goes only to what reads it: --scroll to each drift (registered as
@@ -199,9 +208,10 @@ export default function Scan({ entries, source }: ScanProps) {
                 settle = setTimeout(() => field.style.setProperty("--warp", "0"), 140);
             }
 
+            heldRef.current = held;
             setHeldId(held);
             if (held !== null) setPhase("held");
-            else if (isPastLast) setPhase("end");
+            else if (isPastLast || isAllScanned) setPhase("end");
             else if (window.scrollY > 0) setPhase("travelling");
             else setPhase("rest");
         }
@@ -220,6 +230,11 @@ export default function Scan({ entries, source }: ScanProps) {
             if (settle !== null) clearTimeout(settle);
         };
     }, [entries, drifts]);
+
+    // The scroll loop reads decisions from a ref, so it always sees the latest without re-subscribing.
+    useEffect(() => {
+        decisionsRef.current = decisions;
+    }, [decisions]);
 
     const isOnline = bootStage === "online";
 
