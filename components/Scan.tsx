@@ -451,6 +451,8 @@ export default function Scan({ entries, source }: ScanProps) {
     // Three counts, one source: the record, your scan, and the planet built from it. What the
     // record revealed grows the planet but never counts as scanned.
     const counts = countsOf(entries, decisions, revealed);
+    // Where the record came from, in a stranger's words.
+    const provenance = source === "substrate" ? "Read live from Notion" : "From the stored copy";
     const captured = entries.filter((entry) => done[entry.id] === "kept");
     const mass = counts.planet.mass;
 
@@ -568,6 +570,8 @@ export default function Scan({ entries, source }: ScanProps) {
 
             <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
                 <BootScreen objectCount={entries.length} source={source} reading={reading} onBootStage={setBootStage}>
+                    {/* Whose record this is, and where it came from: the HUD's top line, from the hand-over on. */}
+                    <span className={styles.hudOwner}>Nat Moges · {provenance}</span>
                     {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
                     {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
@@ -647,7 +651,7 @@ export default function Scan({ entries, source }: ScanProps) {
                         <>
                             <span className={styles.hudHint}>End of record</span>
                             <p>
-                                Read from {source === "substrate" ? "the substrate" : "cache"} ·{" "}
+                                {provenance} ·{" "}
                                 {counts.record.kept} kept · {counts.record.debris} debris
                             </p>
                             <Link href="/before" className={styles.hudLink}>

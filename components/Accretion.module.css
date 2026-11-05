@@ -493,6 +493,19 @@
     text-transform: uppercase;
 }
 
+/* Integration item 6: whose record it is, and where it came from. */
+.hudOwner {
+    display: block;
+    margin-bottom: 0.55rem;
+    padding-bottom: 0.45rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--signal) 18%, transparent);
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
 .hud .hudTitle {
     display: inline-block;
     font-size: 1.1rem;

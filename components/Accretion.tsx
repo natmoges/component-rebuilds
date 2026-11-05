@@ -85,6 +85,54 @@
  * REDUCED MOTION: unchanged. The plain record list, no scene.
  */
 
+/*
+ * INTEGRATION PASS, ITEM 6 — the frame.
+ * What I found: once the boot hands over, the page never says whose it is
+ * or where its record comes from. The only way back up 30,000 px of record
+ * is to scroll it. And the end is a dead end: one link, to /before. Back2Top
+ * (build #3) was finished and sitting unused. Here the page names itself
+ * inside the HUD it already has, lends you the rocket for the ride home,
+ * and makes the end of the record its payoff. No new frame and no nav
+ * bar: the satellite's HUD is the only chrome.
+ *
+ * WHOSE IT IS: once the boot hands over, the HUD's top line stays put:
+ * NAT MOGES · READ LIVE FROM NOTION. From the stored copy, it says so.
+ *
+ * THE ROCKET: past 30% of the record, Back2Top appears bottom right,
+ * breathing, the same rocket as build #3 and natmoges.com, clear of the
+ * planet and its count. Tap it and the record rides back past you to the
+ * top, inside three seconds. The ride doesn't scan: nothing hunts while
+ * you're carried. Scroll, and the ride breaks where you are, and scanning
+ * resumes from there.
+ *
+ * RESCAN, NOW WITH THE RIDE: everything goes back to zero, and the rocket
+ * carries you to the start, so the record begins again from the first
+ * object.
+ *
+ * THE END IS THE PAYOFF: the grown planet, both moons named, and the HUD's
+ * last transmission. The record's numbers, then where to go:
+ * the build, commit by commit (the repo: every paragraph above its code,
+ * every commit in order) · natmoges.com · contact · the index this page
+ * grew out of. The seam stays findable. Rescan last.
+ *
+ * THE KNOBS: the rocket at 30% · the ride inside three seconds · the
+ * proof link to the repo.
+ *
+ * FAILURE: if the record comes from the stored copy, the HUD's top line
+ * and the end card say so. The links don't depend on it.
+ *
+ * PHONE: the rocket is a tap, the links are taps, and the HUD keeps its
+ * width. Where the HUD fills the screen's width, the rocket rides just
+ * above the HUD's left corner instead, in thumb reach.
+ *
+ * KEYBOARD: tab to the rocket, enter, and focus lands at the top of the
+ * page, as in build #3.
+ *
+ * REDUCED MOTION: the plain record list ends with the same lines: whose
+ * it is, the record's numbers, the repo, natmoges.com, contact, /before.
+ * The rocket jumps instead of riding.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";
@@ -165,7 +213,8 @@ export default async function Accretion() {
                 ))}
             </ol>
             <p className={styles.source}>
-                Read from {source === "substrate" ? "the substrate" : "cache"} · {record.kept} kept ·{" "}
+                Nat Moges · {source === "substrate" ? "Read live from Notion" : "From the stored copy"} ·{" "}
+                {record.kept} kept ·{" "}
                 {record.debris} debris
             </p>
             <p className={styles.seam}>
