@@ -28,9 +28,8 @@
 
 .slot {
     display: block;
-    width: 44px;
     height: 0.62rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+    /* Integration item 4: no blank line before the title is earned. */
 }
 
 .title .titleText {
