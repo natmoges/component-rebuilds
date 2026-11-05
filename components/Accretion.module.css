@@ -626,6 +626,19 @@
     color: var(--fg);
 }
 
+.rescan {
+    display: block;
+    margin: 0.6rem auto 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--signal);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
 
 .space:has(.scan[data-boot-stage="off"]) .massLabel,
 .space:has(.scan[data-boot-stage="linked"]) .massLabel {

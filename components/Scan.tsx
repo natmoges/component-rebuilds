@@ -218,6 +218,13 @@ function writeMemory(done: Record<string, Decision>) {
     }
 }
 
+function forgetMemory() {
+    try {
+        window.localStorage.removeItem(MEMORY_KEY);
+    } catch {
+        // Nothing was kept, so there's nothing to forget.
+    }
+}
 
 export default function Scan({ entries, source }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
@@ -239,6 +246,8 @@ export default function Scan({ entries, source }: ScanProps) {
     const scannedRef = useRef<Record<string, Decision>>({});
     const locateRef = useRef<(() => void) | null>(null);
     const heldRef = useRef<string | null>(null);
+    // The finale waits until you've travelled into the record, so a Rescan at the end doesn't refire it.
+    const isFinaleArmedRef = useRef(true);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
 
@@ -378,7 +387,9 @@ export default function Scan({ entries, source }: ScanProps) {
     // THE FINALE: at the end of the record, whatever you didn't scan, the record accounts for.
     // Debris is counted at once; the kept fall into the planet as one labelled volley.
     useEffect(() => {
+        if (phase !== "end") isFinaleArmedRef.current = true;
         if (!isOnline || phase !== "end" || isFinished || volley !== null) return;
+        if (!isFinaleArmedRef.current) return;
         // It begins one tick after you arrive, on the same beat as everything else.
         const begin = setTimeout(() => {
             const left = entries.filter((entry) => done[entry.id] === undefined);
@@ -416,6 +427,17 @@ export default function Scan({ entries, source }: ScanProps) {
         }, spacing);
         return () => clearInterval(fall);
     }, [volley]);
+
+    // RESCAN: back to zero, the planet included, and you travel the record again from where you are.
+    function handleRescan() {
+        forgetMemory();
+        heldRef.current = null;
+        isFinaleArmedRef.current = false;
+        setArrival("now");
+        setVolley(null);
+        setRevealed({});
+        setDecisions({});
+    }
 
     const held = entries.find((entry) => entry.id === heldId) ?? null;
     const decision: Decision | undefined = held !== null ? decisions[held.id] : undefined;
@@ -631,6 +653,11 @@ export default function Scan({ entries, source }: ScanProps) {
                             <Link href="/before" className={styles.hudLink}>
                                 The index this page grew out of →
                             </Link>
+                            {isFinished && (
+                                <button type="button" className={styles.rescan} onClick={handleRescan}>
+                                    Rescan
+                                </button>
+                            )}
                         </>
                     )}
                 </BootScreen>
