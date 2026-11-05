@@ -67,6 +67,8 @@ const METEOR_COUNT = 18;
 
 // The finale's volley fits inside two bars, however many objects are left.
 const VOLLEY_MS = 2 * BAR_MS;
+// What this browser remembers: every object the record has accounted for, and how.
+const MEMORY_KEY = "accretion.finished.v1";
 
 type Phase = "rest" | "travelling" | "held" | "end";
 type Reading = "rest" | "searching" | "hunting" | "kept" | "debris" | "end";
@@ -189,13 +191,39 @@ function isStratumProven(entries: Entry[], inPlanet: Record<string, Decision>, e
     return kept.length > 0 && kept.every((entry) => inPlanet[entry.id] === "kept");
 }
 
+function decisionOf(entry: Entry): Decision {
+    return entry.state === "Kept" ? "kept" : "debris";
+}
+
+// The memory is only trusted where the record still agrees with it: an object that was debris
+// and has since been proven in Notion is left out, so the next visit finds it and keeps it.
+function readMemory(entries: Entry[]): Record<string, Decision> {
+    try {
+        const stored = JSON.parse(window.localStorage.getItem(MEMORY_KEY) ?? "{}") as Record<string, Decision>;
+        const agreed: Record<string, Decision> = {};
+        for (const entry of entries) {
+            if (stored[entry.id] === decisionOf(entry)) agreed[entry.id] = stored[entry.id];
+        }
+        return agreed;
+    } catch {
+        return {};
+    }
+}
+
+function writeMemory(done: Record<string, Decision>) {
+    try {
+        window.localStorage.setItem(MEMORY_KEY, JSON.stringify(done));
+    } catch {
+        // A browser that won't keep anything just gets a first visit every time.
+    }
+}
 
 
 export default function Scan({ entries, source }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
-    // What the record accounted for without you: revealed at the finale.
+    // What the record accounted for without you: revealed at the finale, or remembered.
     const [revealed, setRevealed] = useState<Record<string, Decision>>({});
     const [volley, setVolley] = useState<string[] | null>(null);
     // How the planet takes what arrives: a scanned object after its absorb, the rest at once.
@@ -301,7 +329,7 @@ export default function Scan({ entries, source }: ScanProps) {
         };
     }, [entries, drifts]);
 
-    // Everything the record has accounted for: your scan, plus what it revealed.
+    // Everything the record has accounted for: your scan, plus what it revealed or remembered.
     const done = useMemo(() => ({ ...revealed, ...decisions }), [revealed, decisions]);
     const isFinished = entries.every((entry) => done[entry.id] !== undefined);
 
@@ -312,6 +340,23 @@ export default function Scan({ entries, source }: ScanProps) {
         scannedRef.current = decisions;
         locateRef.current?.();
     }, [done, decisions]);
+
+    // A return visit opens on what this browser finished, as far as the record still agrees.
+    // (Read after the first paint: the server can't see this browser's memory.)
+    useEffect(() => {
+        const recall = setTimeout(() => {
+            const remembered = readMemory(entries);
+            if (Object.keys(remembered).length === 0) return;
+            setArrival("now");
+            setRevealed(remembered);
+        }, 0);
+        return () => clearTimeout(recall);
+    }, [entries]);
+
+    // A finished record is remembered, however it was finished.
+    useEffect(() => {
+        if (isFinished && volley === null) writeMemory(done);
+    }, [isFinished, volley, done]);
 
     const isOnline = bootStage === "online";
 
