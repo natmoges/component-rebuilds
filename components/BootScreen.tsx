@@ -77,10 +77,9 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import styles from "./BootScreen.module.css";
+// Accretion's tempo, from the one clock: a one-second bar of eight ticks.
+import { BAR_MS, TICK_MS } from "../lib/tempo";
 
-// Accretion's tempo: SignalLocation's one-second bar of eight ticks.
-const BAR_MS = 1000;
-const TICK_MS = BAR_MS / 8;
 const CHAR_MS = 20;
 const DOT_MS = 5;
 const HURRY = 2;

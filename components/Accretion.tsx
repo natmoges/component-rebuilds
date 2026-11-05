@@ -47,6 +47,7 @@
 
 import Link from "next/link";
 import { readRecord } from "../lib/record";
+import { tempoStyle } from "../lib/tempo";
 import Scan from "./Scan";
 import StarCloud from "./StarCloud";
 import Gravity from "./Gravity";
@@ -96,7 +97,7 @@ export default async function Accretion() {
     const debrisCount = entries.length - keptCount;
 
     return (
-        <main className={styles.space}>
+        <main className={styles.space} style={tempoStyle}>
             <div className={styles.stars} aria-hidden="true">
                 <span className={styles.starLayer} style={{ boxShadow: starField(140, 7) }} />
                 <span className={styles.starLayer} style={{ boxShadow: starField(60, 23) }} />

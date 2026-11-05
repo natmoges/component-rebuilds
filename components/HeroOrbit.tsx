@@ -102,6 +102,7 @@ import {
 } from "three";
 import TextScrambler from "./TextScrambler";
 import styles from "./HeroOrbit.module.css";
+import { ARRIVAL_MS } from "../lib/tempo";
 
 const ZOOM = 1.7;
 const DEGREE = Math.PI / 180;
@@ -121,7 +122,6 @@ const DUST_MAX = 6000;
 const DUST_BASE = 800;
 const DUST_PER_KEPT = 150;
 const DUST_COLORS = ["#C4D1D6", "#19897C"];
-const ARRIVAL_MS = 3000;
 const SETTLE_RATE = 3;
 const ORBIT_SECONDS = [120, 60];
 const ORBIT_TILT = [0, -5 * DEGREE];

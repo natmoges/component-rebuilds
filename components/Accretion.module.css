@@ -1,5 +1,5 @@
 .space {
-    --bar: 1000ms;
+    /* --bar, --hold and --flight come from lib/tempo.ts, set on this element. */
     --orbit: min(30vw, 420px);
     min-height: 100vh;
     background: #000;
@@ -395,7 +395,7 @@
 .object[data-decision="kept"] {
     color: var(--signal);
     filter: drop-shadow(0 0 8px var(--signal));
-    animation: absorb calc(var(--bar) * 2) ease-in var(--bar) forwards;
+    animation: absorb var(--flight) ease-in var(--hold) forwards;
 }
 
 .object[data-decision="debris"] {

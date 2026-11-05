@@ -7,11 +7,10 @@ import BootScreen, { type BootStage } from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
+import { BAR_MS, HUNT_MS } from "../lib/tempo";
 
 const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
-const BAR_MS = 1000;
-const HUNT_MS = 2 * BAR_MS;
 const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
 const METEOR_COUNT = 18;
