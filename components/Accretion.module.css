@@ -331,12 +331,15 @@
     position: absolute;
     top: -20vh;
     width: 1.5px;
-    height: calc(var(--length) * (1 + var(--warp, 0)));
+    height: var(--length);
     border-radius: 1px;
     background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, var(--brightness)));
     rotate: 5deg;
+    /* The warp stretches the streak on the compositor (scale), not by re-laying it out (height). */
+    transform-origin: top;
+    scale: 1 calc(1 + var(--warp, 0));
     animation: fall linear infinite;
-    transition: height 0.25s ease-out;
+    transition: scale 0.25s ease-out;
 }
 
 @keyframes fall {
@@ -412,6 +415,23 @@
         transform: translate(-34vw, 30vh) rotate(-220deg) scale(0.6);
         opacity: 0.1;
     }
+}
+
+/* The drift layer spans the whole scan, so each drift keeps its place in the scroll,
+   and clips like the passages did, so the page still ends where the record ends.
+   Each drift receives --scroll itself; it's registered below as non-inherited,
+   so the shapes inside a drift never restyle as you scroll. */
+.drifts {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    pointer-events: none;
+}
+
+@property --scroll {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 0;
 }
 
 /* Each drift sits in its era's stretch of the scroll. Far ones lag behind near ones. */

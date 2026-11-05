@@ -147,6 +147,8 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     const [failedImages, setFailedImages] = useState<string[]>([]);
     const [bootStage, setBootStage] = useState<BootStage>("off");
     const scanRef = useRef<HTMLDivElement | null>(null);
+    const fieldRef = useRef<HTMLDivElement | null>(null);
+    const driftRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
@@ -161,18 +163,6 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
         function locate() {
             frame = null;
             const scanLine = window.innerHeight / 2;
-
-            if (!isMotionReduced && scanRef.current !== null) {
-                const now = performance.now();
-                const speed = Math.abs(window.scrollY - lastY) / Math.max(16, now - lastTime);
-                lastY = window.scrollY;
-                lastTime = now;
-                const style = scanRef.current.style;
-                style.setProperty("--scroll", String(window.scrollY));
-                style.setProperty("--warp", Math.min(speed * 2.5, 5).toFixed(2));
-                if (settle !== null) clearTimeout(settle);
-                settle = setTimeout(() => style.setProperty("--warp", "0"), 140);
-            }
 
             let held: string | null = null;
             for (let index = 0; index < entries.length; index++) {
@@ -189,6 +179,29 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             const last = objectRefs.current[entries.length - 1];
             const isPastLast =
                 !!last && last.getBoundingClientRect().bottom < scanLine - HOLD_TOLERANCE_PX;
+
+            // Writes come after every read, so the browser lays the page out once per frame.
+            // Each value goes only to what reads it: --scroll to each drift (registered as
+            // non-inherited, so nothing inside a drift restyles), --warp to the meteor field.
+            const field = fieldRef.current;
+            if (!isMotionReduced && field !== null) {
+                const now = performance.now();
+                const speed = Math.abs(window.scrollY - lastY) / Math.max(16, now - lastTime);
+                lastY = window.scrollY;
+                lastTime = now;
+                // Only drifts within two screens of the view can be seen, so only they move.
+                const scrolled = String(window.scrollY);
+                const vh = window.innerHeight / 100;
+                const viewMiddle = window.scrollY + 50 * vh;
+                for (let index = 0; index < drifts.length; index++) {
+                    const home = (60 + drifts[index].slot * 90) * vh;
+                    if (Math.abs(home - viewMiddle) > 2 * window.innerHeight) continue;
+                    driftRefs.current[index]?.style.setProperty("--scroll", scrolled);
+                }
+                field.style.setProperty("--warp", Math.min(speed * 2.5, 5).toFixed(2));
+                if (settle !== null) clearTimeout(settle);
+                settle = setTimeout(() => field.style.setProperty("--warp", "0"), 140);
+            }
 
             setHeldId(held);
             if (held !== null) setPhase("held");
@@ -210,7 +223,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
             if (frame !== null) cancelAnimationFrame(frame);
             if (settle !== null) clearTimeout(settle);
         };
-    }, [entries]);
+    }, [entries, drifts]);
 
     const isOnline = bootStage === "online";
 
@@ -253,7 +266,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
 
     return (
         <div ref={scanRef} className={styles.scan} data-reading={reading} data-boot-stage={bootStage} data-trail-zone>
-            <div className={styles.field} aria-hidden="true">
+            <div ref={fieldRef} className={styles.field} aria-hidden="true">
                 {meteors.map((meteor, index) => (
                     <span
                         key={`meteor-${index}`}
@@ -271,12 +284,14 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                 ))}
             </div>
 
-            <ol className={styles.passages}>
+            <div className={styles.drifts} aria-hidden="true">
                 {drifts.map((drift, index) => (
                     <span
                         key={`drift-${index}`}
+                        ref={(element) => {
+                            driftRefs.current[index] = element;
+                        }}
                         className={styles.drift}
-                        aria-hidden="true"
                         style={
                             {
                                 left: `${drift.left}%`,
@@ -289,6 +304,9 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                         <Matter era={drift.era} variant={drift.variant} />
                     </span>
                 ))}
+            </div>
+
+            <ol className={styles.passages}>
                 {entries.map((entry, index) => (
                     <li key={entry.id} className={styles.passage}>
                         <span
