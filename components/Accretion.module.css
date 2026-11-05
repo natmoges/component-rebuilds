@@ -618,6 +618,15 @@
     transition: opacity var(--bar);
 }
 
+/* Integration item 5: once the record is finished, a second line says what the planet carries. */
+.massRecord {
+    display: block;
+    margin-top: 4px;
+    text-align: center;
+    color: var(--fg);
+}
+
+
 .space:has(.scan[data-boot-stage="off"]) .massLabel,
 .space:has(.scan[data-boot-stage="linked"]) .massLabel {
     opacity: 0;

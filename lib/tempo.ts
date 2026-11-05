@@ -120,12 +120,21 @@ export function recordCountOf(entries: Entry[]): RecordCount {
     return { kept, debris: entries.length - kept, total: entries.length };
 }
 
-export function countsOf(entries: Entry[], decisions: Record<string, Decision>): Counts {
+// What the record revealed at the finale (or this browser remembered) grows the planet, but it
+// is never added to your scan: revealed and scanned are kept apart (integration item 5).
+export function countsOf(
+    entries: Entry[],
+    decisions: Record<string, Decision>,
+    revealed: Record<string, Decision> = {}
+): Counts {
     const decided = entries.filter((entry) => decisions[entry.id] !== undefined);
     const kept = decided.filter((entry) => decisions[entry.id] === "kept").length;
+    const revealedKept = entries.filter(
+        (entry) => decisions[entry.id] === undefined && revealed[entry.id] === "kept"
+    ).length;
     return {
         record: recordCountOf(entries),
         scan: { decided: decided.length, kept, debris: decided.length - kept },
-        planet: { mass: kept },
+        planet: { mass: kept + revealedKept },
     };
 }

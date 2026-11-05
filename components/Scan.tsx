@@ -1,5 +1,55 @@
 "use client";
 
+/*
+ * INTEGRATION PASS, ITEM 5 — the finale.
+ * What I found: the planet only grows from what you scan, so whoever
+ * skims reaches the end with a small planet, while the end card counts the
+ * whole record. Two numbers on one screen that don't agree. And the only
+ * way to a full planet was to sit through every object. Here the end of
+ * the record is where the two numbers meet, and the record itself makes
+ * them meet: it never pretends you did the scanning.
+ *
+ * THE TRIGGER: you reach the end of the record. Travelling there is the
+ * price. Scrolling there fast still counts, because scrolling is travel.
+ *
+ * THE REVEAL: the HUD says what's happening, "Accreting the remaining 24",
+ * and every kept object you didn't scan falls into the planet as one
+ * volley, a tick apart, the whole volley inside two bars. The planet grows
+ * as they land, and both moons name themselves once their strata are all
+ * in. Debris doesn't fall. The end card counts it.
+ *
+ * TWO COUNTS, KEPT HONEST: the record's objects are revealed, not scanned.
+ * Your count stays yours, SCANNED 12 / 43, and the planet now carries the
+ * record's kept. Revealed and scanned are never added together.
+ *
+ * NOTHING TO SCAN TWICE: once the record has revealed itself, the ride
+ * back is free in both directions. Nothing hunts, and the satellite only
+ * drifts.
+ *
+ * IF YOU SCANNED EVERYTHING: there's nothing left to reveal, so the
+ * volley doesn't fire. The end card simply agrees with you.
+ *
+ * REMEMBERED: the page remembers this browser finished the record. A
+ * return visit opens on the grown planet, both moons named, with RESCAN in
+ * the HUD. If the record has grown since (proof arrived in Notion), only
+ * the new kept objects are left to find.
+ *
+ * RESCAN: everything goes back to zero, the planet included, and you
+ * travel the record again from wherever you are.
+ *
+ * THE KNOBS: the volley a tick apart, squeezed to fit two bars · the label
+ * "Accreting the remaining N" · the memory keyed to the record's kept
+ * objects.
+ *
+ * FAILURE: if this browser won't keep anything (private window, storage
+ * blocked), every visit is a first visit. The finale still plays. From
+ * the stored copy, it reveals the stored copy's kept.
+ *
+ * PHONE: the same finale, and RESCAN is a tap.
+ *
+ * REDUCED MOTION: unchanged. The plain record list has no planet to fill.
+ */
+
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import TextScrambler from "./TextScrambler";
@@ -7,13 +57,16 @@ import BootScreen, { type BootStage } from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
-import { BAR_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
+import { BAR_MS, TICK_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
 
 const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
 const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
 const METEOR_COUNT = 18;
+
+// The finale's volley fits inside two bars, however many objects are left.
+const VOLLEY_MS = 2 * BAR_MS;
 
 type Phase = "rest" | "travelling" | "held" | "end";
 type Reading = "rest" | "searching" | "hunting" | "kept" | "debris" | "end";
@@ -130,15 +183,23 @@ export interface ScanProps {
     source: "substrate" | "cache";
 }
 
-function isStratumProven(entries: Entry[], decisions: Record<string, Decision>, era: string): boolean {
+// A moon names itself once every kept object in its stratum is in the planet, scanned or revealed.
+function isStratumProven(entries: Entry[], inPlanet: Record<string, Decision>, era: string): boolean {
     const kept = entries.filter((entry) => eraOf(entry.stratum) === era && entry.state === "Kept");
-    return kept.length > 0 && kept.every((entry) => decisions[entry.id] === "kept");
+    return kept.length > 0 && kept.every((entry) => inPlanet[entry.id] === "kept");
 }
+
+
 
 export default function Scan({ entries, source }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
+    // What the record accounted for without you: revealed at the finale.
+    const [revealed, setRevealed] = useState<Record<string, Decision>>({});
+    const [volley, setVolley] = useState<string[] | null>(null);
+    // How the planet takes what arrives: a scanned object after its absorb, the rest at once.
+    const [arrival, setArrival] = useState<"absorb" | "now">("absorb");
     const [dissolvedId, setDissolvedId] = useState<string | null>(null);
     const [failedImages, setFailedImages] = useState<string[]>([]);
     const [bootStage, setBootStage] = useState<BootStage>("off");
@@ -146,7 +207,9 @@ export default function Scan({ entries, source }: ScanProps) {
     const fieldRef = useRef<HTMLDivElement | null>(null);
     const driftRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
-    const decisionsRef = useRef<Record<string, Decision>>({});
+    const doneRef = useRef<Record<string, Decision>>({});
+    const scannedRef = useRef<Record<string, Decision>>({});
+    const locateRef = useRef<(() => void) | null>(null);
     const heldRef = useRef<string | null>(null);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
@@ -162,15 +225,18 @@ export default function Scan({ entries, source }: ScanProps) {
             frame = null;
             const scanLine = window.innerHeight / 2;
 
-            // An object you've already scanned is gone into the planet (or tumbled away),
-            // so it never locks again. The one you're on stays held until you move off it.
-            const decided = decisionsRef.current;
+            // An object already accounted for, scanned or revealed, is gone into the planet
+            // (or tumbled away), so it never locks again. The one you just scanned stays held
+            // until you move off it; a revealed one is never held.
+            const decided = doneRef.current;
+            const scanned = scannedRef.current;
             let held: string | null = null;
             for (let index = 0; index < entries.length; index++) {
                 const object = objectRefs.current[index];
                 if (!object) continue;
                 const id = entries[index].id;
-                if (decided[id] !== undefined && id !== heldRef.current) continue;
+                const isStillHeld = id === heldRef.current && scanned[id] !== undefined;
+                if (decided[id] !== undefined && !isStillHeld) continue;
                 const box = object.getBoundingClientRect();
                 const middle = box.top + box.height / 2;
                 if (Math.abs(middle - scanLine) <= HOLD_TOLERANCE_PX) {
@@ -179,10 +245,12 @@ export default function Scan({ entries, source }: ScanProps) {
                 }
             }
 
-            const last = objectRefs.current[entries.length - 1];
+            // Measured on the last object's row, which never moves: the object itself can
+            // tumble back down past the scan line once it's decided.
+            const last = objectRefs.current[entries.length - 1]?.parentElement;
             const isPastLast =
                 !!last && last.getBoundingClientRect().bottom < scanLine - HOLD_TOLERANCE_PX;
-            // Once every object is scanned, the rest of the ride is the end: no hunting, anywhere.
+            // Once every object is accounted for, the rest of the ride is the end: no hunting, anywhere.
             const isAllScanned = entries.every((entry) => decided[entry.id] !== undefined);
 
             // Writes come after every read, so the browser lays the page out once per frame.
@@ -221,6 +289,7 @@ export default function Scan({ entries, source }: ScanProps) {
         }
 
         locate();
+        locateRef.current = handleScroll;
         window.addEventListener("scroll", handleScroll, { passive: true });
         window.addEventListener("resize", handleScroll);
         return () => {
@@ -228,28 +297,80 @@ export default function Scan({ entries, source }: ScanProps) {
             window.removeEventListener("resize", handleScroll);
             if (frame !== null) cancelAnimationFrame(frame);
             if (settle !== null) clearTimeout(settle);
+            locateRef.current = null;
         };
     }, [entries, drifts]);
 
-    // The scroll loop reads decisions from a ref, so it always sees the latest without re-subscribing.
+    // Everything the record has accounted for: your scan, plus what it revealed.
+    const done = useMemo(() => ({ ...revealed, ...decisions }), [revealed, decisions]);
+    const isFinished = entries.every((entry) => done[entry.id] !== undefined);
+
+    // The scroll loop reads them from a ref, so it always sees the latest without re-subscribing,
+    // and it looks again at once, so a finished record reads as the end without waiting for a scroll.
     useEffect(() => {
-        decisionsRef.current = decisions;
-    }, [decisions]);
+        doneRef.current = done;
+        scannedRef.current = decisions;
+        locateRef.current?.();
+    }, [done, decisions]);
 
     const isOnline = bootStage === "online";
 
     useEffect(() => {
-        if (!isOnline || heldId === null || decisions[heldId] !== undefined) return;
+        if (!isOnline || heldId === null || done[heldId] !== undefined) return;
         const entry = entries.find((candidate) => candidate.id === heldId);
         if (entry === undefined) return;
         const hunt = setTimeout(() => {
+            // A scanned object lands after its absorb, whatever landed before it.
+            setArrival("absorb");
             setDecisions((current) => ({
                 ...current,
                 [heldId]: entry.state === "Kept" ? "kept" : "debris",
             }));
         }, HUNT_MS);
         return () => clearTimeout(hunt);
-    }, [isOnline, heldId, decisions, entries]);
+    }, [isOnline, heldId, done, entries]);
+
+    // THE FINALE: at the end of the record, whatever you didn't scan, the record accounts for.
+    // Debris is counted at once; the kept fall into the planet as one labelled volley.
+    useEffect(() => {
+        if (!isOnline || phase !== "end" || isFinished || volley !== null) return;
+        // It begins one tick after you arrive, on the same beat as everything else.
+        const begin = setTimeout(() => {
+            const left = entries.filter((entry) => done[entry.id] === undefined);
+            const debris = left.filter((entry) => entry.state !== "Kept");
+            const kept = left.filter((entry) => entry.state === "Kept").map((entry) => entry.id);
+            setArrival("now");
+            setRevealed((current) => ({
+                ...current,
+                ...Object.fromEntries(debris.map((entry) => [entry.id, "debris" as Decision])),
+            }));
+            if (kept.length > 0) setVolley(kept);
+        }, TICK_MS);
+        return () => clearTimeout(begin);
+    }, [isOnline, phase, isFinished, volley, entries, done]);
+
+    // The volley: a tick apart, squeezed so the whole of it lands inside two bars. It keeps time
+    // to the clock, not to the timer: if a render runs long, the next tick lands whatever is due.
+    useEffect(() => {
+        if (volley === null) return;
+        const spacing = Math.min(TICK_MS, VOLLEY_MS / volley.length);
+        const start = performance.now();
+        let landed = 0;
+        const fall = setInterval(() => {
+            const due = Math.min(volley.length, Math.floor((performance.now() - start) / spacing) + 1);
+            const arriving = volley.slice(landed, due);
+            landed = due;
+            setRevealed((current) => ({
+                ...current,
+                ...Object.fromEntries(arriving.map((id) => [id, "kept" as Decision])),
+            }));
+            if (landed === volley.length) {
+                clearInterval(fall);
+                setVolley(null);
+            }
+        }, spacing);
+        return () => clearInterval(fall);
+    }, [volley]);
 
     const held = entries.find((entry) => entry.id === heldId) ?? null;
     const decision: Decision | undefined = held !== null ? decisions[held.id] : undefined;
@@ -260,9 +381,10 @@ export default function Scan({ entries, source }: ScanProps) {
     else if (phase === "end") reading = "end";
     else reading = "rest";
 
-    // Three counts, one source: the record, your scan, and the planet built from it.
-    const counts = countsOf(entries, decisions);
-    const captured = entries.filter((entry) => decisions[entry.id] === "kept");
+    // Three counts, one source: the record, your scan, and the planet built from it. What the
+    // record revealed grows the planet but never counts as scanned.
+    const counts = countsOf(entries, decisions, revealed);
+    const captured = entries.filter((entry) => done[entry.id] === "kept");
     const mass = counts.planet.mass;
 
     const hasImage = held !== null && held.image !== null && !failedImages.includes(held.id);
@@ -327,7 +449,7 @@ export default function Scan({ entries, source }: ScanProps) {
                                 objectRefs.current[index] = element;
                             }}
                             className={styles.object}
-                            data-decision={decisions[entry.id] ?? "unscanned"}
+                            data-decision={done[entry.id] ?? "unscanned"}
                         >
                             <Matter era={eraOf(entry.stratum)} variant={index} />
                         </span>
@@ -343,9 +465,10 @@ export default function Scan({ entries, source }: ScanProps) {
             <HeroOrbit
                 mass={mass}
                 fullMass={counts.record.kept}
+                arrivalMs={arrival === "now" ? 0 : undefined}
                 isOnline={bootStage === "gated" || bootStage === "online"}
-                isArchitectNamed={isStratumProven(entries, decisions, "3")}
-                isTechnologistNamed={isStratumProven(entries, decisions, "5")}
+                isArchitectNamed={isStratumProven(entries, done, "3")}
+                isTechnologistNamed={isStratumProven(entries, done, "5")}
             />
 
             <div
@@ -369,6 +492,10 @@ export default function Scan({ entries, source }: ScanProps) {
                 <span className={styles.massLabel}>
                     {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
                     Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
+                    {/* Once the record is finished, the planet carries the record, and says so. */}
+                    {isFinished && volley === null && (
+                        <span className={styles.massRecord}>Record · {counts.record.kept} kept</span>
+                    )}
                 </span>
             </div>
 
@@ -445,7 +572,11 @@ export default function Scan({ entries, source }: ScanProps) {
                         </>
                     )}
 
-                    {reading === "end" && (
+                    {reading === "end" && volley !== null && (
+                        <span className={styles.hudHint}>Accreting the remaining {volley.length}</span>
+                    )}
+
+                    {reading === "end" && volley === null && (
                         <>
                             <span className={styles.hudHint}>End of record</span>
                             <p>

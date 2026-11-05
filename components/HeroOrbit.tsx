@@ -59,7 +59,8 @@
  * (build #2), then stays.
  *
  * SCROLLING BACK: a decision stays made, so the mass stays and the names
- * stay. Nothing climbs back out.
+ * stay. Nothing climbs back out. (Integration item 5: a Rescan is the one
+ * way back to zero, and it lands at once.)
  *
  * THE END: the planet at full size, both moons named, the count, and
  * the source line. This build is in the record too, so the planet takes
@@ -285,6 +286,9 @@ function grainsOf(count: number, seed: number) {
 export interface HeroOrbitProps {
     mass: number;
     fullMass: number;
+    // How long an arrival takes to land. A scanned object takes the absorb; what the record
+    // reveals, or a Rescan, lands at once (integration item 5).
+    arrivalMs?: number;
     isOnline: boolean;
     isArchitectNamed: boolean;
     isTechnologistNamed: boolean;
@@ -517,6 +521,7 @@ function canDraw(): boolean {
 export default function HeroOrbit({
     mass,
     fullMass,
+    arrivalMs = ARRIVAL_MS,
     isOnline,
     isArchitectNamed,
     isTechnologistNamed,
@@ -525,21 +530,26 @@ export default function HeroOrbit({
     const [hasFailed, setHasFailed] = useState(() => !canDraw());
     const [landed, setLanded] = useState({ mass, isArchitectNamed, isTechnologistNamed });
     const stageRef = useRef<HTMLDivElement>(null);
+    const pendingRef = useRef<ReturnType<typeof setTimeout>[]>([]);
     const titlesRef = useRef<(HTMLSpanElement | null)[]>([]);
     const named = [landed.isArchitectNamed, landed.isTechnologistNamed];
 
+    // Each arrival lands on its own clock, so a second object in flight never holds back the
+    // first. Anything that lands at once overtakes whatever is still in flight.
     useEffect(() => {
-        const isSame =
-            mass === landed.mass &&
-            isArchitectNamed === landed.isArchitectNamed &&
-            isTechnologistNamed === landed.isTechnologistNamed;
-        if (isSame) return;
-        const arrival = setTimeout(
-            () => setLanded({ mass, isArchitectNamed, isTechnologistNamed }),
-            ARRIVAL_MS
-        );
-        return () => clearTimeout(arrival);
-    }, [mass, isArchitectNamed, isTechnologistNamed, landed]);
+        const next = { mass, isArchitectNamed, isTechnologistNamed };
+        if (arrivalMs === 0) {
+            pendingRef.current.forEach(clearTimeout);
+            pendingRef.current = [];
+        }
+        const arrival = setTimeout(() => {
+            pendingRef.current = pendingRef.current.filter((pending) => pending !== arrival);
+            setLanded(next);
+        }, arrivalMs);
+        pendingRef.current.push(arrival);
+    }, [mass, isArchitectNamed, isTechnologistNamed, arrivalMs]);
+
+    useEffect(() => () => pendingRef.current.forEach(clearTimeout), []);
 
     useEffect(() => {
         function handleLeave() {
