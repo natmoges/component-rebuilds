@@ -35,7 +35,8 @@
  * on a phone it starts right away. The tube opens from its line to full
  * height in a tick, already the size it will stay.
  *
- * DURING: about 7 seconds. Lines start on SignalLocation's tick, the dot
+ * DURING: about 7 seconds (it ran about 20 until integration item 3 put
+ * it on the clock). Lines start on SignalLocation's tick, the dot
  * leaders run out fast, and each reading drops whole on the next tick,
  * quantized like a note on the grid.
  *
@@ -49,8 +50,9 @@
  * lit Signal green, is the name and the systems. Three ticks each, with a
  * torn red and cyan tick between them.
  *
- * SCROLLING MID-BOOT: a boot is a boot. It keeps typing, twice as fast,
- * and the scan waits for it to finish.
+ * SCROLLING MID-BOOT: was "a boot is a boot: it keeps typing, twice as
+ * fast, and the scan waits for it to finish." Item 3 reversed it: the
+ * first scroll finishes the boot.
  *
  * AT THE END: "AWAITING SIGNAL", and the status bar reads Scroll to
  * travel. The log stays up, still glitching, until the first move off
@@ -75,6 +77,38 @@
  * nothing boots and nothing waits on it.
  */
 
+/*
+ * INTEGRATION PASS, ITEM 3 — usable from the first frame.
+ * What I found: the boot's score is written to run about 7 seconds, but it
+ * was played as 302 timers in a row, one per character, each starting after
+ * the last one finished drawing. The drawing added up, and the boot came in
+ * around 20 seconds after the preloader, 24 from a cold load. Scrolling
+ * hurried it, but the scan still waited, so a visitor who scrolled got
+ * nothing back. A boot that holds you is a wall, not an intro.
+ *
+ * ON THE CLOCK: the score plays against the time the boot started, not
+ * against the last character. Every tick it catches up to where the score
+ * says it should be, so it lands in its 7 seconds on any machine, and a
+ * slow frame never makes it later.
+ *
+ * SCROLLING MID-BOOT: the first scroll finishes the boot. Every line that
+ * hasn't typed yet lands whole on the next tick, the scene comes online in
+ * order (beacon, count, scan) inside a bar, and the scroll that did it is
+ * already travelling. Nobody waits for the log to finish reading itself.
+ *
+ * NOT SCROLLING: nothing changes. The boot types its log in its 7 seconds
+ * and the scene comes online line by line, the way build 13 made it.
+ *
+ * THE KNOBS: the score unchanged (20 ms a character, dots at 5, readings
+ * on the tick) · the finish, one tick for the rest of the log to land and
+ * one bar for the scene to come online.
+ *
+ * FAILURE: unchanged. If the code never arrives, the tube opens on its own
+ * at eight seconds with the log printed.
+ *
+ * REDUCED MOTION: unchanged. No HUD, nothing boots.
+ */
+
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import styles from "./BootScreen.module.css";
 // Accretion's tempo, from the one clock: a one-second bar of eight ticks.
@@ -82,7 +116,6 @@ import { BAR_MS, TICK_MS } from "../lib/tempo";
 
 const CHAR_MS = 20;
 const DOT_MS = 5;
-const HURRY = 2;
 
 // Where the preloader never shows (phones, tablets), the boot doesn't wait for it.
 const NO_PRELOADER = "(hover: none) and (pointer: coarse), (max-width: 809px)";
@@ -223,7 +256,7 @@ export default function BootScreen({
     const [hasFolded, setHasFolded] = useState(false);
     const [isCycling, setIsCycling] = useState(false);
     const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const isHurriedRef = useRef(false);
+    const isFinishingRef = useRef(false);
     const doneAtRef = useRef(0);
 
     const lines = useMemo(() => bootLinesOf(objectCount, source), [objectCount, source]);
@@ -245,24 +278,73 @@ export default function BootScreen({
         }
 
         let index = 0;
+        // Score time: how far into the score the boot should be. It runs on the clock,
+        // so a slow frame is caught up on the next tick instead of pushing everything later.
+        let scoreTime = 0;
+        let lastNow = 0;
+        let isTyping = false;
+        const finishTimers: ReturnType<typeof setTimeout>[] = [];
 
-        function handleHurry() {
-            isHurriedRef.current = true;
+        // THE FINISH: the rest of the log lands whole on the tick, and the stages it
+        // hadn't reached come online in order (beacon, count, scan), two ticks apart.
+        function finish() {
+            setTypedCount(total);
+            const left: BootStage[] = [];
+            for (let passed = index; passed < steps.length; passed++) {
+                const stage = steps[passed].stage;
+                if (stage) left.push(stage);
+            }
+            index = steps.length;
+            left.forEach((stage, order) => {
+                finishTimers.push(setTimeout(() => onBootStage(stage), order * 2 * TICK_MS));
+            });
+            finishTimers.push(
+                setTimeout(() => {
+                    doneAtRef.current = performance.now();
+                    setBootPhase("done");
+                }, Math.max(0, left.length - 1) * 2 * TICK_MS)
+            );
+        }
+
+        // The first scroll finishes the boot, on the next tick of the grid.
+        function handleFirstScroll() {
+            if (isFinishingRef.current) return;
+            isFinishingRef.current = true;
+            window.removeEventListener("scroll", handleFirstScroll);
+            if (!isTyping) return; // still warming up: typeNext finishes the moment it starts
+            if (typingRef.current !== null) clearTimeout(typingRef.current);
+            typingRef.current = setTimeout(finish, TICK_MS - (performance.now() % TICK_MS));
         }
 
         function typeNext() {
-            const step = steps[index];
-            setTypedCount(step.count);
-            if (step.stage) onBootStage(step.stage);
-            index += 1;
-            if (index >= steps.length) {
-                doneAtRef.current = performance.now();
-                setBootPhase("done");
-                window.removeEventListener("scroll", handleHurry);
+            isTyping = true;
+            if (isFinishingRef.current) {
+                finish();
                 return;
             }
-            const speed = isHurriedRef.current ? HURRY : 1;
-            typingRef.current = setTimeout(typeNext, (steps[index].at - step.at) / speed);
+            const now = performance.now();
+            if (lastNow === 0) scoreTime = steps[0].at;
+            else scoreTime += now - lastNow;
+            lastNow = now;
+
+            // Catch up: every step the score has reached lands now, and every stage it
+            // passed fires in order, so the beacon, the count and the scan never skip.
+            let reached = index;
+            while (reached + 1 < steps.length && steps[reached + 1].at <= scoreTime) reached += 1;
+            for (let passed = index; passed <= reached; passed++) {
+                const stage = steps[passed].stage;
+                if (stage) onBootStage(stage);
+            }
+            setTypedCount(steps[reached].count);
+            index = reached + 1;
+
+            if (index >= steps.length) {
+                doneAtRef.current = now;
+                setBootPhase("done");
+                window.removeEventListener("scroll", handleFirstScroll);
+                return;
+            }
+            typingRef.current = setTimeout(typeNext, Math.max(0, steps[index].at - scoreTime));
         }
 
         function isPreloaderUp() {
@@ -282,11 +364,12 @@ export default function BootScreen({
             }, 2 * TICK_MS);
         }
 
-        window.addEventListener("scroll", handleHurry, { passive: true });
+        window.addEventListener("scroll", handleFirstScroll, { passive: true });
         typingRef.current = setTimeout(powerOn, 0);
         return () => {
-            window.removeEventListener("scroll", handleHurry);
+            window.removeEventListener("scroll", handleFirstScroll);
             if (typingRef.current !== null) clearTimeout(typingRef.current);
+            finishTimers.forEach(clearTimeout);
         };
     }, [steps, total, onBootStage]);
 
