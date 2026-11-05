@@ -45,6 +45,46 @@
  * to bottom, kept first, then debris.
  */
 
+/*
+ * INTEGRATION PASS, ITEM 4 — one space.
+ * What I found: each build placed itself, so nothing knew where anything
+ * else was. The satellite's orbit carried it straight across the planet.
+ * The count sat on the planet's face, crossed by the moons' path. The
+ * moons' blank title slots drew little lines in the air before they had
+ * anything to say. Here the scene keeps one rule: everything knows where
+ * the planet is, and nothing sits on top of it by accident.
+ *
+ * THE PLANET IS THE LANDMARK: HeroOrbit already tells the page its radius
+ * and how far it has slid. Everything below reads those two numbers.
+ *
+ * THE SATELLITE KEEPS ITS DISTANCE: a second invisible ring, around the
+ * planet this time, the planet's radius plus a margin. The satellite
+ * glances off it and slides around the curve, the same way it already
+ * circles the lock instead of covering it. Thrown at the planet, it
+ * bounces off the atmosphere.
+ *
+ * THE COUNT SITS AT THE LIMB: under the planet, just past its edge, and
+ * it moves out as the planet grows. It belongs to the planet, but it's
+ * never painted on it, and the moons' path never crosses it.
+ *
+ * THE MOONS SAY NOTHING UNTIL THEY'VE EARNED IT: no blank slot, no line.
+ * A title appears only when it decodes.
+ *
+ * THE KNOBS: the planet's ring at its radius plus 32 px · the count 20 px
+ * below the limb · the moons' slots hidden until named.
+ *
+ * WHAT STAYS: the planet is see-through, the way Tim made it, so stars
+ * and meteors behind it show through its skin. (Decided: hologram, not a
+ * stone.)
+ *
+ * FAILURE: if WebGL can't start, the grey sphere's own size stands in for
+ * the planet's radius, and everything keeps its distance from that.
+ *
+ * PHONE: the same rules, at the phone's planet size.
+ *
+ * REDUCED MOTION: unchanged. The plain record list, no scene.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";

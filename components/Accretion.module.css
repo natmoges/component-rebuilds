@@ -295,12 +295,13 @@
     }
 }
 
+/* The count sits at the planet's limb (integration item 4): under its bottom edge,
+   following its size and slide. Without WebGL, the grey sphere's size stands in. */
 .massLabel {
     position: absolute;
     left: calc(50% + var(--planet-shift, 0px));
-    left: 50%;
+    top: calc(50% + var(--planet-radius, calc(var(--size) / 2)) + 20px);
     translate: -50% 0;
-    margin-top: 26px;
     white-space: nowrap;
     color: var(--muted);
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
