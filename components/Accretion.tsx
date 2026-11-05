@@ -136,6 +136,7 @@
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";
+import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../lib/links";
 import Scan from "./Scan";
 import StarCloud from "./StarCloud";
 import Gravity from "./Gravity";
@@ -217,9 +218,10 @@ export default async function Accretion() {
                 {record.kept} kept ·{" "}
                 {record.debris} debris
             </p>
-            <p className={styles.seam}>
-                <Link href="/before">The index this page grew out of</Link>
-            </p>
+            <nav className={styles.seam} aria-label="Where to go from here">
+                <a href={REPO_URL}>The build, commit by commit</a> · <a href={PORTFOLIO_URL}>natmoges.com</a> ·{" "}
+                <a href={CONTACT_URL}>Contact</a> · <Link href="/before">The index this page grew out of</Link>
+            </nav>
         </main>
     );
 }

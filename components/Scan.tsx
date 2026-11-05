@@ -59,6 +59,7 @@ import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
 import { BAR_MS, TICK_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
+import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../lib/links";
 
 const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
@@ -687,14 +688,26 @@ export default function Scan({ entries, source }: ScanProps) {
 
                         {reading === "end" && volley === null && (
                             <>
+                                {/* The last transmission: the record's numbers, then where to go. */}
                                 <span className={styles.hudHint}>End of record</span>
                                 <p>
-                                    {provenance} ·{" "}
                                     {counts.record.kept} kept · {counts.record.debris} debris
+                                    {source === "cache" && " · from the stored copy"}
                                 </p>
-                                <Link href="/before" className={styles.hudLink}>
-                                    The index this page grew out of →
-                                </Link>
+                                <nav className={styles.hudLinks} aria-label="Where to go from here">
+                                    <a href={REPO_URL} className={styles.hudLink}>
+                                        The build, commit by commit →
+                                    </a>
+                                    <a href={PORTFOLIO_URL} className={styles.hudLink}>
+                                        natmoges.com →
+                                    </a>
+                                    <a href={CONTACT_URL} className={styles.hudLink}>
+                                        Contact →
+                                    </a>
+                                    <Link href="/before" className={styles.hudLink}>
+                                        The index this page grew out of →
+                                    </Link>
+                                </nav>
                                 {isFinished && (
                                     <button type="button" className={styles.rescan} onClick={handleRescan}>
                                         Rescan

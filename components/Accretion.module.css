@@ -524,6 +524,18 @@
     text-transform: uppercase;
 }
 
+/* Integration item 6: the last transmission's ways out, wrapped to the HUD's width. */
+.hudLinks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 1.1rem;
+}
+
+.hudLinks .hudLink {
+    margin-top: 0.4rem;
+}
+
 /* ---------- The artifact: develops on lock, dissolves into the record on tap ---------- */
 
 .artifactButton {
