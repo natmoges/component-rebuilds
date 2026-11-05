@@ -409,6 +409,17 @@
     animation: tumble calc(var(--bar) * 3) ease-in forwards;
 }
 
+/* Item 5 follow-up: what the record revealed, or this browser remembered, stays in its passage,
+   marked as taken: kept in a quiet green, debris in grey. No flight, no tumble. */
+.object[data-decision="taken-kept"] {
+    color: color-mix(in srgb, var(--signal) 70%, #a3a9b1);
+    opacity: 0.8;
+}
+
+.object[data-decision="taken-debris"] {
+    color: #4a4e55;
+}
+
 @keyframes absorb {
     to {
         transform: translateX(var(--orbit)) scale(0.25);

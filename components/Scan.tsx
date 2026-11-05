@@ -24,7 +24,10 @@
  *
  * NOTHING TO SCAN TWICE: once the record has revealed itself, the ride
  * back is free in both directions. Nothing hunts, and the satellite only
- * drifts.
+ * drifts. (Nov 5, follow-up: but the record doesn't vanish. What the
+ * record revealed, or this browser remembered, stays in its passage,
+ * marked as taken, and passing one shows its card at once: no hunt, no
+ * lock, no count. A finished record reads like a library.)
  *
  * IF YOU SCANNED EVERYTHING: there's nothing left to reveal, so the
  * volley doesn't fire. The end card simply agrees with you.
@@ -281,7 +284,9 @@ export default function Scan({ entries, source }: ScanProps) {
                 if (!object) continue;
                 const id = entries[index].id;
                 const isStillHeld = id === heldRef.current && scanned[id] !== undefined;
-                if (decided[id] !== undefined && !isStillHeld) continue;
+                // Only what you scanned has gone into the planet. What the record revealed stays,
+                // and can be passed and read.
+                if (scanned[id] !== undefined && !isStillHeld) continue;
                 const box = object.getBoundingClientRect();
                 const middle = box.top + box.height / 2;
                 if (Math.abs(middle - scanLine) <= HOLD_TOLERANCE_PX) {
@@ -484,6 +489,17 @@ export default function Scan({ entries, source }: ScanProps) {
     else if (phase === "end") reading = "end";
     else reading = "rest";
 
+    // Rereading: an object the record revealed (or this browser remembered) shows its card the
+    // moment you pass it. The scan itself stays as it was, so nothing locks and the satellite
+    // keeps drifting; only the HUD reads.
+    const isRereading =
+        isOnline && phase === "held" && held !== null && volley === null &&
+        decisions[held.id] === undefined && revealed[held.id] !== undefined;
+    if (isRereading) reading = isFinished ? "end" : "searching";
+    const card: Decision | undefined =
+        isRereading && held !== null ? revealed[held.id] : reading === "kept" || reading === "debris" ? reading : undefined;
+    const hudReading: Reading = card ?? reading;
+
     // Three counts, one source: the record, your scan, and the planet built from it. What the
     // record revealed grows the planet but never counts as scanned.
     const counts = countsOf(entries, decisions, revealed);
@@ -555,7 +571,9 @@ export default function Scan({ entries, source }: ScanProps) {
                                     objectRefs.current[index] = element;
                                 }}
                                 className={styles.object}
-                                data-decision={done[entry.id] ?? "unscanned"}
+                                data-decision={
+                                decisions[entry.id] ?? (revealed[entry.id] ? `taken-${revealed[entry.id]}` : "unscanned")
+                            }
                             >
                                 <Matter era={eraOf(entry.stratum)} variant={index} />
                             </span>
@@ -605,13 +623,13 @@ export default function Scan({ entries, source }: ScanProps) {
                     </span>
                 </div>
 
-                <aside ref={hudRef} className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
-                    <BootScreen objectCount={entries.length} source={source} reading={reading} onBootStage={setBootStage}>
+                <aside ref={hudRef} className={styles.hud} data-reading={hudReading} aria-live="polite" data-trail-off>
+                    <BootScreen objectCount={entries.length} source={source} reading={hudReading} onBootStage={setBootStage}>
                         {/* Whose record this is, and where it came from: the HUD's top line, from the hand-over on. */}
                         <span className={styles.hudOwner}>Nat Moges · {provenance}</span>
                         {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
-                        {reading === "searching" && (
+                        {reading === "searching" && card === undefined && (
                             <span className={styles.hudHint}>{isRiding ? "Returning to the start" : "Scanning…"}</span>
                         )}
 
@@ -626,19 +644,19 @@ export default function Scan({ entries, source }: ScanProps) {
                             />
                         )}
 
-                        {(reading === "kept" || reading === "debris") && held !== null && (
+                        {card !== undefined && held !== null && (
                             <>
                                 <span className={styles.hudWhen}>{held.when}</span>
                                 <TextScrambler
-                                    key={`${held.id}-${reading}`}
+                                    key={`${held.id}-${card}`}
                                     text={held.title}
                                     className={styles.hudTitle}
-                                    textColor={reading === "debris" ? "var(--muted)" : "var(--signal)"}
+                                    textColor={card === "debris" ? "var(--muted)" : "var(--signal)"}
                                     scrambleColor="var(--muted)"
                                     durationMs={BAR_MS}
                                 />
 
-                                {reading === "kept" && !isDissolved && (
+                                {card === "kept" && !isDissolved && (
                                     <button
                                         key={`${held.id}-artifact`}
                                         type="button"
@@ -661,18 +679,18 @@ export default function Scan({ entries, source }: ScanProps) {
                                     </button>
                                 )}
 
-                                {(isDissolved || reading === "debris") && (
+                                {(isDissolved || card === "debris") && (
                                     <div key={`${held.id}-readout`} className={styles.readout}>
                                         <p>{held.whatChanged}</p>
-                                        {reading === "kept" && held.credit && (
+                                        {card === "kept" && held.credit && (
                                             <p className={styles.hudCredit}>{held.credit}</p>
                                         )}
-                                        {reading === "kept" && held.link && (
+                                        {card === "kept" && held.link && (
                                             <a href={held.link} className={styles.hudLink}>
                                                 Open →
                                             </a>
                                         )}
-                                        {reading === "debris" && (
+                                        {card === "debris" && (
                                             <p className={styles.hudLock}>
                                                 Signal lost. Locks when: {held.lockCondition}
                                             </p>
@@ -686,7 +704,7 @@ export default function Scan({ entries, source }: ScanProps) {
                             <span className={styles.hudHint}>Accreting the remaining {volley.length}</span>
                         )}
 
-                        {reading === "end" && volley === null && (
+                        {reading === "end" && volley === null && card === undefined && (
                             <>
                                 {/* The last transmission: the record's numbers, then where to go. */}
                                 <span className={styles.hudHint}>End of record</span>
