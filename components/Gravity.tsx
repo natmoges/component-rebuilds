@@ -59,7 +59,9 @@
  * below it, so it turns back above the HUD. When a lock opens the full
  * readout, the readout stays on top and the satellite passes behind it.
  * One lap every three screens or so: scroll faster and it circles faster;
- * stop and it stops travelling.
+ * stop and it stops travelling. Once the whole record is scanned, or you're
+ * past its end, there's nothing left to circle: scrolling stops turning the
+ * orbit and it only drifts (integration pass).
  *
  * DURING A LOCK: it keeps drifting. The beam re-aims every frame from the
  * satellite to the scan line, and its hunting, locked and debris looks
@@ -326,7 +328,11 @@ export default function Gravity({ children }: GravityProps) {
         let scrolled = 0;
 
         const handleScroll = () => {
-            scrolled += window.scrollY - lastScrollY;
+            // At the end of the record (all scanned, or past the last object) the
+            // satellite stops circling the lock; the drift and tumble carry on.
+            if (sight?.getAttribute("data-reading") !== "end") {
+                scrolled += window.scrollY - lastScrollY;
+            }
             lastScrollY = window.scrollY;
         };
 
