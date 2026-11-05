@@ -7,7 +7,7 @@ import BootScreen, { type BootStage } from "./BootScreen";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
-import { BAR_MS, HUNT_MS } from "../lib/tempo";
+import { BAR_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
 
 const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
@@ -15,7 +15,6 @@ const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
 const METEOR_COUNT = 18;
 
-type Decision = "kept" | "debris";
 type Phase = "rest" | "travelling" | "held" | "end";
 type Reading = "rest" | "searching" | "hunting" | "kept" | "debris" | "end";
 
@@ -129,8 +128,6 @@ function meteorsOf(count: number): Meteor[] {
 export interface ScanProps {
     entries: Entry[];
     source: "substrate" | "cache";
-    keptCount: number;
-    debrisCount: number;
 }
 
 function isStratumProven(entries: Entry[], decisions: Record<string, Decision>, era: string): boolean {
@@ -138,7 +135,7 @@ function isStratumProven(entries: Entry[], decisions: Record<string, Decision>, 
     return kept.length > 0 && kept.every((entry) => decisions[entry.id] === "kept");
 }
 
-export default function Scan({ entries, source, keptCount, debrisCount }: ScanProps) {
+export default function Scan({ entries, source }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
     const [decisions, setDecisions] = useState<Record<string, Decision>>({});
@@ -248,8 +245,10 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
     else if (phase === "end") reading = "end";
     else reading = "rest";
 
+    // Three counts, one source: the record, your scan, and the planet built from it.
+    const counts = countsOf(entries, decisions);
     const captured = entries.filter((entry) => decisions[entry.id] === "kept");
-    const mass = captured.length;
+    const mass = counts.planet.mass;
 
     const hasImage = held !== null && held.image !== null && !failedImages.includes(held.id);
     const hasArtifact = held !== null && (hasImage || held.snippet !== null);
@@ -328,7 +327,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
 
             <HeroOrbit
                 mass={mass}
-                fullMass={keptCount}
+                fullMass={counts.record.kept}
                 isOnline={bootStage === "gated" || bootStage === "online"}
                 isArchitectNamed={isStratumProven(entries, decisions, "3")}
                 isTechnologistNamed={isStratumProven(entries, decisions, "5")}
@@ -434,7 +433,7 @@ export default function Scan({ entries, source, keptCount, debrisCount }: ScanPr
                             <span className={styles.hudHint}>End of record</span>
                             <p>
                                 Read from {source === "substrate" ? "the substrate" : "cache"} ·{" "}
-                                {keptCount} kept · {debrisCount} debris
+                                {counts.record.kept} kept · {counts.record.debris} debris
                             </p>
                             <Link href="/before" className={styles.hudLink}>
                                 The index this page grew out of →

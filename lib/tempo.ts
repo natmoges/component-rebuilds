@@ -52,6 +52,7 @@
  */
 
 import type { CSSProperties } from "react";
+import type { Entry } from "./record";
 
 // The one clock. Every other timing is a number of bars.
 export const BAR_MS = 1000;
@@ -76,3 +77,48 @@ export const tempoStyle = {
     "--hold": `${HOLD_MS}ms`,
     "--flight": `${FLIGHT_MS}ms`,
 } as CSSProperties;
+
+// ---------- The three counts ----------
+
+// What the record decides for an object once the crosshair has held it.
+export type Decision = "kept" | "debris";
+
+// The record: what my database says. Fixed for the visit.
+export interface RecordCount {
+    kept: number;
+    debris: number;
+    total: number;
+}
+
+// Your scan: every object the crosshair has decided on this visit.
+export interface ScanCount {
+    decided: number;
+    kept: number;
+    debris: number;
+}
+
+// The planet: built only from the kept objects you've decoded.
+export interface PlanetCount {
+    mass: number;
+}
+
+export interface Counts {
+    record: RecordCount;
+    scan: ScanCount;
+    planet: PlanetCount;
+}
+
+export function recordCountOf(entries: Entry[]): RecordCount {
+    const kept = entries.filter((entry) => entry.state === "Kept").length;
+    return { kept, debris: entries.length - kept, total: entries.length };
+}
+
+export function countsOf(entries: Entry[], decisions: Record<string, Decision>): Counts {
+    const decided = entries.filter((entry) => decisions[entry.id] !== undefined);
+    const kept = decided.filter((entry) => decisions[entry.id] === "kept").length;
+    return {
+        record: recordCountOf(entries),
+        scan: { decided: decided.length, kept, debris: decided.length - kept },
+        planet: { mass: kept },
+    };
+}

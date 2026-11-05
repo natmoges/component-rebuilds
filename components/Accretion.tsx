@@ -47,7 +47,7 @@
 
 import Link from "next/link";
 import { readRecord } from "../lib/record";
-import { tempoStyle } from "../lib/tempo";
+import { tempoStyle, recordCountOf } from "../lib/tempo";
 import Scan from "./Scan";
 import StarCloud from "./StarCloud";
 import Gravity from "./Gravity";
@@ -93,8 +93,7 @@ function Satellite() {
 
 export default async function Accretion() {
     const { entries, source } = await readRecord();
-    const keptCount = entries.filter((entry) => entry.state === "Kept").length;
-    const debrisCount = entries.length - keptCount;
+    const record = recordCountOf(entries);
 
     return (
         <main className={styles.space} style={tempoStyle}>
@@ -108,7 +107,7 @@ export default async function Accretion() {
             <Gravity>
                 <Satellite />
             </Gravity>
-            <Scan entries={entries} source={source} keptCount={keptCount} debrisCount={debrisCount} />
+            <Scan entries={entries} source={source} />
 
             <ol className={styles.record}>
                 {entries.map((entry) => (
@@ -126,8 +125,8 @@ export default async function Accretion() {
                 ))}
             </ol>
             <p className={styles.source}>
-                Read from {source === "substrate" ? "the substrate" : "cache"} · {keptCount} kept ·{" "}
-                {debrisCount} debris
+                Read from {source === "substrate" ? "the substrate" : "cache"} · {record.kept} kept ·{" "}
+                {record.debris} debris
             </p>
             <p className={styles.seam}>
                 <Link href="/before">The index this page grew out of</Link>
