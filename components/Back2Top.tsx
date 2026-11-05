@@ -33,9 +33,13 @@
  * tab to it, enter, focus falls back to the top/start of the page. Colours
  * stay inside the site's palette: Signal green for the ring, the hover and
  * the exhaust, with the blue ring for the click.
+ *
+ * (Integration item 6: Accretion borrows the rocket. The page can start the
+ * ride itself, as Rescan does, and the rocket tells the page while it's
+ * riding, so the scan can stand down. Same ride, same breaks.)
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import { Rocket } from "lucide-react";
 import styles from "./Back2Top.module.css";
 
@@ -47,6 +51,16 @@ export interface Back2TopProps {
     hasExhaust?: boolean;
     ringColor?: string;
     hoverColor?: string;
+    // Told true when a ride starts, false when it lands or breaks.
+    onRideChange?: (isRiding: boolean) => void;
+    // Lets the page start the ride itself.
+    ref?: Ref<Back2TopHandle>;
+    // Lets the page move the rocket into its own lane.
+    className?: string;
+}
+
+export interface Back2TopHandle {
+    rideUp: () => void;
 }
 
 function easeInOutCubic(t: number) {
@@ -61,7 +75,9 @@ export default function Back2Top({
     hasExhaust = true,
     ringColor = "var(--signal)",
     hoverColor = "var(--signal)",
-
+    onRideChange,
+    ref,
+    className,
 }: Back2TopProps) {
     const [isPastThreshold, setIsPastThreshold] = useState(false);
 
@@ -86,6 +102,11 @@ export default function Back2Top({
 
     const frameRef = useRef<number | null>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const onRideChangeRef = useRef(onRideChange);
+
+    useEffect(() => {
+        onRideChangeRef.current = onRideChange;
+    }, [onRideChange]);
 
     useEffect(() => {
         function breakRide() {
@@ -93,6 +114,7 @@ export default function Back2Top({
                 buttonRef.current?.style.setProperty("--exhaust", "0");
                 cancelAnimationFrame(frameRef.current);
                 frameRef.current = null;
+                onRideChangeRef.current?.(false);
             }
         }
 
@@ -118,19 +140,26 @@ export default function Back2Top({
             return;
         }
         const start = window.scrollY;
+        // Already at the top: there's no ride to take.
+        if (start <= 0) return;
         const durationMs = Math.min((start / rideUpPxPerSec) * 1000, maxRideMs);
         const startTime = performance.now();
+        onRideChangeRef.current?.(true);
 
         function step(now: number) {
-            const t = Math.min((now - startTime) / durationMs, 1);
+            // A frame's timestamp can fall just before the ride began, so time never runs backwards.
+            const t = Math.min(Math.max(0, now - startTime) / durationMs, 1);
             const eased = easeInOutCubic(t);
             window.scrollTo(0, start * (1 - eased));
             if (hasExhaust) buttonRef.current?.style.setProperty("--exhaust", String(eased));
             frameRef.current = t < 1 ? requestAnimationFrame(step) : null;
+            if (t === 1) onRideChangeRef.current?.(false);
         }
 
         frameRef.current = requestAnimationFrame(step);
     }
+
+    useImperativeHandle(ref, () => ({ rideUp }));
 
     function handleClick(event: React.MouseEvent<HTMLButtonElement>) {
         event.currentTarget.focus();
@@ -145,7 +174,7 @@ export default function Back2Top({
             ref={buttonRef}
             type="button"
             aria-label="Scroll to top"
-            className={styles.button}
+            className={className ? `${styles.button} ${className}` : styles.button}
             style={
                 {
                     "--exhaust-color": exhaustColor,

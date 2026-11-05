@@ -54,6 +54,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import TextScrambler from "./TextScrambler";
 import BootScreen, { type BootStage } from "./BootScreen";
+import Back2Top, { type Back2TopHandle } from "./Back2Top";
 import type { Entry } from "../lib/record";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
@@ -248,6 +249,11 @@ export default function Scan({ entries, source }: ScanProps) {
     const heldRef = useRef<string | null>(null);
     // The finale waits until you've travelled into the record, so a Rescan at the end doesn't refire it.
     const isFinaleArmedRef = useRef(true);
+    // The rocket (build #3): while it carries you, the scan stands down.
+    const rocketRef = useRef<Back2TopHandle>(null);
+    const isRidingRef = useRef(false);
+    const [isRiding, setIsRiding] = useState(false);
+    const hudRef = useRef<HTMLElement | null>(null);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
 
@@ -268,7 +274,8 @@ export default function Scan({ entries, source }: ScanProps) {
             const decided = doneRef.current;
             const scanned = scannedRef.current;
             let held: string | null = null;
-            for (let index = 0; index < entries.length; index++) {
+            // While the rocket carries you, nothing is held, so nothing hunts.
+            for (let index = 0; index < entries.length && !isRidingRef.current; index++) {
                 const object = objectRefs.current[index];
                 if (!object) continue;
                 const id = entries[index].id;
@@ -337,6 +344,26 @@ export default function Scan({ entries, source }: ScanProps) {
             locateRef.current = null;
         };
     }, [entries, drifts]);
+
+    // The HUD tells the page how much of the screen's foot it takes, so the rocket can ride above it on a phone.
+    useEffect(() => {
+        const hud = hudRef.current;
+        if (hud === null) return;
+        const root = document.documentElement;
+        function measure() {
+            if (hud === null) return;
+            root.style.setProperty("--hud-clearance", `${Math.round(window.innerHeight - hud.getBoundingClientRect().top)}px`);
+        }
+        measure();
+        const watch = new ResizeObserver(measure);
+        watch.observe(hud);
+        window.addEventListener("resize", measure);
+        return () => {
+            watch.disconnect();
+            window.removeEventListener("resize", measure);
+            root.style.removeProperty("--hud-clearance");
+        };
+    }, []);
 
     // Everything the record has accounted for: your scan, plus what it revealed or remembered.
     const done = useMemo(() => ({ ...revealed, ...decisions }), [revealed, decisions]);
@@ -437,6 +464,14 @@ export default function Scan({ entries, source }: ScanProps) {
         setVolley(null);
         setRevealed({});
         setDecisions({});
+        // And the rocket carries you to the start, so the record begins again from the first object.
+        rocketRef.current?.rideUp();
+    }
+
+    function handleRide(riding: boolean) {
+        isRidingRef.current = riding;
+        setIsRiding(riding);
+        locateRef.current?.();
     }
 
     const held = entries.find((entry) => entry.id === heldId) ?? null;
@@ -469,203 +504,209 @@ export default function Scan({ entries, source }: ScanProps) {
     }
 
     return (
-        <div ref={scanRef} className={styles.scan} data-reading={reading} data-boot-stage={bootStage} data-trail-zone>
-            <div ref={fieldRef} className={styles.field} aria-hidden="true">
-                {meteors.map((meteor, index) => (
-                    <span
-                        key={`meteor-${index}`}
-                        className={styles.meteor}
-                        style={
-                            {
-                                left: `${meteor.left}%`,
-                                "--length": `${meteor.length}px`,
-                                "--brightness": meteor.brightness,
-                                animationDuration: `${meteor.seconds}s`,
-                                animationDelay: `${meteor.delay}s`,
-                            } as CSSProperties
-                        }
-                    />
-                ))}
-            </div>
-
-            <div className={styles.drifts} aria-hidden="true">
-                {drifts.map((drift, index) => (
-                    <span
-                        key={`drift-${index}`}
-                        ref={(element) => {
-                            driftRefs.current[index] = element;
-                        }}
-                        className={styles.drift}
-                        style={
-                            {
-                                left: `${drift.left}%`,
-                                "--slot": drift.slot,
-                                "--depth": drift.depth,
-                                rotate: `${drift.turn}deg`,
-                            } as CSSProperties
-                        }
-                    >
-                        <Matter era={drift.era} variant={drift.variant} />
-                    </span>
-                ))}
-            </div>
-
-            <ol className={styles.passages}>
-                {entries.map((entry, index) => (
-                    <li key={entry.id} className={styles.passage}>
+        <>
+            <div ref={scanRef} className={styles.scan} data-reading={reading} data-boot-stage={bootStage} data-trail-zone>
+                <div ref={fieldRef} className={styles.field} aria-hidden="true">
+                    {meteors.map((meteor, index) => (
                         <span
+                            key={`meteor-${index}`}
+                            className={styles.meteor}
+                            style={
+                                {
+                                    left: `${meteor.left}%`,
+                                    "--length": `${meteor.length}px`,
+                                    "--brightness": meteor.brightness,
+                                    animationDuration: `${meteor.seconds}s`,
+                                    animationDelay: `${meteor.delay}s`,
+                                } as CSSProperties
+                            }
+                        />
+                    ))}
+                </div>
+
+                <div className={styles.drifts} aria-hidden="true">
+                    {drifts.map((drift, index) => (
+                        <span
+                            key={`drift-${index}`}
                             ref={(element) => {
-                                objectRefs.current[index] = element;
+                                driftRefs.current[index] = element;
                             }}
-                            className={styles.object}
-                            data-decision={done[entry.id] ?? "unscanned"}
+                            className={styles.drift}
+                            style={
+                                {
+                                    left: `${drift.left}%`,
+                                    "--slot": drift.slot,
+                                    "--depth": drift.depth,
+                                    rotate: `${drift.turn}deg`,
+                                } as CSSProperties
+                            }
                         >
-                            <Matter era={eraOf(entry.stratum)} variant={index} />
-                        </span>
-                    </li>
-                ))}
-            </ol>
-
-            <div className={styles.sight} data-reading={reading} data-sight aria-hidden="true">
-                <span className={styles.beam} />
-                <span className={styles.lockOn} />
-            </div>
-
-            <HeroOrbit
-                mass={mass}
-                fullMass={counts.record.kept}
-                arrivalMs={arrival === "now" ? 0 : undefined}
-                isOnline={bootStage === "gated" || bootStage === "online"}
-                isArchitectNamed={isStratumProven(entries, done, "3")}
-                isTechnologistNamed={isStratumProven(entries, done, "5")}
-            />
-
-            <div
-                className={styles.body}
-                style={{ "--mass": mass } as CSSProperties}
-                data-planet-body
-                aria-hidden="true"
-            >
-                <span className={styles.planet} />
-                <span className={styles.ring}>
-                    {captured.map((entry, index) => (
-                        <span
-                            key={entry.id}
-                            className={styles.moon}
-                            style={{ "--angle": `${index * 137.5}deg` } as CSSProperties}
-                        >
-                            <Matter era={eraOf(entry.stratum)} variant={index} />
+                            <Matter era={drift.era} variant={drift.variant} />
                         </span>
                     ))}
-                </span>
-                <span className={styles.massLabel}>
-                    {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
-                    Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
-                    {/* Once the record is finished, the planet carries the record, and says so. */}
-                    {isFinished && volley === null && (
-                        <span className={styles.massRecord}>Record · {counts.record.kept} kept</span>
-                    )}
-                </span>
-            </div>
+                </div>
 
-            <aside className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
-                <BootScreen objectCount={entries.length} source={source} reading={reading} onBootStage={setBootStage}>
-                    {/* Whose record this is, and where it came from: the HUD's top line, from the hand-over on. */}
-                    <span className={styles.hudOwner}>Nat Moges · {provenance}</span>
-                    {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
+                <ol className={styles.passages}>
+                    {entries.map((entry, index) => (
+                        <li key={entry.id} className={styles.passage}>
+                            <span
+                                ref={(element) => {
+                                    objectRefs.current[index] = element;
+                                }}
+                                className={styles.object}
+                                data-decision={done[entry.id] ?? "unscanned"}
+                            >
+                                <Matter era={eraOf(entry.stratum)} variant={index} />
+                            </span>
+                        </li>
+                    ))}
+                </ol>
 
-                    {reading === "searching" && <span className={styles.hudHint}>Scanning…</span>}
+                <div className={styles.sight} data-reading={reading} data-sight aria-hidden="true">
+                    <span className={styles.beam} />
+                    <span className={styles.lockOn} />
+                </div>
 
-                    {reading === "hunting" && held !== null && (
-                        <TextScrambler
-                            key={`${held.id}-hunting`}
-                            text="Decoding"
-                            className={styles.hudTitle}
-                            textColor="var(--muted)"
-                            scrambleColor="var(--muted)"
-                            durationMs={HUNT_MS}
-                        />
-                    )}
+                <HeroOrbit
+                    mass={mass}
+                    fullMass={counts.record.kept}
+                    arrivalMs={arrival === "now" ? 0 : undefined}
+                    isOnline={bootStage === "gated" || bootStage === "online"}
+                    isArchitectNamed={isStratumProven(entries, done, "3")}
+                    isTechnologistNamed={isStratumProven(entries, done, "5")}
+                />
 
-                    {(reading === "kept" || reading === "debris") && held !== null && (
-                        <>
-                            <span className={styles.hudWhen}>{held.when}</span>
+                <div
+                    className={styles.body}
+                    style={{ "--mass": mass } as CSSProperties}
+                    data-planet-body
+                    aria-hidden="true"
+                >
+                    <span className={styles.planet} />
+                    <span className={styles.ring}>
+                        {captured.map((entry, index) => (
+                            <span
+                                key={entry.id}
+                                className={styles.moon}
+                                style={{ "--angle": `${index * 137.5}deg` } as CSSProperties}
+                            >
+                                <Matter era={eraOf(entry.stratum)} variant={index} />
+                            </span>
+                        ))}
+                    </span>
+                    <span className={styles.massLabel}>
+                        {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
+                        Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
+                        {/* Once the record is finished, the planet carries the record, and says so. */}
+                        {isFinished && volley === null && (
+                            <span className={styles.massRecord}>Record · {counts.record.kept} kept</span>
+                        )}
+                    </span>
+                </div>
+
+                <aside ref={hudRef} className={styles.hud} data-reading={reading} aria-live="polite" data-trail-off>
+                    <BootScreen objectCount={entries.length} source={source} reading={reading} onBootStage={setBootStage}>
+                        {/* Whose record this is, and where it came from: the HUD's top line, from the hand-over on. */}
+                        <span className={styles.hudOwner}>Nat Moges · {provenance}</span>
+                        {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
+
+                        {reading === "searching" && (
+                            <span className={styles.hudHint}>{isRiding ? "Returning to the start" : "Scanning…"}</span>
+                        )}
+
+                        {reading === "hunting" && held !== null && (
                             <TextScrambler
-                                key={`${held.id}-${reading}`}
-                                text={held.title}
+                                key={`${held.id}-hunting`}
+                                text="Decoding"
                                 className={styles.hudTitle}
-                                textColor={reading === "debris" ? "var(--muted)" : "var(--signal)"}
+                                textColor="var(--muted)"
                                 scrambleColor="var(--muted)"
-                                durationMs={BAR_MS}
+                                durationMs={HUNT_MS}
                             />
+                        )}
 
-                            {reading === "kept" && !isDissolved && (
-                                <button
-                                    key={`${held.id}-artifact`}
-                                    type="button"
-                                    className={styles.artifactButton}
-                                    onClick={handleDissolve}
-                                    aria-label={`${held.title}: read the record`}
-                                >
-                                    {hasImage ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={held.image ?? ""}
-                                            alt=""
-                                            className={styles.artifact}
-                                            onError={() => handleImageError(held.id)}
-                                        />
-                                    ) : (
-                                        <pre className={styles.snippet}>{held.snippet}</pre>
-                                    )}
-                                    <span className={styles.hudHint}>Tap to read</span>
-                                </button>
-                            )}
+                        {(reading === "kept" || reading === "debris") && held !== null && (
+                            <>
+                                <span className={styles.hudWhen}>{held.when}</span>
+                                <TextScrambler
+                                    key={`${held.id}-${reading}`}
+                                    text={held.title}
+                                    className={styles.hudTitle}
+                                    textColor={reading === "debris" ? "var(--muted)" : "var(--signal)"}
+                                    scrambleColor="var(--muted)"
+                                    durationMs={BAR_MS}
+                                />
 
-                            {(isDissolved || reading === "debris") && (
-                                <div key={`${held.id}-readout`} className={styles.readout}>
-                                    <p>{held.whatChanged}</p>
-                                    {reading === "kept" && held.credit && (
-                                        <p className={styles.hudCredit}>{held.credit}</p>
-                                    )}
-                                    {reading === "kept" && held.link && (
-                                        <a href={held.link} className={styles.hudLink}>
-                                            Open →
-                                        </a>
-                                    )}
-                                    {reading === "debris" && (
-                                        <p className={styles.hudLock}>
-                                            Signal lost. Locks when: {held.lockCondition}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </>
-                    )}
+                                {reading === "kept" && !isDissolved && (
+                                    <button
+                                        key={`${held.id}-artifact`}
+                                        type="button"
+                                        className={styles.artifactButton}
+                                        onClick={handleDissolve}
+                                        aria-label={`${held.title}: read the record`}
+                                    >
+                                        {hasImage ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img
+                                                src={held.image ?? ""}
+                                                alt=""
+                                                className={styles.artifact}
+                                                onError={() => handleImageError(held.id)}
+                                            />
+                                        ) : (
+                                            <pre className={styles.snippet}>{held.snippet}</pre>
+                                        )}
+                                        <span className={styles.hudHint}>Tap to read</span>
+                                    </button>
+                                )}
 
-                    {reading === "end" && volley !== null && (
-                        <span className={styles.hudHint}>Accreting the remaining {volley.length}</span>
-                    )}
+                                {(isDissolved || reading === "debris") && (
+                                    <div key={`${held.id}-readout`} className={styles.readout}>
+                                        <p>{held.whatChanged}</p>
+                                        {reading === "kept" && held.credit && (
+                                            <p className={styles.hudCredit}>{held.credit}</p>
+                                        )}
+                                        {reading === "kept" && held.link && (
+                                            <a href={held.link} className={styles.hudLink}>
+                                                Open →
+                                            </a>
+                                        )}
+                                        {reading === "debris" && (
+                                            <p className={styles.hudLock}>
+                                                Signal lost. Locks when: {held.lockCondition}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </>
+                        )}
 
-                    {reading === "end" && volley === null && (
-                        <>
-                            <span className={styles.hudHint}>End of record</span>
-                            <p>
-                                {provenance} ·{" "}
-                                {counts.record.kept} kept · {counts.record.debris} debris
-                            </p>
-                            <Link href="/before" className={styles.hudLink}>
-                                The index this page grew out of →
-                            </Link>
-                            {isFinished && (
-                                <button type="button" className={styles.rescan} onClick={handleRescan}>
-                                    Rescan
-                                </button>
-                            )}
-                        </>
-                    )}
-                </BootScreen>
-            </aside>
-        </div >
+                        {reading === "end" && volley !== null && (
+                            <span className={styles.hudHint}>Accreting the remaining {volley.length}</span>
+                        )}
+
+                        {reading === "end" && volley === null && (
+                            <>
+                                <span className={styles.hudHint}>End of record</span>
+                                <p>
+                                    {provenance} ·{" "}
+                                    {counts.record.kept} kept · {counts.record.debris} debris
+                                </p>
+                                <Link href="/before" className={styles.hudLink}>
+                                    The index this page grew out of →
+                                </Link>
+                                {isFinished && (
+                                    <button type="button" className={styles.rescan} onClick={handleRescan}>
+                                        Rescan
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </BootScreen>
+                </aside>
+            </div>
+            {/* Outside the scan, so it stays fixed to the screen, and still there in reduced motion. */}
+            <Back2Top ref={rocketRef} scrollThreshold={0.3} onRideChange={handleRide} className={styles.rocketLane} />
+        </>
     );
 }

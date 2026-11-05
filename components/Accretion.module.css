@@ -751,3 +751,13 @@
         display: block;
     }
 }
+
+/* Integration item 6: on a phone the HUD fills the width, so the rocket rides just above the
+   HUD's left corner, in thumb reach. (button. outranks Back2Top's own corner.) */
+@media (max-width: 600px) {
+    button.rocketLane {
+        left: 16px;
+        right: auto;
+        bottom: calc(var(--hud-clearance, 6vh) + 12px);
+    }
+}
