@@ -46,7 +46,8 @@
  * into the planet. It hits the skin in a burst of dust, and the planet
  * grows one step over one bar. Every kept object leaves a little more
  * dust behind, so the planet gets heavier as well as bigger. The count
- * under it reads Accreted 01, 02, and so on.
+ * under it reads your scan out of the record: Scanned 01 / 41, 02 / 41,
+ * and so on (integration pass, item 2).
  *
  * DEBRIS: the planet doesn't move. Debris never reaches it.
  *

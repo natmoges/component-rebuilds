@@ -351,7 +351,8 @@ export default function Scan({ entries, source }: ScanProps) {
                     ))}
                 </span>
                 <span className={styles.massLabel}>
-                    Accreted {String(mass).padStart(2, "0")}
+                    {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
+                    Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
                 </span>
             </div>
 
