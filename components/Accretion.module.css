@@ -451,7 +451,8 @@
     height: var(--length);
     border-radius: 1px;
     background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, var(--brightness)));
-    rotate: 5deg;
+    /* Integration item 9: each meteor its own angle, within one shared direction. */
+    rotate: var(--tilt, 5deg);
     /* The warp stretches the streak on the compositor (scale), not by re-laying it out (height). */
     transform-origin: top;
     scale: 1 calc(1 + var(--warp, 0));
@@ -459,9 +460,29 @@
     transition: scale 0.25s var(--ease-settle);
 }
 
+/* A bright one, now and then, with a teal tail. */
+.meteor[data-bright] {
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--world) 70%, transparent) 55%, rgba(255, 255, 255, var(--brightness)));
+}
+
+/* It falls across the sky in the first third of its cycle and is unseen for the rest, so meteors
+   come rarely and at their own pace. */
 @keyframes fall {
-    to {
-        transform: translate(-12vw, 140vh);
+    0% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+
+    34% {
+        transform: translate(var(--drift, -12vw), 140vh);
+        opacity: 1;
+    }
+
+    35%,
+    100% {
+        transform: translate(var(--drift, -12vw), 140vh);
+        opacity: 0;
     }
 }
 

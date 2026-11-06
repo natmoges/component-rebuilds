@@ -71,7 +71,8 @@ const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
 const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
-const METEOR_COUNT = 18;
+// Integration item 9: fewer meteors, each on its own cycle, so the sky has weather, not rain.
+const METEOR_COUNT = 10;
 
 // The finale's volley fits inside two bars, however many objects are left.
 const VOLLEY_MS = 2 * BAR_MS;
@@ -174,18 +175,30 @@ type Meteor = {
     seconds: number;
     delay: number;
     brightness: number;
+    tilt: number;
+    drift: number;
+    isBright: boolean;
 };
 
 function meteorsOf(count: number): Meteor[] {
     const next = seeded(41);
-    // Meteors fall in the outer lanes only, so the centre stays clear for the beam.
-    return Array.from({ length: count }, () => ({
-        left: next() < 0.5 ? next() * 28 : 72 + next() * 34,
-        length: 20 + Math.round(next() * 60),
-        seconds: 2 + next() * 3,
-        delay: -next() * 5,
-        brightness: 0.15 + next() * 0.3,
-    }));
+    // Meteors fall in the outer lanes only, so the centre stays clear for the beam. Each has its
+    // own angle (one shared direction, down and left), speed, length and brightness, and spends
+    // most of its cycle unseen, so they come rarely; every fifth is a bright one with a teal tail.
+    return Array.from({ length: count }, (_, index) => {
+        const tilt = 2 + next() * 12;
+        const isBright = index % 5 === 2;
+        return {
+            left: next() < 0.5 ? next() * 28 : 72 + next() * 34,
+            length: (isBright ? 70 : 20) + Math.round(next() * 60),
+            seconds: 6 + next() * 9,
+            delay: -next() * 15,
+            brightness: isBright ? 0.75 : 0.15 + next() * 0.3,
+            tilt,
+            drift: -Math.tan((tilt * Math.PI) / 180) * 140,
+            isBright,
+        };
+    });
 }
 
 export interface ScanProps {
@@ -566,11 +579,14 @@ export default function Scan({ entries, source }: ScanProps) {
                         <span
                             key={`meteor-${index}`}
                             className={styles.meteor}
+                            data-bright={meteor.isBright || undefined}
                             style={
                                 {
                                     left: `${meteor.left}%`,
                                     "--length": `${meteor.length}px`,
                                     "--brightness": meteor.brightness,
+                                    "--tilt": `${meteor.tilt.toFixed(1)}deg`,
+                                    "--drift": `${meteor.drift.toFixed(1)}vh`,
                                     animationDuration: `${meteor.seconds}s`,
                                     animationDelay: `${meteor.delay}s`,
                                 } as CSSProperties

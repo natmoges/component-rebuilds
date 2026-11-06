@@ -133,6 +133,44 @@
  * The rocket jumps instead of riding.
  */
 
+/*
+ * INTEGRATION PASS, ITEM 9 — polish.
+ * What I found: with the pieces integrated, what's left is rhythm and
+ * composition. The meteors fall like rain: eighteen streaks, one angle,
+ * one pace. The left third of the screen holds nothing but passing
+ * matter. Every object gets the same 90vh, kept or debris, so the record
+ * reads as a list, not a history. And sometimes the planet's rings turn
+ * edge-on and read as stripes. Here the sky gets weather, the record gets
+ * chapters, and the planet keeps its face.
+ *
+ * METEORS: rare and varied. Fewer at once, each with its own angle (within
+ * one shared direction), speed, length and brightness, and every so often
+ * a bright one with a teal tail. Scrolling still stretches them.
+ *
+ * THE LEFT THIRD: the record's chapters. As you cross into a stratum, its
+ * name and years surface on the left in my portfolio's telemetry voice
+ * (THE SUBSTRATE · 2023–2024), then fade as you read on. Not a frame and
+ * not a position readout: a chapter title that comes and goes.
+ *
+ * THE RHYTHM: measured, not guessed. Passages tighten from 90vh to 75vh, so
+ * the record reads as one sitting, while each object still holds at the
+ * lock long enough to decode at an easy scroll. Debris passes quicker than
+ * what's kept. A short breath between strata marks the chapters.
+ *
+ * THE RINGS: tilted toward the camera, so they always read as nested
+ * curves, as on my hero, whatever the spin.
+ *
+ * THE KNOBS: meteor count and spread · the chapter title's hold · the
+ * passage heights, kept and debris · the breath between strata · BAR stays
+ * 1000 ms, and the tempo is confirmed as final.
+ *
+ * PHONE: the chapter title sits above the HUD, not in a left third the
+ * phone doesn't have.
+ *
+ * REDUCED MOTION: meteors still. The plain list gets the strata as
+ * headings.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";

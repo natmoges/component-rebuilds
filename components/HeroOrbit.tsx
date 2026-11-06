@@ -223,9 +223,12 @@ const LANE_CLEARANCE = 22 + 16;
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
 varying vec3 vLocal;
+varying vec3 vView;
 
 void main() {
     vLocal = position;
+    // Where this point sits on the body, as the camera sees it, whatever the spin (item 9).
+    vView = mat3(modelViewMatrix) * position;
     vNormal = normalize(normalMatrix * normal);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
@@ -241,10 +244,14 @@ uniform float uPixelRatio;
 
 varying vec3 vNormal;
 varying vec3 vLocal;
+varying vec3 vView;
 
 const vec3 VIEW = vec3(0.0, 0.0, 1.0);
 const vec3 LIGHT = vec3(-0.4, 0.6, 0.7);
-const vec3 AXIS = vec3(0.7071, 0.7071, 0.0);
+// Integration item 9: the rings' pole is fixed toward the camera, up and to the right, so they
+// always read as nested curves, as on my hero. They used to turn with the planet and, at some
+// points in the spin, went edge-on and read as stripes. The dust carries the turn now.
+const vec3 POLE = vec3(0.42, 0.38, 0.82);
 // Integration item 8: fewer rings, as on my hero, each drawn the same width on any screen.
 const float RINGS = 7.0;
 const float RING_WIDTH = 1.6;
@@ -256,7 +263,7 @@ void main() {
     float rim = 0.12 + pow(1.0 - facing, 3.0) * 1.3;
     float light = max(dot(normal, normalize(LIGHT)), 0.0);
 
-    float band = dot(vLocal, AXIS) / uRadius * RINGS;
+    float band = dot(normalize(vView), normalize(POLE)) * RINGS;
     float edge = fwidth(band) * uPixelRatio * RING_WIDTH * 0.5;
     float line = 1.0 - smoothstep(edge * 0.5, edge, abs(fract(band - 0.5) - 0.5));
 
