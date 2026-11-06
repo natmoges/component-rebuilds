@@ -1019,3 +1019,18 @@
         bottom: calc(var(--hud-clearance, 6vh) + 12px);
     }
 }
+
+/* Integration item 10: the artifact's hint names the gesture you have. */
+.onPointer {
+    display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .onTouch {
+        display: none;
+    }
+
+    .onPointer {
+        display: inline;
+    }
+}

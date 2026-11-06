@@ -685,6 +685,15 @@ export default function Scan({ entries, source }: ScanProps) {
         if (focus !== null) setDissolvedId(focus.id);
     }
 
+    // The readout follows the artifact on its own (item 10): stay with a kept object for two bars and
+    // its story replaces the picture, so a reader who pauses reads it without having to tap.
+    const autoReadId = card === "kept" && focus !== null && hasArtifact && !isDissolved ? focus.id : null;
+    useEffect(() => {
+        if (autoReadId === null) return;
+        const read = setTimeout(() => setDissolvedId(autoReadId), 2 * BAR_MS);
+        return () => clearTimeout(read);
+    }, [autoReadId]);
+
     function handleImageError(id: string) {
         setFailedImages((current) => (current.includes(id) ? current : [...current, id]));
     }
@@ -874,7 +883,11 @@ export default function Scan({ entries, source }: ScanProps) {
                                         ) : (
                                             <pre className={styles.snippet}>{focus.snippet}</pre>
                                         )}
-                                        <span className={styles.hudHint}>Tap to read</span>
+                                        {/* The hint names the gesture you have: a tap on a phone, a click with a mouse. */}
+                                        <span className={styles.hudHint}>
+                                            <span className={styles.onTouch}>Tap to read</span>
+                                            <span className={styles.onPointer}>Click to read</span>
+                                        </span>
                                     </button>
                                 )}
 
