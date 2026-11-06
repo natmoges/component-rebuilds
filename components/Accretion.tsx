@@ -175,6 +175,7 @@ import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";
 import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../lib/links";
+import { chapterOf } from "../lib/chapters";
 import Scan from "./Scan";
 import StarCloud from "./StarCloud";
 import Gravity from "./Gravity";
@@ -250,8 +251,15 @@ export default async function Accretion() {
             <Scan entries={entries} source={source} />
 
             <ol className={styles.record}>
-                {entries.map((entry) => (
+                {entries.map((entry, index) => (
                     <li key={entry.id} className={styles.entry} data-state={entry.state}>
+                        {/* Integration item 9: the strata as headings in the plain list. */}
+                        {(index === 0 || entries[index - 1].stratum !== entry.stratum) && (
+                            <p className={styles.recordChapter}>
+                                {chapterOf(entries, entry.stratum).label} · {chapterOf(entries, entry.stratum).name} ·{" "}
+                                {chapterOf(entries, entry.stratum).years}
+                            </p>
+                        )}
                         <span className={styles.when}>{entry.when}</span>
                         <h2 className={styles.title}>
                             {entry.link ? <a href={entry.link}>{entry.title}</a> : entry.title}

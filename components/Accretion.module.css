@@ -502,18 +502,32 @@
     overflow: clip;
 }
 
+/* Integration item 9: the record's rhythm, measured. Every object holds at the lock over the same
+   55vh of scroll (about 440 px on a laptop: 0.9 s at an easy 480 px/s, past the hunt's 0.75 s),
+   so kept and debris both decode. What changes is the approach: 15vh before a kept object, 5vh
+   before debris, so debris passes quicker, plus a 20vh breath before each new stratum. */
 .passage {
+    --approach: 15vh;
+    --breath: 0vh;
     position: relative;
-    height: 90vh;
+    height: calc(var(--breath) + var(--approach) + 52px + 55vh);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+.passage[data-state="Debris"] {
+    --approach: 5vh;
+}
+
+.passage[data-opens] {
+    --breath: 20vh;
+}
+
 .object {
     position: sticky;
     top: calc(50vh - 26px);
-    margin-top: 40vh;
+    margin-top: calc(var(--breath) + var(--approach));
     width: 52px;
     height: 52px;
     color: var(--muted);
@@ -586,14 +600,84 @@
 /* Each drift sits in its era's stretch of the scroll. Far ones lag behind near ones. */
 .drift {
     position: absolute;
-    top: calc(60vh + var(--slot) * 90vh);
+    top: calc(60vh + var(--slot) * var(--pitch, 90vh));
     width: calc(12px + var(--depth) * 40px);
     aspect-ratio: 1;
     color: var(--quiet);
     opacity: calc(0.1 + var(--depth) * 0.3);
-    transform: translateY(calc((var(--scroll, 0) * 1px + 50vh - (60vh + var(--slot) * 90vh)) * (1 - var(--depth)) * 0.5));
+    transform: translateY(calc((var(--scroll, 0) * 1px + 50vh - (60vh + var(--slot) * var(--pitch, 90vh))) * (1 - var(--depth)) * 0.5));
     transition: opacity calc(var(--bar) / 2);
     pointer-events: none;
+}
+
+/* Integration item 9: the record's chapters, in the left third, in my portfolio's telemetry voice
+   (label · name · coordinates). It surfaces, holds, and fades; it isn't a frame. */
+.chapter {
+    position: fixed;
+    left: clamp(16px, 6vw, 96px);
+    top: 38vh;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    pointer-events: none;
+    animation: chapterSurface calc(var(--bar) * 6) var(--ease-settle) forwards;
+}
+
+.chapterLabel {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.chapterName {
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.chapterYears {
+    color: var(--quiet);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+}
+
+@keyframes chapterSurface {
+    0% {
+        opacity: 0;
+        translate: 0 8px;
+    }
+
+    12% {
+        opacity: 1;
+        translate: 0 0;
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* On a phone there's no left third, and the lock fills the middle row: the chapter takes the
+   empty top-left corner, across the sky from the satellite. */
+@media (max-width: 700px) {
+    .chapter {
+        left: 16px;
+        top: 10vh;
+    }
+
+    .chapterName {
+        font-size: 1rem;
+    }
 }
 
 /* ---------- The HUD: bottom centre, an instrument readout ---------- */
@@ -824,6 +908,15 @@
 }
 
 /* ---------- The record (the reduced-motion view) ---------- */
+
+.recordChapter {
+    margin: 2.5rem 0 1rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
 
 .record {
     list-style: none;

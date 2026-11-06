@@ -62,6 +62,7 @@ import TextScrambler from "./TextScrambler";
 import BootScreen, { type BootStage } from "./BootScreen";
 import Back2Top, { type Back2TopHandle } from "./Back2Top";
 import type { Entry } from "../lib/record";
+import { chapterOf } from "../lib/chapters";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
 import { BAR_MS, TICK_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
@@ -73,6 +74,8 @@ const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
 // Integration item 9: fewer meteors, each on its own cycle, so the sky has weather, not rain.
 const METEOR_COUNT = 10;
+// The breath before each new stratum, in vh (item 9).
+const BREATH_VH = 20;
 
 // The finale's volley fits inside two bars, however many objects are left.
 const VOLLEY_MS = 2 * BAR_MS;
@@ -273,6 +276,9 @@ export default function Scan({ entries, source }: ScanProps) {
     const heldRef = useRef<string | null>(null);
     // The finale waits until you've travelled into the record, so a Rescan at the end doesn't refire it.
     const isFinaleArmedRef = useRef(true);
+    // The chapter you're in (integration item 9): the stratum of the passage at the lock.
+    const [chapter, setChapter] = useState<string | null>(null);
+    const chapterRef = useRef<string | null>(null);
     // The rocket (build #3): while it carries you, the scan stands down.
     const rocketRef = useRef<Back2TopHandle>(null);
     const isRidingRef = useRef(false);
@@ -280,6 +286,16 @@ export default function Scan({ entries, source }: ScanProps) {
     const hudRef = useRef<HTMLElement | null>(null);
     const drifts = useMemo(() => driftOf(entries), [entries]);
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
+    // The record's average passage, so the drift matter keeps its era's stretch now that passages
+    // vary (integration item 9): kept 70vh, debris 60vh, a 20vh breath at each new stratum, and the
+    // object itself (about 6.5vh).
+    const pitchVh = useMemo(() => {
+        if (entries.length === 0) return 90;
+        const opens = entries.filter((entry, index) => index === 0 || entries[index - 1].stratum !== entry.stratum).length;
+        const kept = entries.filter((entry) => entry.state === "Kept").length;
+        const total = kept * 70 + (entries.length - kept) * 60 + opens * BREATH_VH + entries.length * 6.5;
+        return total / entries.length;
+    }, [entries]);
 
     useEffect(() => {
         const isMotionReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -337,6 +353,21 @@ export default function Scan({ entries, source }: ScanProps) {
             const last = objectRefs.current[entries.length - 1]?.parentElement;
             const isPastLast =
                 !!last && last.getBoundingClientRect().bottom < scanLine - HOLD_TOLERANCE_PX;
+            // The chapter: the stratum of the last passage that has reached the lock. None before
+            // the first, none past the last, and none while the rocket carries you (item 9).
+            let reached: string | null = null;
+            if (!isRidingRef.current && !isPastLast) {
+                for (let index = 0; index < entries.length; index++) {
+                    const passage = objectRefs.current[index]?.parentElement;
+                    if (!passage || passage.getBoundingClientRect().top > scanLine) break;
+                    reached = entries[index].stratum;
+                }
+            }
+            if (reached !== chapterRef.current && !isRidingRef.current) {
+                chapterRef.current = reached;
+                setChapter(reached);
+            }
+
             // Once every object is accounted for, the rest of the ride is the end: no hunting, anywhere.
             const isAllScanned = entries.every((entry) => decided[entry.id] !== undefined);
 
@@ -354,7 +385,7 @@ export default function Scan({ entries, source }: ScanProps) {
                 const vh = window.innerHeight / 100;
                 const viewMiddle = window.scrollY + 50 * vh;
                 for (let index = 0; index < drifts.length; index++) {
-                    const home = (60 + drifts[index].slot * 90) * vh;
+                    const home = (60 + drifts[index].slot * pitchVh) * vh;
                     if (Math.abs(home - viewMiddle) > 2 * window.innerHeight) continue;
                     driftRefs.current[index]?.style.setProperty("--scroll", scrolled);
                 }
@@ -386,7 +417,7 @@ export default function Scan({ entries, source }: ScanProps) {
             if (settle !== null) clearTimeout(settle);
             locateRef.current = null;
         };
-    }, [entries, drifts]);
+    }, [entries, drifts, pitchVh]);
 
     // The HUD tells the page how much of the screen's foot it takes, so the rocket can ride above it on a phone.
     useEffect(() => {
@@ -595,7 +626,7 @@ export default function Scan({ entries, source }: ScanProps) {
                     ))}
                 </div>
 
-                <div className={styles.drifts} aria-hidden="true">
+                <div className={styles.drifts} style={{ "--pitch": `${pitchVh}vh` } as CSSProperties} aria-hidden="true">
                     {drifts.map((drift, index) => (
                         <span
                             key={`drift-${index}`}
@@ -617,9 +648,22 @@ export default function Scan({ entries, source }: ScanProps) {
                     ))}
                 </div>
 
+                {/* The chapter title: surfaces in the left third as you cross into a stratum, then fades. */}
+                {isOnline && chapter !== null && reading !== "end" && (
+                    <div key={chapter} className={styles.chapter} aria-hidden="true">
+                        <span className={styles.chapterLabel}>{chapterOf(entries, chapter).label}</span>
+                        <span className={styles.chapterName}>{chapterOf(entries, chapter).name}</span>
+                        <span className={styles.chapterYears}>{chapterOf(entries, chapter).years}</span>
+                    </div>
+                )}
                 <ol className={styles.passages}>
                     {entries.map((entry, index) => (
-                        <li key={entry.id} className={styles.passage}>
+                        <li
+                            key={entry.id}
+                            className={styles.passage}
+                            data-state={entry.state}
+                            data-opens={index === 0 || entries[index - 1].stratum !== entry.stratum || undefined}
+                        >
                             <span
                                 ref={(element) => {
                                     objectRefs.current[index] = element;
