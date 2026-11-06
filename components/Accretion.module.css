@@ -304,7 +304,7 @@
     translate: -50% 0;
     white-space: nowrap;
     color: var(--muted);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -498,7 +498,7 @@
 .hudHint {
     display: block;
     color: var(--muted);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -511,13 +511,14 @@
     padding-bottom: 0.45rem;
     border-bottom: 1px solid color-mix(in srgb, var(--signal) 18%, transparent);
     color: var(--muted);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
 .hud .hudTitle {
+    font-family: var(--font-display);
     display: inline-block;
     font-size: 1.1rem;
     font-weight: 600;
@@ -529,7 +530,7 @@
     display: inline-block;
     margin-top: 0.6rem;
     color: var(--signal);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -574,7 +575,7 @@
     margin: 0 auto 0.4rem;
     padding: 0.6rem 0.8rem;
     text-align: left;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.78rem;
     /* Long lines wrap inside the HUD instead of running past its edge. */
     white-space: pre-wrap;
@@ -669,7 +670,7 @@
     border: 0;
     background: none;
     color: var(--signal);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;

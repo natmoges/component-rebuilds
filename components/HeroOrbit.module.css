@@ -21,7 +21,7 @@
     margin: 6px 0 0 14px;
     white-space: nowrap;
     color: var(--muted);
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-display);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
 }

@@ -33,7 +33,7 @@
 }
 
 .noise {
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-weight: 400;
 }
 

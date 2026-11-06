@@ -91,7 +91,7 @@
     padding: 0;
     list-style: none;
     text-align: left;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-mono);
     font-size: 0.68rem;
     line-height: 1.5;
     letter-spacing: 0.02em;

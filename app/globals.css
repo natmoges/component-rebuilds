@@ -1,4 +1,58 @@
+/*
+ * INTEGRATION PASS, ITEM 7 — one hand.
+ * What I found: fourteen builds, each dressed by its own reference. The
+ * rebuilds speak in the system's fonts, three greys, two greens and a
+ * red, with ten different easing curves, on a black that isn't my
+ * portfolio's. natmoges.com speaks Inter, Space Grotesk and Roboto Mono
+ * on charcoal, with one green. Side by side they don't read as one
+ * hand. Here every build takes its type, colour, line and motion from
+ * one set of tokens, the same set as my portfolio, so the page and the
+ * portfolio read as one system, and the planet can replace my hero
+ * without changing accent.
+ *
+ * TYPE, THREE ROLES: display is Space Grotesk, for titles: the HUD's
+ * decoded title, the moons' names, each build page's heading. Text is
+ * Inter, for what a person reads: the record's lines, the blurbs, the
+ * index. Mono is Roboto Mono, for telemetry only: counts, labels, the
+ * boot log, the HUD's top line. Not every sentence is a spacecraft
+ * terminal.
+ *
+ * COLOUR, FOUR ROLES: teal is the world: the planet, its dust, its
+ * moons. Green is the signal: the HUD, the lock, the beam, the links, the
+ * rocket; one green, my portfolio's. Grey-white is structure: text,
+ * borders, the quiet parts. Red is the glitch, and only the glitch.
+ * The ground is my portfolio's charcoal.
+ *
+ * LINE, ONE FAMILY: hairlines for orbits, leaders and borders; one
+ * stroke for everything drawn (the satellite, the record's objects, the
+ * rocket); a heavier stroke only for the scan's active geometry.
+ *
+ * MOTION, THREE CURVES: settle, for things arriving; travel, for things
+ * carried (the ride, the flight); snap, for a control answering a tap.
+ *
+ * THE REFERENCES: where a build's easing or timing is the behaviour I
+ * credited, it stays on that build's own page. Fonts and colours come
+ * from here everywhere.
+ *
+ * THE KNOBS: every value lives once, in this file and its TypeScript
+ * twin for the planet's shaders.
+ *
+ * FAILURE: if a font can't load, the system font stands in, at the same
+ * role.
+ *
+ * PHONE: the same tokens, at the phone's sizes.
+ *
+ * REDUCED MOTION: the curves don't matter; the colours and type still
+ * do.
+ */
+
 :root {
+  /* Type, three roles. The faces load once, in the layout; each role falls back to the
+     system's own font if its face can't load. */
+  --font-display: var(--face-display, ui-sans-serif, system-ui, sans-serif);
+  --font-text: var(--face-text, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif);
+  --font-mono: var(--face-mono, ui-monospace, "SF Mono", Menlo, monospace);
+
   --bg: #0b0b0c;
   --fg: #ededed;
   --muted: #8a8a8f;
@@ -12,8 +66,14 @@ html, body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-text);
   -webkit-font-smoothing: antialiased;
 }
 
 a { color: inherit; }
+
+/* Every build page's heading speaks in the display face. */
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+}

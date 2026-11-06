@@ -473,7 +473,7 @@
 
 .hint kbd {
     padding: 2px 6px;
-    font-family: monospace;
+    font-family: var(--font-mono);
     font-size: 12px;
     border-radius: 4px;
     border: 1px solid color-mix(in srgb, var(--viewer-muted) 40%, transparent);

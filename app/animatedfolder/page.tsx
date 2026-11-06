@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Roboto_Mono } from "next/font/google";
 import AnimatedFolder, { type Project } from "../../components/AnimatedFolder";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
     title: "AnimatedFolder · Component Rebuilds",
 };
-
-const robotoMono = Roboto_Mono({ subsets: ["latin"] });
-const inter = Inter({ subsets: ["latin"] });
 
 const sovereign: Project[] = [
     { id: "artifact", title: "Artifact", image: "/animatedfolder/sovereign-artifact.jpg", link: "https://internal-architecture-brief.my.canva.site/sovereign-infrastructure-case-study" },
@@ -29,10 +25,11 @@ const businessOs: Project[] = [
 ];
 
 export default function AnimatedFolderPage() {
+    // The folder's fonts are its knobs; they now come from the shared roles (integration item 7).
     const fonts = {
-        titleFont: robotoMono.style.fontFamily,
-        cardTitleFont: robotoMono.style.fontFamily,
-        countFont: inter.style.fontFamily,
+        titleFont: "var(--font-mono)",
+        cardTitleFont: "var(--font-mono)",
+        countFont: "var(--font-text)",
     };
 
     return (
