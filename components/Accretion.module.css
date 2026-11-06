@@ -15,6 +15,9 @@
     inset: 0;
     overflow: hidden;
     pointer-events: none;
+    /* Integration item 8: the sky falls from charcoal to a green-grey glow at the horizon, as on
+       natmoges.com. */
+    background: linear-gradient(to bottom, transparent 42%, color-mix(in srgb, var(--horizon) 70%, transparent) 100%);
 }
 
 .starLayer {
@@ -115,9 +118,12 @@
 
 /* ---------- The sight: a beam and a lock, only while tractoring ---------- */
 
+/* Integration item 8: the scan's geometry is in the front plane, with the satellite and the
+   record, so the beam crosses in front of the planet, never behind it. */
 .sight {
     position: fixed;
     inset: 0;
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -337,6 +343,12 @@
     overflow: hidden;
     pointer-events: none;
     transition: opacity calc(var(--bar) / 2);
+    /* Integration item 8: meteors pass behind the planet, never across its face. The field is
+       cut away over the planet's disc, wherever HeroOrbit says it is; the stars still show
+       through the skin, as Tim made it. */
+    mask-image: radial-gradient(circle at calc(50% + var(--orbit) + var(--planet-shift, 0px)) 50%,
+            transparent calc(var(--planet-radius, 0px) - 2px),
+            black calc(var(--planet-radius, 0px) + 6px));
 }
 
 /* While something is held, the field and the drift step back. */

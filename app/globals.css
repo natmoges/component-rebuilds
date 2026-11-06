@@ -69,6 +69,8 @@
   /* The world: the planet's teal. */
   --world: #4CB2AF;
   --world-deep: #19897C;
+  /* The horizon: the green-grey glow my hero falls to at the bottom of the sky (item 8). */
+  --horizon: #56655d;
   /* The glitch: the one red, and its split partner. */
   --glitch: #ff0000;
   --glitch-pair: #00ffff;
