@@ -91,6 +91,58 @@
  * today, so there's no planet to move.
  */
 
+/*
+ * INTEGRATION PASS, ITEM 8 — the gate.
+ * What I found: side by side with my hero, the planet I drew in code
+ * reads as a sketch of it. The rings are many and faint where Tim's are
+ * few and bright. The dust is a wide cloud of white specks where his is a
+ * teal haze on the skin. The moons are grey balls on two full ellipses
+ * where his are striped, lit, and pull short comet trails with a colour
+ * fringe. The sky is flat where his falls to a green-grey horizon. And the
+ * moons' names run off the screen's edge. This planet is meant to replace
+ * my hero, so it doesn't until it matches it or beats it. Here it
+ * catches up, and the page around it gets the same light.
+ *
+ * THE BODY: a deeper teal, lit from one side, with the rim glowing where
+ * the light grazes it. Fewer contour rings, brighter, Tim's green.
+ *
+ * THE DUST: a fine teal haze hugging the skin, thickening as the record
+ * falls in, never a cloud of white specks.
+ *
+ * THE MOONS: lit white, banded the way Tim's are, each pulling a short
+ * trail that fades behind it with a faint red and blue fringe. No full
+ * orbit lines. Their names sit beside them in small mono, and stay on
+ * screen: near the edge, a name moves to the moon's other side.
+ *
+ * THE SKY: charcoal at the top, falling to a green-grey glow at the
+ * horizon, as on natmoges.com.
+ *
+ * DEPTH: three planes. The sky and its meteors behind; the planet and
+ * moons in the middle; the satellite, the record and the HUD in front.
+ * Meteors pass behind the planet, never across its face.
+ *
+ * THE SATELLITE: redrawn in the planet's three-quarter view and lit by
+ * its key light, so it belongs to the scene instead of sitting on it.
+ *
+ * FAILURE: if WebGL can't start, a drawn planet stands in: the same body,
+ * rim and rings in CSS, not a grey ball. It shows only when WebGL
+ * refuses, never while it's starting.
+ *
+ * THE GATE: a capture of my hero and this planet at the same size, side
+ * by side, one attribute at a time: body, rim, rings, dust, moons,
+ * trails, sky. I judge it. Until every line passes, natmoges.com keeps the
+ * Spline embed.
+ *
+ * PHONE: the planet sized and placed so its count and its moons' names
+ * never leave the screen.
+ *
+ * REDUCED MOTION: unchanged. The plain record list has no planet.
+ *
+ * (Decided: the rings stay Tim's green, a credited exception to the
+ * colour roles, because the hero is the bar. The moons keep their earned
+ * titles, set in the hero's small-mono label style.)
+ */
+
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Canvas, useFrame, type RootState } from "@react-three/fiber";
 import {
@@ -159,6 +211,7 @@ uniform vec3 uContour;
 uniform vec3 uBase;
 uniform float uRadius;
 uniform float uLit;
+uniform float uPixelRatio;
 
 varying vec3 vNormal;
 varying vec3 vLocal;
@@ -166,21 +219,25 @@ varying vec3 vLocal;
 const vec3 VIEW = vec3(0.0, 0.0, 1.0);
 const vec3 LIGHT = vec3(-0.4, 0.6, 0.7);
 const vec3 AXIS = vec3(0.7071, 0.7071, 0.0);
-const float RINGS = 11.0;
+// Integration item 8: fewer rings, as on my hero, each drawn the same width on any screen.
+const float RINGS = 7.0;
+const float RING_WIDTH = 1.6;
 
 void main() {
     vec3 normal = normalize(vNormal);
     float facing = max(dot(normal, VIEW), 0.0);
-    float rim = 0.2 + pow(1.0 - facing, 2.0);
+    // A thin bright limb where the light grazes, and a soft glow inside it.
+    float rim = 0.12 + pow(1.0 - facing, 3.0) * 1.3;
     float light = max(dot(normal, normalize(LIGHT)), 0.0);
 
     float band = dot(vLocal, AXIS) / uRadius * RINGS;
-    float line = 1.0 - min(abs(fract(band - 0.5) - 0.5) / fwidth(band), 1.0);
+    float edge = fwidth(band) * uPixelRatio * RING_WIDTH * 0.5;
+    float line = 1.0 - smoothstep(edge * 0.5, edge, abs(fract(band - 0.5) - 0.5));
 
-    vec3 color = uBase * (0.7 + 0.6 * light);
-    color += uContour * line * 0.35 * uLit;
-    color += uRim * rim * 0.6 * mix(0.3, 1.0, uLit);
-    float alpha = clamp(0.55 + rim * 0.5 * mix(0.4, 1.0, uLit) + line * 0.2 * uLit, 0.0, 1.0);
+    vec3 color = uBase * (0.6 + 0.8 * light);
+    color += uContour * line * (0.55 + 0.35 * light) * uLit;
+    color += uRim * rim * 0.65 * mix(0.3, 1.0, uLit);
+    float alpha = clamp(0.62 + rim * 0.45 * mix(0.4, 1.0, uLit) + line * 0.25 * uLit, 0.0, 1.0);
 
     gl_FragColor = vec4(color, alpha);
     #include <colorspace_fragment>
@@ -200,9 +257,10 @@ varying float vAlpha;
 varying float vTint;
 
 const float LIFE = 5.0;
-const float LIFT = 22.0;
-const float SWIRL = 6.0;
-const float SIZE = 1.6;
+// Integration item 8: a haze on the skin, as on my hero, not a cloud around it.
+const float LIFT = 9.0;
+const float SWIRL = 3.0;
+const float SIZE = 1.3;
 
 void main() {
     float life = fract(uTime / LIFE + fract(aSeed * 7.31));
@@ -240,8 +298,9 @@ varying float vTint;
 void main() {
     vec2 point = gl_PointCoord - 0.5;
     if (dot(point, point) > 0.25) discard;
-    vec3 color = mix(uTintA, uTintB, step(0.5, vTint));
-    gl_FragColor = vec4(color, vAlpha * mix(0.15, 0.85, uLit));
+    // Mostly teal; one grain in five catches the light.
+    vec3 color = mix(uTintA, uTintB, step(0.2, vTint));
+    gl_FragColor = vec4(color, vAlpha * mix(0.12, 0.7, uLit));
     #include <colorspace_fragment>
 }
 `;
@@ -307,15 +366,17 @@ function Planet({ isOnline }: { isOnline: boolean }) {
             uBase: { value: new Color(BASE) },
             uRadius: { value: RADIUS },
             uLit: { value: 0 },
+            uPixelRatio: { value: 1 },
         }),
         []
     );
 
-    useFrame((_, delta) => {
+    useFrame((state, delta) => {
         const planet = planetRef.current;
         const material = skinRef.current;
         if (planet === null || material === null) return;
         const step = Math.min(delta, MAX_STEP);
+        material.uniforms.uPixelRatio.value = state.viewport.dpr;
         planet.rotation.y += (step / SPIN_SECONDS) * Math.PI * 2;
 
         const lit = material.uniforms.uLit;
@@ -410,6 +471,7 @@ function Moon({
             uBase: { value: new Color(MOON_DARK) },
             uRadius: { value: MOON_RADIUS },
             uLit: { value: 1 },
+            uPixelRatio: { value: 1 },
         }),
         []
     );
