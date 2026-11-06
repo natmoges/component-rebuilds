@@ -43,7 +43,8 @@
  *
  * KEEPING ITS DISTANCE (and, since integration item 4, a second ring around
  * the planet, its radius plus 32 px: it glances off that one too, so it
- * never crosses the body): an invisible orbit, 185 px around the lock, is as
+ * never crosses the body): an invisible orbit, 185 px around the lock (130 px
+ * since integration item 8, so the scroll track clears the planet), is as
  * close as its centre can ever come to what it scans. Thrown at it, it glances off
  * and slides around the curve, circling the lock instead of covering it.
  *
@@ -64,6 +65,16 @@
  * stop and it stops travelling. Once the whole record is scanned, or you're
  * past its end, there's nothing left to circle: scrolling stops turning the
  * orbit and it only drifts (integration pass).
+ *
+ * (Integration item 8: scrolling now rides one track, a full circle around
+ * the lock, as tight as the keep-out allows (130 px plus a little), never
+ * wider than the room above the HUD or before the planet. It used to circle
+ * at whatever distance the satellite was floating, so after a fling it rode
+ * a path through the walls, the HUD's floor and the planet's ring, and they
+ * fought it every frame: it stuck at the bottom and glitched. Now a
+ * satellite off the track glides onto it as you scroll, and one still
+ * flying from a throw finishes its throw first. No flattened floor: the
+ * circle is sized to fit.)
  *
  * DURING A LOCK: it keeps drifting. The beam re-aims every frame from the
  * satellite to the scan line, and its hunting, locked and debris looks
@@ -127,14 +138,18 @@ const MAX_SPEED = 90;
 const SCROLL_PER_LAP_PX = 2400;
 const SCROLL_MAX_PX = 120;
 
-// Below the lock the orbit flattens so it turns back above the HUD, whose top
+// The scroll track stays above the HUD, whose top
 // sits at about this share of the screen's height when it shows an entry.
 const HUD_TOP_SHARE = 0.78;
 const HUD_CLEARANCE_PX = 16;
 
 // The orbit: as close as the satellite can come to the lock. Smaller on small
 // screens, never more than this share of the shorter side.
-const ORBIT_RADIUS_PX = 185;
+const ORBIT_RADIUS_PX = 130;
+// The scroll track: just outside the keep-out, and how fast a satellite off it glides on (share
+// of the gap closed each frame).
+const TRACK_GAP_PX = 6;
+const TRACK_GLIDE = 0.12;
 const ORBIT_SHARE = 0.3;
 
 // The planet's ring (integration item 4): as close as the satellite's centre can
@@ -165,30 +180,6 @@ function spaceCurrent(seconds: number) {
         y: (DRIFT_SPEED * 0.6 * (Math.cos(seconds * 0.17 + 0.4) + 0.5 * Math.sin(seconds * 0.41 + 2.1))) / 1.5,
         spin: TUMBLE * Math.sin(seconds * 0.29 + 0.7),
     };
-}
-
-// How far out the orbit through this point is (its radius above the lock).
-// Exact above the lock; below it, unsquashed while that's still reliable.
-function reachOf(awayX: number, awayY: number, floor: number) {
-    const straight = Math.hypot(awayX, awayY);
-    if (awayY > 0 && awayY < floor * 0.95 && straight > floor) {
-        return Math.abs(awayX) / Math.sqrt(1 - (awayY * awayY) / (floor * floor));
-    }
-    return straight;
-}
-
-// One frame of travel around the lock. Above the lock the path is a circle;
-// below it, a circle squashed so it never drops past `floor`. Works on the
-// offset from the lock and returns the new offset.
-function travelOrbit(awayX: number, awayY: number, turn: number, floor: number, reach: number) {
-    const squash = Math.min(1, floor / reach);
-
-    // Unsquash, turn on the circle, squash again.
-    const roundY = awayY > 0 ? awayY / squash : awayY;
-    const angle = Math.atan2(roundY, awayX) + turn;
-    const nextX = Math.cos(angle) * reach;
-    const nextY = Math.sin(angle) * reach;
-    return { x: nextX, y: nextY > 0 ? nextY * squash : nextY };
 }
 
 interface GravityProps {
@@ -250,7 +241,9 @@ export default function Gravity({ children }: GravityProps) {
                 Bodies.rectangle(width + half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
                 // The orbit: sized so the satellite's centre stops on the line,
                 // and slippery, so it slides around instead of sticking.
-                Bodies.circle(width / 2, height / 2, orbitRadius - twinHeight / 2, {
+                // (Integration item 8: sized by the satellite's width, so its wings never touch it
+                // while it rides the track; the backstop in keepOnScreen guards the centre.)
+                Bodies.circle(width / 2, height / 2, Math.max(1, orbitRadius - twinWidth / 2), {
                     isStatic: true,
                     friction: 0,
                 }),
@@ -388,11 +381,15 @@ export default function Gravity({ children }: GravityProps) {
             lastScrollY = window.scrollY;
         };
 
-        // The orbit's size is remembered between frames, and re-measured only
-        // above the lock or after something other than scrolling moved it.
-        let orbitReach = 0;
-        let placedX = Number.NaN;
-        let placedY = Number.NaN;
+        // The track: one full circle around the lock that the satellite rides as you scroll. As
+        // tight as the keep-out allows, never wider than the room above the HUD or before the planet.
+        const trackRadius = (lockX: number, lockY: number) => {
+            const hudRoom = window.innerHeight * HUD_TOP_SHARE - HUD_CLEARANCE_PX - twinHeight / 2 - lockY;
+            const ring = planetRing();
+            const planetRoom =
+                ring === null ? Number.POSITIVE_INFINITY : Math.hypot(ring.x - lockX, ring.y - lockY) - ring.radius;
+            return Math.max(orbitRadius, Math.min(orbitRadius + TRACK_GAP_PX, hudRoom, planetRoom));
+        };
 
         let lastTime = performance.now();
 
@@ -404,29 +401,25 @@ export default function Gravity({ children }: GravityProps) {
             keepOnScreen();
             shadow.frictionAir = dragFor(shadow.speed);
 
-            // Scrolling: carry the twin around the lock at its own distance,
-            // clockwise going down. Its speed is left alone, so it's still
-            // physics: walls, the orbit and throws all still apply.
-            if (scrolled !== 0 && !grabRef.current) {
+            // Scrolling: carry the twin around the lock on the track, clockwise going down. On the
+            // track it rides exactly; off it (drifted, or settled after a throw) it glides on. A
+            // satellite still flying from a throw isn't steered: the throw finishes first.
+            if (scrolled !== 0 && !grabRef.current && shadow.speed < SLOW_SPEED) {
                 const turn =
                     (Math.max(-SCROLL_MAX_PX, Math.min(SCROLL_MAX_PX, scrolled)) / SCROLL_PER_LAP_PX) *
                     Math.PI *
                     2;
                 const lockX = window.innerWidth / 2;
                 const lockY = window.innerHeight / 2;
-                const floor = Math.max(
-                    orbitRadius,
-                    window.innerHeight * HUD_TOP_SHARE - HUD_CLEARANCE_PX - twinHeight / 2 - lockY,
-                );
                 const awayX = shadow.position.x - lockX;
                 const awayY = shadow.position.y - lockY;
-                const moved = !(Math.hypot(shadow.position.x - placedX, shadow.position.y - placedY) < 3);
-                if (moved || awayY <= 0) orbitReach = reachOf(awayX, awayY, floor);
-
-                const next = travelOrbit(awayX, awayY, turn, floor, orbitReach);
-                placedX = lockX + next.x;
-                placedY = lockY + next.y;
-                Body.setPosition(shadow, { x: placedX, y: placedY });
+                const distance = Math.hypot(awayX, awayY) || 1;
+                const angle = Math.atan2(awayY, awayX) + turn;
+                const reach = distance + (trackRadius(lockX, lockY) - distance) * TRACK_GLIDE;
+                Body.setPosition(shadow, {
+                    x: lockX + Math.cos(angle) * reach,
+                    y: lockY + Math.sin(angle) * reach,
+                });
                 keepClearOfPlanet();
             }
             scrolled = 0;
