@@ -27,7 +27,10 @@
  * drifts. (Nov 5, follow-up: but the record doesn't vanish. What the
  * record revealed, or this browser remembered, stays in its passage,
  * marked as taken, and passing one shows its card at once: no hunt, no
- * lock, no count. A finished record reads like a library.)
+ * lock, no count. A finished record reads like a library. And what you
+ * scanned yourself flies into the planet as before, then settles back into
+ * its passage, taken, once it's off screen, so the record is all there on
+ * the way back.)
  *
  * IF YOU SCANNED EVERYTHING: there's nothing left to reveal, so the
  * volley doesn't fire. The end card simply agrees with you.
@@ -249,6 +252,10 @@ export default function Scan({ entries, source }: ScanProps) {
     const objectRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const doneRef = useRef<Record<string, Decision>>({});
     const scannedRef = useRef<Record<string, Decision>>({});
+    // Objects you scanned whose flight is over and whose passage has left the screen: they settle
+    // back into place, taken, so the record is all there on the way back.
+    const settledRef = useRef<Record<string, true>>({});
+    const [settled, setSettled] = useState<Record<string, true>>({});
     const locateRef = useRef<(() => void) | null>(null);
     const heldRef = useRef<string | null>(null);
     // The finale waits until you've travelled into the record, so a Rescan at the end doesn't refire it.
@@ -279,14 +286,31 @@ export default function Scan({ entries, source }: ScanProps) {
             const scanned = scannedRef.current;
             let held: string | null = null;
             // While the rocket carries you, nothing is held, so nothing hunts.
+            // A scanned object settles once its passage is off screen, so it never pops back in view.
+            const settling: string[] = [];
+            for (let index = 0; index < entries.length; index++) {
+                const id = entries[index].id;
+                if (scanned[id] === undefined || settledRef.current[id] || id === heldRef.current) continue;
+                const passage = objectRefs.current[index]?.parentElement;
+                if (!passage) continue;
+                const box = passage.getBoundingClientRect();
+                if (box.bottom < 0 || box.top > window.innerHeight) settling.push(id);
+            }
+            if (settling.length > 0) {
+                const next = { ...settledRef.current };
+                for (const id of settling) next[id] = true;
+                settledRef.current = next;
+                setSettled(next);
+            }
+
             for (let index = 0; index < entries.length && !isRidingRef.current; index++) {
                 const object = objectRefs.current[index];
                 if (!object) continue;
                 const id = entries[index].id;
                 const isStillHeld = id === heldRef.current && scanned[id] !== undefined;
-                // Only what you scanned has gone into the planet. What the record revealed stays,
-                // and can be passed and read.
-                if (scanned[id] !== undefined && !isStillHeld) continue;
+                // An object you've just scanned is in flight, so it can't be held. Once it has
+                // settled back into its passage, it can be passed and read, like what the record revealed.
+                if (scanned[id] !== undefined && !settledRef.current[id] && !isStillHeld) continue;
                 const box = object.getBoundingClientRect();
                 const middle = box.top + box.height / 2;
                 if (Math.abs(middle - scanLine) <= HOLD_TOLERANCE_PX) {
@@ -466,6 +490,8 @@ export default function Scan({ entries, source }: ScanProps) {
         forgetMemory();
         heldRef.current = null;
         isFinaleArmedRef.current = false;
+        settledRef.current = {};
+        setSettled({});
         setArrival("now");
         setVolley(null);
         setRevealed({});
@@ -492,12 +518,14 @@ export default function Scan({ entries, source }: ScanProps) {
     // Rereading: an object the record revealed (or this browser remembered) shows its card the
     // moment you pass it. The scan itself stays as it was, so nothing locks and the satellite
     // keeps drifting; only the HUD reads.
-    const isRereading =
-        isOnline && phase === "held" && held !== null && volley === null &&
-        decisions[held.id] === undefined && revealed[held.id] !== undefined;
+    const isTaken = (id: string) =>
+        decisions[id] !== undefined ? settled[id] === true : revealed[id] !== undefined;
+    const isRereading = isOnline && phase === "held" && held !== null && volley === null && isTaken(held.id);
     if (isRereading) reading = isFinished ? "end" : "searching";
     const card: Decision | undefined =
-        isRereading && held !== null ? revealed[held.id] : reading === "kept" || reading === "debris" ? reading : undefined;
+        isRereading && held !== null
+            ? (decisions[held.id] ?? revealed[held.id])
+            : reading === "kept" || reading === "debris" ? reading : undefined;
     const hudReading: Reading = card ?? reading;
 
     // Three counts, one source: the record, your scan, and the planet built from it. What the
@@ -572,7 +600,9 @@ export default function Scan({ entries, source }: ScanProps) {
                                 }}
                                 className={styles.object}
                                 data-decision={
-                                decisions[entry.id] ?? (revealed[entry.id] ? `taken-${revealed[entry.id]}` : "unscanned")
+                                isTaken(entry.id)
+                                    ? `taken-${decisions[entry.id] ?? revealed[entry.id]}`
+                                    : (decisions[entry.id] ?? "unscanned")
                             }
                             >
                                 <Matter era={eraOf(entry.stratum)} variant={index} />
