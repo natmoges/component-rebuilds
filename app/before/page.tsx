@@ -2,6 +2,10 @@
 // Each rung is a layer. Each build reuses what the last one taught and adds one new idea.
 import styles from "./page.module.css";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+// Integration item 10: the root title is Accretion now, so the old index names itself.
+export const metadata: Metadata = { title: "The ladder index · Component Rebuilds" };
 
 type BuildStatus = "shipped" | "next" | "planned";
 

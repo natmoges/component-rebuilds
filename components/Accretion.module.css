@@ -962,6 +962,30 @@
     text-align: center;
 }
 
+/* Integration item 10: the page's name, read aloud but not drawn while the scan runs. */
+.intro {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.intro h1 {
+    margin: 0 0 0.75rem;
+    color: var(--fg);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 500;
+}
+
+.intro p {
+    margin: 0;
+    color: var(--fg-soft);
+    line-height: 1.6;
+}
+
 /* ---------- Small screens ---------- */
 
 @media (max-width: 600px) {
@@ -1007,6 +1031,19 @@
     .source,
     .seam {
         display: block;
+    }
+
+    /* The intro shows here, below the satellite, instead of being read aloud only. */
+    .intro {
+        position: relative;
+        width: auto;
+        height: auto;
+        max-width: 640px;
+        margin: 0 auto 2.5rem;
+        padding-top: 9rem;
+        overflow: visible;
+        clip-path: none;
+        white-space: normal;
     }
 }
 

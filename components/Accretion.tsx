@@ -295,6 +295,16 @@ export default async function Accretion() {
             </Gravity>
             <Scan entries={entries} source={source} />
 
+            {/* Integration item 10: the page's name. Read aloud on every visit; shown with the plain
+                list when motion is reduced, where it's the first thing on the page. */}
+            <header className={styles.intro}>
+                <h1>Nat Moges · Accretion</h1>
+                <p>
+                    My record, oldest first, {source === "substrate" ? "read live from Notion" : "from the stored copy"}.
+                    What the record can prove is kept; what it can&apos;t yet is debris, with what would lock it.
+                </p>
+            </header>
+
             <ol className={styles.record}>
                 {entries.map((entry, index) => (
                     <li key={entry.id} className={styles.entry} data-state={entry.state}>
