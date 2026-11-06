@@ -48,7 +48,7 @@
 
 .button:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5),
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 50%, transparent),
         0 10px 30px rgba(2, 6, 23, 0.12);
     color: #ffffff;
 }

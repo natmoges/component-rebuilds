@@ -95,7 +95,7 @@
     font-size: 0.68rem;
     line-height: 1.5;
     letter-spacing: 0.02em;
-    color: #d9d9d9;
+    color: var(--fg-soft);
 }
 
 /* Each line is its own row, so a wrapped line keeps its number beside it. */
@@ -138,11 +138,11 @@
 }
 
 .label {
-    color: #b8b8bd;
+    color: var(--muted);
 }
 
 .value {
-    color: #d9d9d9;
+    color: var(--fg-soft);
     white-space: nowrap;
 }
 
@@ -151,14 +151,14 @@
     color: var(--signal);
     white-space: nowrap;
     text-shadow:
-        0 0 0.3px #00ff41,
-        0 0 0.6px #00ff41,
-        0 0 0.9px #00ff41,
-        0 0 1.2px #00ff41;
+        0 0 0.3px var(--signal),
+        0 0 0.6px var(--signal),
+        0 0 0.9px var(--signal),
+        0 0 1.2px var(--signal);
 }
 
 .debris {
-    color: #8a8f98;
+    color: var(--muted);
 }
 
 /* Not typed yet: already in place, so the screen is its final size from the start */
@@ -171,23 +171,23 @@
    NAT is Signal green, glowing: the name, and the systems. */
 .word {
     display: inline-block;
-    color: #f2f2f2;
+    color: var(--fg);
     font-weight: 700;
 }
 
 .screen[data-word="nat"] .word {
     color: var(--signal);
     text-shadow:
-        0 0 2px #00ff41,
-        0 0 6px color-mix(in srgb, #00ff41 60%, transparent);
+        0 0 2px var(--signal),
+        0 0 6px color-mix(in srgb, var(--signal) 60%, transparent);
 }
 
 /* the split tick between them: his glitch colours, torn apart and jolted */
 .screen[data-word="split"] .word {
     color: #ffffff;
     text-shadow:
-        -2px 0 #ff0000,
-        2px 0 #00ffff;
+        -2px 0 var(--glitch),
+        2px 0 var(--glitch-pair);
     transform: translateX(1px) skewX(-8deg);
 }
 
@@ -197,7 +197,7 @@
     height: 1em;
     margin-left: 1px;
     vertical-align: text-bottom;
-    background: #d9d9d9;
+    background: var(--fg-soft);
     animation: blink 1s steps(1) infinite;
 }
 

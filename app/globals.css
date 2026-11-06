@@ -53,18 +53,31 @@
   --font-text: var(--face-text, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif);
   --font-mono: var(--face-mono, ui-monospace, "SF Mono", Menlo, monospace);
 
-  --bg: #0b0b0c;
+  /* Colour, four roles. The planet's shaders read the same values from lib/tokens.ts. */
+  /* The ground: my portfolio's charcoal. */
+  --ground: #131517;
+  /* Structure: grey-white, in my portfolio's steps. */
   --fg: #ededed;
-  --muted: #8a8a8f;
+  --fg-soft: #d9d9d9;
+  --muted: #a1a1aa;
+  --quiet: #6b7280;
+  --dim: #4b5563;
   --line: #222226;
+  /* The signal: one green, my portfolio's. */
   --signal: #22C55E;
+  /* The world: the planet's teal. */
+  --world: #4CB2AF;
+  --world-deep: #19897C;
+  /* The glitch: the one red, and its split partner. */
+  --glitch: #ff0000;
+  --glitch-pair: #00ffff;
 }
 
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
-  background: var(--bg);
+  background: var(--ground);
   color: var(--fg);
   font-family: var(--font-text);
   -webkit-font-smoothing: antialiased;

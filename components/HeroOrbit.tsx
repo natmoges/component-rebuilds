@@ -105,13 +105,16 @@ import {
 import TextScrambler from "./TextScrambler";
 import styles from "./HeroOrbit.module.css";
 import { ARRIVAL_MS } from "../lib/tempo";
+import { SIGNAL, WORLD, WORLD_DEEP } from "../lib/tokens";
 
 const ZOOM = 1.7;
 const DEGREE = Math.PI / 180;
 const START_SCALE = 0.45;
 const RADIUS = 137.5;
-const RIM = "#4CB2AF";
-const CONTOUR = "#22C55E";
+// The planet's colours come from the shared tokens (integration item 7). Its contours are
+// still Signal green, as Tim drew them; by the colour roles they're the world's. Item 8's call.
+const RIM = WORLD;
+const CONTOUR = SIGNAL;
 const BASE = "#0F1C19";
 const SPIN_SECONDS = 120;
 const MAX_STEP = 1 / 30;
@@ -123,7 +126,7 @@ const CAMERA_POSITION = new Vector3(0, 0, 1).applyEuler(CAMERA_ROTATION).multipl
 const DUST_MAX = 6000;
 const DUST_BASE = 800;
 const DUST_PER_KEPT = 150;
-const DUST_COLORS = ["#C4D1D6", "#19897C"];
+const DUST_COLORS = ["#C4D1D6", WORLD_DEEP];
 const SETTLE_RATE = 3;
 const ORBIT_SECONDS = [120, 60];
 const ORBIT_TILT = [0, -5 * DEGREE];

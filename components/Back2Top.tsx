@@ -37,6 +37,9 @@
  * (Integration item 6: Accretion borrows the rocket. The page can start the
  * ride itself, as Rescan does, and the rocket tells the page while it's
  * riding, so the scan can stand down. Same ride, same breaks.)
+ *
+ * (Integration item 7: the click ring is Signal green now, not blue. One
+ * green, my portfolio's.)
  */
 
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
