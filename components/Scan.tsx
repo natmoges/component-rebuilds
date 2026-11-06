@@ -250,6 +250,23 @@ function forgetMemory() {
     }
 }
 
+// Where a record's link goes, named (integration item 10), so "Open" says what it opens. A link back
+// to this page itself is dropped: it would only reload the record you're reading.
+const SITE_HOST = "component-rebuilds.vercel.app";
+function destinationOf(link: string): string | null {
+    let url: URL;
+    try {
+        url = new URL(link);
+    } catch {
+        return null;
+    }
+    const isThisSite = url.hostname === SITE_HOST || url.origin === window.location.origin;
+    if (isThisSite) return url.pathname === "/" || url.pathname === window.location.pathname ? null : url.pathname;
+    const host = url.hostname.replace(/^www\./, "");
+    const parts = host.split(".");
+    return parts.length > 2 && !host.endsWith(".vercel.app") ? parts.slice(-2).join(".") : host;
+}
+
 export default function Scan({ entries, source }: ScanProps) {
     const [heldId, setHeldId] = useState<string | null>(null);
     const [phase, setPhase] = useState<Phase>("rest");
@@ -309,6 +326,13 @@ export default function Scan({ entries, source }: ScanProps) {
         const total = kept * 70 + (entries.length - kept) * 60 + opens * BREATH_VH + entries.length * 6.5;
         return total / entries.length;
     }, [entries]);
+
+    // Every visit starts at the top, where the boot is (item 10). A reload used to put you back mid-record
+    // under a replaying boot, with the count back at zero.
+    useEffect(() => {
+        window.history.scrollRestoration = "manual";
+        window.scrollTo(0, 0);
+    }, []);
 
     useEffect(() => {
         const isMotionReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -785,7 +809,12 @@ export default function Scan({ entries, source }: ScanProps) {
                     </span>
                     <span className={styles.massLabel}>
                         {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
-                        Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
+                        {/* A return visit that scanned nothing yet shows only the record it remembers (item 10). */}
+                        {!(isFinished && counts.scan.decided === 0) && (
+                            <>
+                                Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}
+                            </>
+                        )}
                         {/* Once the record is finished, the planet carries the record, and says so. */}
                         {isFinished && volley === null && (
                             <span className={styles.massRecord}>Record · {counts.record.kept} kept</span>
@@ -855,9 +884,10 @@ export default function Scan({ entries, source }: ScanProps) {
                                         {card === "kept" && focus.credit && (
                                             <p className={styles.hudCredit}>{focus.credit}</p>
                                         )}
-                                        {card === "kept" && focus.link && (
-                                            <a href={focus.link} className={styles.hudLink}>
-                                                Open →
+                                        {/* In a new tab, so the record you're reading is still here when you come back. */}
+                                        {card === "kept" && focus.link && destinationOf(focus.link) !== null && (
+                                            <a href={focus.link} className={styles.hudLink} target="_blank" rel="noopener noreferrer">
+                                                Open · {destinationOf(focus.link)} →
                                             </a>
                                         )}
                                         {card === "debris" && (
