@@ -219,6 +219,11 @@ const CAMERA_RIGHT = new Vector3(1, 0, 0).applyEuler(CAMERA_ROTATION);
 const SATELLITE_CLEARANCE = 185 + 24;
 const NARROW_WIDTH = 700;
 const LANE_CLEARANCE = 22 + 16;
+// Integration item 10: how far a moon's orbit reaches across the screen, in planet radii (measured
+// from Tim's camera: 1.6 × 0.954), plus room for the moon itself. On a laptop the grown planet is
+// framed so both moons stay on screen, because their names are the payoff.
+const ORBIT_REACH = 1.53;
+const MOON_ROOM = 18 + 24;
 
 const SKIN_VERTEX = /* glsl */ `
 varying vec3 vNormal;
@@ -649,18 +654,27 @@ function Body({
         }
 
         const share = fullMass > 0 ? Math.min(mass / fullMass, 1) : 0;
-        const target = START_SCALE + (HERO_SCALE - START_SCALE) * share;
+        const width = window.innerWidth;
+        const lockX = width / 2;
+        const isNarrow = width < NARROW_WIDTH;
+        const clearance = isNarrow ? LANE_CLEARANCE : SATELLITE_CLEARANCE;
+        // The biggest planet whose moons fit between the satellite's lane and the screen's edge (item 10).
+        // A phone keeps its own layout: there the names stay on screen even when a moon can't.
+        const room = width - MOON_ROOM - lockX - clearance;
+        const fit = isNarrow ? HERO_SCALE : room / ((1 + ORBIT_REACH) * RADIUS * zoom);
+        const heroScale = Math.max(START_SCALE, Math.min(HERO_SCALE, fit));
+        const target = START_SCALE + (heroScale - START_SCALE) * share;
         const step = Math.min(delta, MAX_STEP);
         const current = growth.scale.x;
         growth.scale.setScalar(current + (target - current) * (1 - Math.exp(-step * GROW_RATE)));
 
         const radiusPx = RADIUS * growth.scale.x * zoom;
-        const width = window.innerWidth;
-        const lockX = width / 2;
         const stageX = lockX + Math.min(width * 0.3, 420);
-        const clearance = width < NARROW_WIDTH ? LANE_CLEARANCE : SATELLITE_CLEARANCE;
         const edgeX = lockX + clearance + radiusPx;
-        const shiftPx = Math.max(0, edgeX - stageX);
+        // Clear of the satellite on the left; on a laptop, the moons' reach clear of the edge on the right.
+        const reachX = isNarrow ? Infinity : width - MOON_ROOM - ORBIT_REACH * radiusPx;
+        const centreX = Math.max(edgeX, Math.min(stageX, reachX));
+        const shiftPx = centreX - stageX;
         growth.position.copy(CAMERA_RIGHT).multiplyScalar(shiftPx / zoom);
 
         const host = stageRef.current?.parentElement;
