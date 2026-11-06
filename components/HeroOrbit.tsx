@@ -124,8 +124,29 @@
  * moons in the middle; the satellite, the record and the HUD in front.
  * Meteors pass behind the planet, never across its face.
  *
- * THE SATELLITE: redrawn in the planet's three-quarter view and lit by
- * its key light, so it belongs to the scene instead of sitting on it.
+ * THE SATELLITE: SAT_1, a probe drawn in the planet's own language. Its
+ * dish is a record: grooves in Tim's green inside the world's teal rim,
+ * with a highlight sweeping round it at 33⅓. A small mono tag names it
+ * SAT_1, the way my hero labels MOON_1 and SAT_2. It's lit by the
+ * planet's key light, in the planet's three-quarter view.
+ *
+ *   HUNTING: the dish swings to face what it's reading.
+ *   LOCKED: the beam leaves from the dish's spindle.
+ *   KEPT: the next groove lights and stays lit. As the planet fills, so
+ *   does the record, and on a finished record every groove is lit.
+ *   DEBRIS: nothing lights.
+ *   RESCAN: the grooves go dark with everything else.
+ *
+ * Gravity (build #12) still owns how it moves: grabbed, thrown, orbiting
+ * the lock. Only the drawing changes.
+ *
+ * FAILURE: if the engine can't start, SAT_1 stays home, drawn and lit,
+ * still spinning.
+ *
+ * PHONE: the same probe; the tag hides if the screen is too narrow to
+ * keep it clear of the planet.
+ *
+ * REDUCED MOTION: no sweep and no swing. The lit grooves still count.
  *
  * FAILURE: if WebGL can't start, a drawn planet stands in: the same body,
  * rim and rings in CSS, not a grey ball. It shows only when WebGL
@@ -555,7 +576,9 @@ function Moon({
         const stageLeft = title.offsetParent?.getBoundingClientRect().left ?? 0;
         const width = title.offsetWidth;
         const isFlipped = stageLeft + x + TITLE_GAP + width > window.innerWidth - TITLE_GAP;
-        const left = isFlipped ? x - width - TITLE_GAP * 2 : x;
+        // And it never leaves the screen at all: on a phone the moon itself can be past the edge.
+        const flipped = isFlipped ? x - width - TITLE_GAP * 2 : x;
+        const left = Math.min(Math.max(flipped, TITLE_GAP - stageLeft), window.innerWidth - stageLeft - width - TITLE_GAP * 2);
         title.style.translate = `${left.toFixed(1)}px ${y.toFixed(1)}px`;
     });
 

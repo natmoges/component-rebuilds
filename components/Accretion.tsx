@@ -154,28 +154,41 @@ function starField(count: number, seed: number): string {
     ).join(", ");
 }
 
+// Integration item 8: SAT_1, a probe drawn in the planet's own language. Its dish is a record:
+// grooves in Tim's green inside the world's teal rim, a highlight sweeping round at 33⅓. Lit by the
+// planet's key light (upper left): the body's top catches it, its left face is half lit, its
+// right face is in shade. The grooves light as the planet fills (Scan's data-grooves).
 function Satellite() {
     return (
         <svg className={styles.satellite} viewBox="0 0 120 64" aria-hidden="true">
-            <g fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round">
-                <rect className={styles.panel} x="2" y="22" width="38" height="16" rx="1" />
-                <line x1="11.5" y1="22" x2="11.5" y2="38" />
-                <line x1="21" y1="22" x2="21" y2="38" />
-                <line x1="30.5" y1="22" x2="30.5" y2="38" />
-                <line x1="2" y1="30" x2="40" y2="30" />
-                <rect className={styles.panel} x="80" y="22" width="38" height="16" rx="1" />
-                <line x1="89.5" y1="22" x2="89.5" y2="38" />
-                <line x1="99" y1="22" x2="99" y2="38" />
-                <line x1="108.5" y1="22" x2="108.5" y2="38" />
-                <line x1="80" y1="30" x2="118" y2="30" />
-                <line x1="40" y1="30" x2="48" y2="30" />
-                <line x1="72" y1="30" x2="80" y2="30" />
-                <rect x="48" y="20" width="24" height="20" rx="3" />
-                <line x1="60" y1="20" x2="60" y2="10" />
-                <path d="M53 10 Q60 2 67 10" />
-                <path d="M55 40h10l-2 6h-6z" />
+            <g fill="none" stroke="currentColor" strokeLinejoin="round" strokeLinecap="round">
+                <line x1="51" y1="17" x2="16.4" y2="11.9" />
+                <circle cx="14" cy="11.5" r="2.6" fill="currentColor" fillOpacity="0.25" />
+                <line x1="69" y1="17" x2="99" y2="25.5" />
+                <rect x="99" y="23" width="11" height="5.5" rx="1.5" transform="rotate(16 104.5 25.75)" fill="currentColor" fillOpacity="0.14" />
+                <polygon points="55.5,18.3 51,15 51,21 55.5,24.3" fill="currentColor" fillOpacity="0.18" />
+                <polygon points="64.5,18.3 55.5,18.3 55.5,24.3 64.5,24.3" fill="currentColor" fillOpacity="0.1" />
+                <polygon points="69,15 64.5,18.3 64.5,24.3 69,21" fill="currentColor" fillOpacity="0.04" />
+                <polygon points="69,15 64.5,18.3 55.5,18.3 51,15 55.5,11.7 64.5,11.7" fill="currentColor" fillOpacity="0.32" />
+                <line x1="60" y1="24.3" x2="60" y2="30.8" />
+                <g className={styles.dish}>
+                    <g transform="translate(60 40) scale(1 0.42)">
+                        <circle className={styles.rim} r="22" />
+                        <circle className={styles.groove} data-groove="1" r="19.5" />
+                        <circle className={styles.groove} data-groove="2" r="17" />
+                        <circle className={styles.groove} data-groove="3" r="14.5" />
+                        <circle className={styles.groove} data-groove="4" r="12" />
+                        <circle className={styles.groove} data-groove="5" r="9.5" />
+                        <circle className={styles.groove} data-groove="6" r="7" />
+                        <g className={styles.sweep}>
+                            <circle r="22" stroke="none" />
+                            <path d="M0 0 L22 0 A22 22 0 0 1 15.6 15.6 Z" stroke="none" />
+                        </g>
+                        <circle className={styles.beacon} r="2.5" stroke="none" />
+                    </g>
+                </g>
             </g>
-            <circle className={styles.beacon} cx="60" cy="30" r="2.5" />
+            <text className={styles.tag} x="86" y="49">SAT_1</text>
         </svg>
     );
 }

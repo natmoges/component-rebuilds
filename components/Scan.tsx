@@ -534,6 +534,9 @@ export default function Scan({ entries, source }: ScanProps) {
     // Where the record came from, in a stranger's words.
     const provenance = source === "substrate" ? "Read live from Notion" : "From the stored copy";
     const captured = entries.filter((entry) => done[entry.id] === "kept");
+    // SAT_1's dish lights a groove for each sixth of the record the planet holds (integration item 8).
+    const grooves =
+        counts.record.kept > 0 ? Math.min(6, Math.floor((counts.planet.mass / counts.record.kept) * 6)) : 0;
     const mass = counts.planet.mass;
 
     const hasImage = held !== null && held.image !== null && !failedImages.includes(held.id);
@@ -550,7 +553,14 @@ export default function Scan({ entries, source }: ScanProps) {
 
     return (
         <>
-            <div ref={scanRef} className={styles.scan} data-reading={reading} data-boot-stage={bootStage} data-trail-zone>
+            <div
+                ref={scanRef}
+                className={styles.scan}
+                data-reading={reading}
+                data-boot-stage={bootStage}
+                data-grooves={grooves}
+                data-trail-zone
+            >
                 <div ref={fieldRef} className={styles.field} aria-hidden="true">
                     {meteors.map((meteor, index) => (
                         <span

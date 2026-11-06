@@ -97,8 +97,86 @@
     }
 }
 
-.panel {
-    fill: color-mix(in srgb, #3a4a5a 55%, transparent);
+/* Integration item 8: SAT_1's dish is a record. */
+.rim {
+    fill: color-mix(in srgb, #0F1C19 90%, transparent);
+    stroke: var(--world);
+}
+
+.groove {
+    stroke: var(--signal);
+    opacity: 0.22;
+    transition: opacity var(--bar);
+}
+
+/* Grooves are hairlines, the line family's finest weight, so six of them still read as grooves. */
+.satellite .groove {
+    stroke-width: var(--hairline);
+}
+
+/* The grooves light by share, outermost first: as the planet fills, so does the record. */
+.space:has(.scan:is([data-grooves="1"],[data-grooves="2"],[data-grooves="3"],[data-grooves="4"],[data-grooves="5"],[data-grooves="6"])) .groove[data-groove="1"],
+.space:has(.scan:is([data-grooves="2"],[data-grooves="3"],[data-grooves="4"],[data-grooves="5"],[data-grooves="6"])) .groove[data-groove="2"],
+.space:has(.scan:is([data-grooves="3"],[data-grooves="4"],[data-grooves="5"],[data-grooves="6"])) .groove[data-groove="3"],
+.space:has(.scan:is([data-grooves="4"],[data-grooves="5"],[data-grooves="6"])) .groove[data-groove="4"],
+.space:has(.scan:is([data-grooves="5"],[data-grooves="6"])) .groove[data-groove="5"],
+.space:has(.scan:is([data-grooves="6"])) .groove[data-groove="6"] {
+    opacity: 0.85;
+}
+
+/* A highlight sweeping round the record at 33⅓ rpm: one turn every 1.8 s. */
+.sweep {
+    fill: color-mix(in srgb, var(--world) 22%, transparent);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: sweep 1.8s linear infinite;
+}
+
+.sweep circle {
+    fill: transparent;
+}
+
+@keyframes sweep {
+    to {
+        rotate: 360deg;
+    }
+}
+
+/* Hunting: the dish swings to face what it's reading, opening toward the lock. */
+.dish {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    transition: scale var(--bar) var(--ease-settle), rotate var(--bar) var(--ease-settle);
+}
+
+.space:has(.scan[data-reading="hunting"]) .dish {
+    scale: 1 1.4;
+    rotate: -6deg;
+}
+
+.tag {
+    fill: var(--muted);
+    stroke: none;
+    font-family: var(--font-mono);
+    font-size: 6.4px;
+    letter-spacing: 0.12em;
+}
+
+/* On a narrow screen the tag hides, so it never crowds the planet. */
+@media (max-width: 700px) {
+    .tag {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sweep {
+        animation: none;
+    }
+
+    .dish {
+        transition: none;
+    }
 }
 
 .beacon {
@@ -324,7 +402,9 @@
    following its size and slide. Without WebGL, the grey sphere's size stands in. */
 .massLabel {
     position: absolute;
-    left: calc(50% + var(--planet-shift, 0px));
+    /* Integration item 8: under the planet, but never past the screen's right edge (on a phone the
+       planet bleeds off it): the label's centre stops 4.75rem short of the edge. */
+    left: min(calc(50% + var(--planet-shift, 0px)), calc(50vw - var(--orbit) + var(--size) / 2 - 4.75rem));
     top: calc(50% + var(--planet-radius, calc(var(--size) / 2)) + 20px);
     translate: -50% 0;
     white-space: nowrap;
@@ -684,6 +764,15 @@
 
 .massLabel {
     transition: opacity var(--bar);
+}
+
+/* Integration item 8: on a phone the HUD fills the screen's foot and would cover a count under the
+   planet, so the count sits just above the planet's top edge instead. */
+@media (max-width: 700px) {
+    .massLabel {
+        top: calc(50% - var(--planet-radius, calc(var(--size) / 2)) - 20px);
+        translate: -50% -100%;
+    }
 }
 
 /* Integration item 5: once the record is finished, a second line says what the planet carries. */
