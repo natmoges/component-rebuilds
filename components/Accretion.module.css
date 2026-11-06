@@ -53,12 +53,22 @@
 
 /* ---------- The satellite: top centre, alive ---------- */
 
+/* Integration item 7: one stroke for everything drawn, the same on screen whatever the
+   drawing's size: the satellite, the record's objects, the drifts, the moons. */
+.satellite g > *,
+.object svg path,
+.drift svg path,
+.moon svg path {
+    stroke-width: var(--stroke);
+    vector-effect: non-scaling-stroke;
+}
+
 .satellite {
     display: block;
     width: 100%;
     color: var(--muted);
     animation:
-        driftIn calc(var(--bar) * 2) cubic-bezier(0.2, 0.8, 0.2, 1) both,
+        driftIn calc(var(--bar) * 2) var(--ease-settle) both,
         bob calc(var(--bar) * 4) ease-in-out calc(var(--bar) * 2) infinite alternate;
 }
 
@@ -132,7 +142,7 @@
     scale: 1 0;
     transition:
         opacity calc(var(--bar) / 2),
-        scale calc(var(--bar) / 2) ease-out;
+        scale calc(var(--bar) / 2) var(--ease-settle);
 }
 
 .sight[data-reading="hunting"] .beam,
@@ -170,19 +180,19 @@
     translate: -50% -50%;
     color: var(--signal);
     background:
-        var(--corner) top left / 18px 2px no-repeat,
-        var(--corner) top left / 2px 18px no-repeat,
-        var(--corner) top right / 18px 2px no-repeat,
-        var(--corner) top right / 2px 18px no-repeat,
-        var(--corner) bottom left / 18px 2px no-repeat,
-        var(--corner) bottom left / 2px 18px no-repeat,
-        var(--corner) bottom right / 18px 2px no-repeat,
-        var(--corner) bottom right / 2px 18px no-repeat;
+        var(--corner) top left / 18px var(--stroke-active) no-repeat,
+        var(--corner) top left / var(--stroke-active) 18px no-repeat,
+        var(--corner) top right / 18px var(--stroke-active) no-repeat,
+        var(--corner) top right / var(--stroke-active) 18px no-repeat,
+        var(--corner) bottom left / 18px var(--stroke-active) no-repeat,
+        var(--corner) bottom left / var(--stroke-active) 18px no-repeat,
+        var(--corner) bottom right / 18px var(--stroke-active) no-repeat,
+        var(--corner) bottom right / var(--stroke-active) 18px no-repeat;
     opacity: 0;
     scale: 1.8;
     transition:
         opacity calc(var(--bar) / 2),
-        scale calc(var(--bar) / 2) ease-out,
+        scale calc(var(--bar) / 2) var(--ease-settle),
         color var(--bar),
         background-color calc(var(--bar) / 2);
 }
@@ -191,7 +201,7 @@
    land, so the green fill arrives on brackets that have already arrived. */
 .sight[data-reading="hunting"] .lockOn {
     opacity: 1;
-    animation: lockClose var(--lock) cubic-bezier(0.3, 0, 0.2, 1) forwards;
+    animation: lockClose var(--lock) var(--ease-travel) forwards;
 }
 
 /* Kept carries the same close-in on, so the brackets finish their last few pixels
@@ -200,7 +210,7 @@
     opacity: 1;
     scale: 1;
     background-color: color-mix(in srgb, var(--signal) 14%, transparent);
-    animation: lockClose var(--lock) cubic-bezier(0.3, 0, 0.2, 1) forwards;
+    animation: lockClose var(--lock) var(--ease-travel) forwards;
 }
 
 .sight[data-reading="debris"] .lockOn {
@@ -230,8 +240,8 @@
     height: var(--size);
     translate: -50% -50%;
     transition:
-        width var(--bar) ease-out,
-        height var(--bar) ease-out;
+        width var(--bar) var(--ease-settle),
+        height var(--bar) var(--ease-settle);
     pointer-events: none;
 }
 
@@ -273,7 +283,7 @@
     color: var(--signal);
     opacity: 0.85;
     transform: rotate(var(--angle)) translateX(calc(var(--size) / 2 + 14px)) rotate(calc(var(--angle) * -1));
-    animation: arrive var(--bar) ease-out both;
+    animation: arrive var(--bar) var(--ease-settle) both;
 }
 
 .moon svg {
@@ -345,7 +355,7 @@
     transform-origin: top;
     scale: 1 calc(1 + var(--warp, 0));
     animation: fall linear infinite;
-    transition: scale 0.25s ease-out;
+    transition: scale 0.25s var(--ease-settle);
 }
 
 @keyframes fall {
@@ -401,12 +411,12 @@
 .object[data-decision="kept"] {
     color: var(--signal);
     filter: drop-shadow(0 0 8px var(--signal));
-    animation: absorb var(--flight) ease-in var(--hold) forwards;
+    animation: absorb var(--flight) var(--ease-travel) var(--hold) forwards;
 }
 
 .object[data-decision="debris"] {
     color: var(--dim);
-    animation: tumble calc(var(--bar) * 3) ease-in forwards;
+    animation: tumble calc(var(--bar) * 3) var(--ease-travel) forwards;
 }
 
 /* Item 5 follow-up: what the record revealed, or this browser remembered, stays in its passage,
@@ -473,7 +483,7 @@
     transform: translateX(-50%);
     width: min(480px, calc(100vw - 32px));
     padding: 1rem 1.25rem;
-    border: 1px solid color-mix(in srgb, var(--signal) 40%, transparent);
+    border: var(--hairline) solid color-mix(in srgb, var(--signal) 40%, transparent);
     background: rgba(5, 12, 8, 0.9);
     backdrop-filter: blur(8px);
     border-radius: 10px;
@@ -509,7 +519,7 @@
     display: block;
     margin-bottom: 0.55rem;
     padding-bottom: 0.45rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--signal) 18%, transparent);
+    border-bottom: var(--hairline) solid color-mix(in srgb, var(--signal) 18%, transparent);
     color: var(--muted);
     font-family: var(--font-mono);
     font-size: 0.62rem;
@@ -567,7 +577,7 @@
     max-height: 22vh;
     margin: 0 auto 0.4rem;
     border-radius: 6px;
-    border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+    border: var(--hairline) solid color-mix(in srgb, var(--signal) 30%, transparent);
     animation: develop var(--bar) steps(8) both;
 }
 
@@ -581,7 +591,7 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     color: var(--signal);
-    border: 1px solid color-mix(in srgb, var(--signal) 30%, transparent);
+    border: var(--hairline) solid color-mix(in srgb, var(--signal) 30%, transparent);
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.4);
     animation: develop var(--bar) steps(8) both;
@@ -600,7 +610,7 @@
 }
 
 .readout {
-    animation: dissolveIn var(--bar) ease-out both;
+    animation: dissolveIn var(--bar) var(--ease-settle) both;
 }
 
 @keyframes dissolveIn {

@@ -71,6 +71,21 @@
   /* The glitch: the one red, and its split partner. */
   --glitch: #ff0000;
   --glitch-pair: #00ffff;
+
+  /* Line, one family: hairlines for orbits, leaders and borders; one stroke for everything
+     drawn, the same on screen at any size; a heavier stroke for the scan's active geometry. */
+  --hairline: 1px;
+  --stroke: 1.75px;
+  --stroke-active: 2px;
+
+  /* Motion, three curves. */
+  /* Settle: things arriving. */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Travel: things carried, the flight, the lock closing in. (The hunt is tuned to this curve:
+     the brackets are within 3 px of the lock at 750 ms on it.) */
+  --ease-travel: cubic-bezier(0.3, 0, 0.2, 1);
+  /* Snap: a control answering a tap. */
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * { box-sizing: border-box; }
