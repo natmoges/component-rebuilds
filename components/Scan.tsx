@@ -260,6 +260,19 @@ export default function Scan({ entries, source }: ScanProps) {
     // How the planet takes what arrives: a scanned object after its absorb, the rest at once.
     const [arrival, setArrival] = useState<"absorb" | "now">("absorb");
     const [dissolvedId, setDissolvedId] = useState<string | null>(null);
+    // Integration item 10: the object the satellite is decoding. Once it's acquired, its hunt
+    // runs to the end even if you scroll on, so a brisk scroll still reads; whatever passes while
+    // the satellite is busy is left for the finale. And the HUD reads what it last read (the
+    // focus) until the next object is acquired, instead of blinking back to "Scanning…".
+    const [targetId, setTargetId] = useState<string | null>(null);
+    const targetRef = useRef<string | null>(null);
+    const [focusId, setFocusId] = useState<string | null>(null);
+    const focusRef = useRef<string | null>(null);
+    // When the focus's card appeared: it holds a bar, so its title decodes once, before the HUD moves on.
+    const cardSinceRef = useRef<number | null>(null);
+    // The object whose decision just landed: its card takes the HUD next, ahead of the new target.
+    const landedRef = useRef<string | null>(null);
+    const isOnlineRef = useRef(false);
     const [failedImages, setFailedImages] = useState<string[]>([]);
     const [bootStage, setBootStage] = useState<BootStage>("off");
     const scanRef = useRef<HTMLDivElement | null>(null);
@@ -303,6 +316,7 @@ export default function Scan({ entries, source }: ScanProps) {
         let settle: ReturnType<typeof setTimeout> | null = null;
         let lastY = window.scrollY;
         let lastTime = performance.now();
+        let cardHold: ReturnType<typeof setTimeout> | null = null;
 
         function locate() {
             frame = null;
@@ -396,6 +410,37 @@ export default function Scan({ entries, source }: ScanProps) {
 
             heldRef.current = held;
             setHeldId(held);
+            // Acquire (item 10): a fresh object at the lock becomes the target, if the satellite
+            // is free. Past the last object the hunt stands down, and the finale accounts for it.
+            if (isPastLast && targetRef.current !== null) {
+                targetRef.current = null;
+                setTargetId(null);
+            }
+            const isFree = targetRef.current === null && !isRidingRef.current;
+            if (isOnlineRef.current && isFree && held !== null && decided[held] === undefined) {
+                targetRef.current = held;
+                setTargetId(held);
+            }
+            // The focus: the target, else what's at the lock, else what the HUD last read. Nothing
+            // while the rocket carries you, or back at the top.
+            const isHome = held === null && window.scrollY <= 0;
+            const current = focusRef.current;
+            const isCard = current !== null && decided[current] !== undefined;
+            if (isCard && cardSinceRef.current === null) cardSinceRef.current = performance.now();
+            const next = isRidingRef.current || isHome ? null : (landedRef.current ?? targetRef.current ?? held ?? current);
+            // A fresh card holds while the next object is still decoding, up to a bar, so its title
+            // decodes once. The next card always takes over the moment it lands, so none is skipped.
+            const shownFor = cardSinceRef.current === null ? BAR_MS : performance.now() - cardSinceRef.current;
+            const isNextDecoding = next !== null && decided[next] === undefined;
+            if (next !== current && isNextDecoding && isCard && shownFor < BAR_MS) {
+                if (cardHold !== null) clearTimeout(cardHold);
+                cardHold = setTimeout(locate, BAR_MS - shownFor);
+            } else if (next !== current) {
+                if (next === landedRef.current) landedRef.current = null;
+                focusRef.current = next;
+                cardSinceRef.current = next !== null && decided[next] !== undefined ? performance.now() : null;
+                setFocusId(next);
+            }
             if (held !== null) setPhase("held");
             else if (isPastLast || isAllScanned) setPhase("end");
             else if (window.scrollY > 0) setPhase("travelling");
@@ -415,6 +460,7 @@ export default function Scan({ entries, source }: ScanProps) {
             window.removeEventListener("resize", handleScroll);
             if (frame !== null) cancelAnimationFrame(frame);
             if (settle !== null) clearTimeout(settle);
+            if (cardHold !== null) clearTimeout(cardHold);
             locateRef.current = null;
         };
     }, [entries, drifts, pitchVh]);
@@ -470,20 +516,33 @@ export default function Scan({ entries, source }: ScanProps) {
 
     const isOnline = bootStage === "online";
 
+    // The scan loop learns the boot is over, and looks at once, so an object already at the lock is acquired.
     useEffect(() => {
-        if (!isOnline || heldId === null || done[heldId] !== undefined) return;
-        const entry = entries.find((candidate) => candidate.id === heldId);
+        isOnlineRef.current = isOnline;
+        locateRef.current?.();
+    }, [isOnline]);
+
+    // The hunt runs on the target, not on what's at the lock: scrolling on doesn't cancel it (item 10).
+    useEffect(() => {
+        if (!isOnline || targetId === null) return;
+        const entry = entries.find((candidate) => candidate.id === targetId);
         if (entry === undefined) return;
         const hunt = setTimeout(() => {
+            const decision: Decision = entry.state === "Kept" ? "kept" : "debris";
             // A scanned object lands after its absorb, whatever landed before it.
             setArrival("absorb");
-            setDecisions((current) => ({
-                ...current,
-                [heldId]: entry.state === "Kept" ? "kept" : "debris",
-            }));
+            setDecisions((current) => ({ ...current, [targetId]: decision }));
+            // The scan loop knows at once, before React renders, so a scroll in between can't
+            // acquire the same object again and leave the satellite stuck on it.
+            doneRef.current = { ...doneRef.current, [targetId]: decision };
+            scannedRef.current = { ...scannedRef.current, [targetId]: decision };
+            // Free again: the scan loop looks once the decision lands, and acquires whatever is at the lock.
+            landedRef.current = targetId;
+            targetRef.current = null;
+            setTargetId(null);
         }, HUNT_MS);
         return () => clearTimeout(hunt);
-    }, [isOnline, heldId, done, entries]);
+    }, [isOnline, targetId, entries]);
 
     // THE FINALE: at the end of the record, whatever you didn't scan, the record accounts for.
     // Debris is counted at once; the kept fall into the planet as one labelled volley.
@@ -533,6 +592,9 @@ export default function Scan({ entries, source }: ScanProps) {
     function handleRescan() {
         forgetMemory();
         heldRef.current = null;
+        targetRef.current = null;
+        landedRef.current = null;
+        setTargetId(null);
         isFinaleArmedRef.current = false;
         settledRef.current = {};
         setSettled({});
@@ -547,6 +609,11 @@ export default function Scan({ entries, source }: ScanProps) {
     function handleRide(riding: boolean) {
         isRidingRef.current = riding;
         setIsRiding(riding);
+        if (riding) {
+            targetRef.current = null;
+            landedRef.current = null;
+            setTargetId(null);
+        }
         locateRef.current?.();
     }
 
@@ -554,7 +621,8 @@ export default function Scan({ entries, source }: ScanProps) {
     const decision: Decision | undefined = held !== null ? decisions[held.id] : undefined;
     let reading: Reading;
     if (!isOnline) reading = "rest";
-    else if (phase === "held" && held !== null) reading = decision ?? "hunting";
+    // The lock hunts only its target; an object passing while the satellite is busy just passes.
+    else if (phase === "held" && held !== null) reading = decision ?? (held.id === targetId ? "hunting" : "searching");
     else if (phase === "travelling") reading = "searching";
     else if (phase === "end") reading = "end";
     else reading = "rest";
@@ -566,11 +634,13 @@ export default function Scan({ entries, source }: ScanProps) {
         decisions[id] !== undefined ? settled[id] === true : revealed[id] !== undefined;
     const isRereading = isOnline && phase === "held" && held !== null && volley === null && isTaken(held.id);
     if (isRereading) reading = isFinished ? "end" : "searching";
-    const card: Decision | undefined =
-        isRereading && held !== null
-            ? (decisions[held.id] ?? revealed[held.id])
-            : reading === "kept" || reading === "debris" ? reading : undefined;
-    const hudReading: Reading = card ?? reading;
+    // The HUD reads the focus (item 10): its card once it's decided or revealed, "Decoding" while
+    // it's the target. At the top and at the end of the record, the HUD says so instead.
+    const focus = entries.find((entry) => entry.id === focusId) ?? null;
+    const isFocusShown = isOnline && focus !== null && phase !== "rest" && !(phase === "end" && held === null);
+    const card: Decision | undefined = isFocusShown ? (decisions[focus.id] ?? revealed[focus.id]) : undefined;
+    const isFocusHunting = isFocusShown && card === undefined && focus.id === targetId;
+    const hudReading: Reading = card ?? (isFocusHunting ? "hunting" : reading === "hunting" ? "searching" : reading);
 
     // Three counts, one source: the record, your scan, and the planet built from it. What the
     // record revealed grows the planet but never counts as scanned.
@@ -583,12 +653,12 @@ export default function Scan({ entries, source }: ScanProps) {
         counts.record.kept > 0 ? Math.min(6, Math.floor((counts.planet.mass / counts.record.kept) * 6)) : 0;
     const mass = counts.planet.mass;
 
-    const hasImage = held !== null && held.image !== null && !failedImages.includes(held.id);
-    const hasArtifact = held !== null && (hasImage || held.snippet !== null);
-    const isDissolved = held !== null && (dissolvedId === held.id || !hasArtifact);
+    const hasImage = focus !== null && focus.image !== null && !failedImages.includes(focus.id);
+    const hasArtifact = focus !== null && (hasImage || focus.snippet !== null);
+    const isDissolved = focus !== null && (dissolvedId === focus.id || !hasArtifact);
 
     function handleDissolve() {
-        if (held !== null) setDissolvedId(held.id);
+        if (focus !== null) setDissolvedId(focus.id);
     }
 
     function handleImageError(id: string) {
@@ -729,13 +799,13 @@ export default function Scan({ entries, source }: ScanProps) {
                         <span className={styles.hudOwner}>Nat Moges · {provenance}</span>
                         {reading === "rest" && <span className={styles.hudHint}>Scroll to travel</span>}
 
-                        {reading === "searching" && card === undefined && (
+                        {hudReading === "searching" && (
                             <span className={styles.hudHint}>{isRiding ? "Returning to the start" : "Scanning…"}</span>
                         )}
 
-                        {reading === "hunting" && held !== null && (
+                        {hudReading === "hunting" && focus !== null && (
                             <TextScrambler
-                                key={`${held.id}-hunting`}
+                                key={`${focus.id}-hunting`}
                                 text="Decoding"
                                 className={styles.hudTitle}
                                 textColor="var(--muted)"
@@ -744,12 +814,12 @@ export default function Scan({ entries, source }: ScanProps) {
                             />
                         )}
 
-                        {card !== undefined && held !== null && (
+                        {card !== undefined && focus !== null && (
                             <>
-                                <span className={styles.hudWhen}>{held.when}</span>
+                                <span className={styles.hudWhen}>{focus.when}</span>
                                 <TextScrambler
-                                    key={`${held.id}-${card}`}
-                                    text={held.title}
+                                    key={`${focus.id}-${card}`}
+                                    text={focus.title}
                                     className={styles.hudTitle}
                                     textColor={card === "debris" ? "var(--muted)" : "var(--signal)"}
                                     scrambleColor="var(--muted)"
@@ -758,41 +828,41 @@ export default function Scan({ entries, source }: ScanProps) {
 
                                 {card === "kept" && !isDissolved && (
                                     <button
-                                        key={`${held.id}-artifact`}
+                                        key={`${focus.id}-artifact`}
                                         type="button"
                                         className={styles.artifactButton}
                                         onClick={handleDissolve}
-                                        aria-label={`${held.title}: read the record`}
+                                        aria-label={`${focus.title}: read the record`}
                                     >
                                         {hasImage ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
-                                                src={held.image ?? ""}
+                                                src={focus.image ?? ""}
                                                 alt=""
                                                 className={styles.artifact}
-                                                onError={() => handleImageError(held.id)}
+                                                onError={() => handleImageError(focus.id)}
                                             />
                                         ) : (
-                                            <pre className={styles.snippet}>{held.snippet}</pre>
+                                            <pre className={styles.snippet}>{focus.snippet}</pre>
                                         )}
                                         <span className={styles.hudHint}>Tap to read</span>
                                     </button>
                                 )}
 
                                 {(isDissolved || card === "debris") && (
-                                    <div key={`${held.id}-readout`} className={styles.readout}>
-                                        <p>{held.whatChanged}</p>
-                                        {card === "kept" && held.credit && (
-                                            <p className={styles.hudCredit}>{held.credit}</p>
+                                    <div key={`${focus.id}-readout`} className={styles.readout}>
+                                        <p>{focus.whatChanged}</p>
+                                        {card === "kept" && focus.credit && (
+                                            <p className={styles.hudCredit}>{focus.credit}</p>
                                         )}
-                                        {card === "kept" && held.link && (
-                                            <a href={held.link} className={styles.hudLink}>
+                                        {card === "kept" && focus.link && (
+                                            <a href={focus.link} className={styles.hudLink}>
                                                 Open →
                                             </a>
                                         )}
                                         {card === "debris" && (
                                             <p className={styles.hudLock}>
-                                                Signal lost. Locks when: {held.lockCondition}
+                                                Signal lost. Locks when: {focus.lockCondition}
                                             </p>
                                         )}
                                     </div>

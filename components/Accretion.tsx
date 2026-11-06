@@ -164,11 +164,56 @@
  * passage heights, kept and debris · the breath between strata · BAR stays
  * 1000 ms, and the tempo is confirmed as final.
  *
- * PHONE: the chapter title sits above the HUD, not in a left third the
- * phone doesn't have.
+ * PHONE: the chapter title takes the top-left corner, across the sky from
+ * the satellite, not a left third the phone doesn't have. (Corrected in
+ * item 10: it first sat above the HUD and ran into the lock.)
  *
  * REDUCED MOTION: meteors still. The plain list gets the strata as
  * headings.
+ */
+
+/*
+ * INTEGRATION PASS, ITEM 10 — the pre-lock audit's fixes.
+ * What I found: running the site as a stranger, at every speed, the scan
+ * had a cliff. At an easy scroll every object decodes; a little faster
+ * and none do, because an object only hunts while it sits at the lock. A
+ * brisk reader got "Scanning…" all the way down. On my own laptop the
+ * grown planet pushed both moons off the edge, so the payoff was two names
+ * pinned to the side. A shared link showed a blank card. A reload dropped
+ * you mid-record under a replaying boot. And the strongest proof rows hid
+ * their story behind a tap.
+ *
+ * BEFORE: the boot, as before. Every visit now starts at the top, where
+ * the boot is, reload or not.
+ *
+ * THE INSTANT IT LOCKS: the object becomes the satellite's target, and its
+ * hunt runs to the end even if you scroll on. While it's busy, what passes
+ * is left for the finale. So speed thins the reading instead of switching
+ * it off.
+ *
+ * DURING: the HUD reads what it last read until the next object is caught,
+ * instead of blinking back to "Scanning…". A card holds while the next
+ * object decodes, up to a bar, so its title decodes once, and the next
+ * card takes over the moment it lands, so none is skipped. Stay with a
+ * kept object for two bars and its story replaces the picture on its own.
+ * A link says where it goes, opens in a new tab, and a link back to this
+ * page is dropped.
+ *
+ * AT THE END: the grown planet is framed so both moons stay on screen. On
+ * a laptop it's the biggest planet whose moons fit between the satellite's
+ * lane and the edge.
+ *
+ * A REPEAT VISIT: the planet carries the record and says only that; no
+ * "scanned 00" under a full planet.
+ *
+ * THE KNOBS: the hunt (0.75 bar) · a card's hold (a bar) · the auto-read
+ * (two bars) · the moons' reach (1.53 radii, measured from the camera).
+ *
+ * PHONE: unchanged layout; the hint says tap. With a mouse it says click.
+ *
+ * REDUCED MOTION: the plain list opens with my name and one line on what
+ * it is. A wrong address gets a 404 in the record's voice, and a shared
+ * link gets a frame of the grown planet.
  */
 
 import Link from "next/link";
