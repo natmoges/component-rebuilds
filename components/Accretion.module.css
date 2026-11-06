@@ -245,26 +245,35 @@
     pointer-events: none;
 }
 
+/* Integration item 8: the stand-in is a drawn planet, the same teal body, rim and green rings
+   as the real one, not a grey ball. */
 .planet {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at 34% 30%, #a3a9b1, #4a4f56 45%, #15171a 78%);
+    background:
+        repeating-linear-gradient(135deg,
+            transparent 0 calc(var(--size) / 14 - 1.5px),
+            color-mix(in srgb, var(--signal) 55%, transparent) calc(var(--size) / 14 - 1.5px) calc(var(--size) / 14)),
+        radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--world) 45%, #0F1C19), #0F1C19 72%);
     box-shadow:
-        inset -6px -8px 18px rgba(0, 0, 0, 0.75),
-        0 0 calc(8px + var(--mass) * 1.5px) color-mix(in srgb, var(--signal) 35%, transparent);
+        inset 0 0 0 1.5px color-mix(in srgb, var(--world) 70%, transparent),
+        inset 0 0 calc(var(--size) * 0.14) color-mix(in srgb, var(--world) 55%, transparent),
+        0 0 calc(8px + var(--mass) * 1.5px) color-mix(in srgb, var(--world) 30%, transparent);
     transition: box-shadow var(--bar);
 }
 
-/* Once HeroOrbit has drawn, the grey sphere hands over. It stays as the fallback. */
+/* It shows only when the planet says WebGL refused. Never while the real planet is loading or
+   starting. */
 .planet,
 .ring {
+    opacity: 0;
     transition: opacity var(--bar);
 }
 
-.space:has([data-orbit-drawn="true"]) .planet,
-.space:has([data-orbit-drawn="true"]) .ring {
-    opacity: 0;
+.space:has([data-orbit-failed]) .planet,
+.space:has([data-orbit-failed]) .ring {
+    opacity: 1;
 }
 
 .ring {
@@ -280,7 +289,7 @@
     width: 14px;
     height: 14px;
     margin: -7px 0 0 -7px;
-    color: var(--signal);
+    color: var(--fg-soft);
     opacity: 0.85;
     transform: rotate(var(--angle)) translateX(calc(var(--size) / 2 + 14px)) rotate(calc(var(--angle) * -1));
     animation: arrive var(--bar) var(--ease-settle) both;

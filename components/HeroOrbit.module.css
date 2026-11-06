@@ -21,7 +21,8 @@
     margin: 6px 0 0 14px;
     white-space: nowrap;
     color: var(--muted);
-    font-family: var(--font-display);
+    /* Integration item 8: the hero's small-mono label style. */
+    font-family: var(--font-mono);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
 }

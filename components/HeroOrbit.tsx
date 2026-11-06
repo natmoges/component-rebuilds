@@ -30,7 +30,9 @@
  * earned, and how much dust each kept object adds.
  *
  * BEFORE LOAD: the server prints today's grey sphere on the right at its
- * starting size, so the body is there from the first paint.
+ * starting size, so the body is there from the first paint. (Integration
+ * item 8: the stand-in is now a drawn planet, and it shows only when WebGL
+ * refuses, never while the planet is starting.)
  *
  * THE INSTANT IT ARRIVES: the planet draws its first frame hidden, then
  * fades in over the grey sphere on one bar, so it never shows the
@@ -81,7 +83,8 @@
  * redrawn to fit when the window changes size.
  *
  * FAILURE: if WebGL can't start, the grey sphere stays and grows the way
- * it does today, with its ring of moons.
+ * it does today, with its ring of moons. (Integration item 8: a drawn
+ * planet in CSS instead: the same teal body, rim and green rings.)
  *
  * PHONE: the same planet with half the dust. It keeps clear of the
  * scan's lane instead of the satellite's orbit, and bleeds further off
@@ -188,6 +191,8 @@ const MOON_RADIUS = 10;
 const MOON_WHITE = "#F2F5F4";
 const MOON_DARK = "#1A1F1E";
 const TITLES = ["SYSTEMS ARCHITECT", "CREATIVE TECHNOLOGIST"];
+// The gap between a moon and its name, on either side.
+const TITLE_GAP = 14;
 const SPOT = new Vector3();
 const CAMERA_RIGHT = new Vector3(1, 0, 0).applyEuler(CAMERA_ROTATION);
 const SATELLITE_CLEARANCE = 185 + 24;
@@ -305,6 +310,45 @@ void main() {
 }
 `;
 
+// Integration item 8: the moons, lit white and banded like my hero's, wound like a ball of thread.
+const MOON_FRAGMENT = /* glsl */ `
+uniform vec3 uWhite;
+uniform vec3 uDark;
+uniform float uRadius;
+
+varying vec3 vNormal;
+varying vec3 vLocal;
+
+const vec3 VIEW = vec3(0.0, 0.0, 1.0);
+const vec3 LIGHT = vec3(-0.4, 0.6, 0.7);
+const vec3 WIND = vec3(0.2, 0.96, 0.18);
+const float BANDS = 4.0;
+
+void main() {
+    vec3 normal = normalize(vNormal);
+    float facing = max(dot(normal, VIEW), 0.0);
+    float light = max(dot(normal, normalize(LIGHT)), 0.0);
+    float band = dot(vLocal, WIND) / uRadius * BANDS;
+    float gap = smoothstep(0.3, 0.42, abs(fract(band) - 0.5));
+    vec3 surface = mix(uWhite, uDark, gap * 0.8);
+    vec3 color = surface * (0.5 + 0.7 * light) + uWhite * pow(1.0 - facing, 2.0) * 0.6;
+    gl_FragColor = vec4(color, 1.0);
+    #include <colorspace_fragment>
+}
+`;
+
+// A soft glow behind each moon, brightest at its centre.
+const HALO_FRAGMENT = /* glsl */ `
+uniform vec3 uWhite;
+varying vec3 vNormal;
+
+void main() {
+    float facing = max(dot(normalize(vNormal), vec3(0.0, 0.0, 1.0)), 0.0);
+    gl_FragColor = vec4(uWhite, pow(facing, 3.0) * 0.28);
+    #include <colorspace_fragment>
+}
+`;
+
 const TRAIL_VERTEX = /* glsl */ `
 varying float vAngle;
 
@@ -314,16 +358,30 @@ void main() {
 }
 `;
 
+// Integration item 8: a short comet trail that fades behind the moon, not a full orbit line.
 const TRAIL_FRAGMENT = /* glsl */ `
+uniform vec3 uColor;
+uniform float uStrength;
+
 varying float vAngle;
+
+const float SPAN = 0.24;
 
 void main() {
     float behind = fract(vAngle / 6.28318);
-    float alpha = pow(1.0 - behind, 3.0) * 0.9;
-    gl_FragColor = vec4(vec3(1.0), alpha);
+    float alpha = pow(max(1.0 - behind / SPAN, 0.0), 2.0) * uStrength;
+    gl_FragColor = vec4(uColor, alpha);
     #include <colorspace_fragment>
 }
 `;
+
+// The trail's strands: a white core, a soft glow, and the red and blue fringe either side of it.
+const TRAIL_STRANDS = [
+    { offset: 0, tube: 1.1, color: "#F2F5F4", strength: 0.95 },
+    { offset: 0, tube: 3.2, color: "#F2F5F4", strength: 0.12 },
+    { offset: 1.8, tube: 0.7, color: "#FF5A5A", strength: 0.32 },
+    { offset: -1.8, tube: 0.7, color: "#5AA8FF", strength: 0.32 },
+];
 
 function grainsOf(count: number, seed: number) {
     let state = seed;
@@ -466,13 +524,18 @@ function Moon({
     const moonRef = useRef<Mesh>(null);
     const skin = useMemo(
         () => ({
-            uRim: { value: new Color(MOON_WHITE) },
-            uContour: { value: new Color(MOON_WHITE) },
-            uBase: { value: new Color(MOON_DARK) },
+            uWhite: { value: new Color(MOON_WHITE) },
+            uDark: { value: new Color(MOON_DARK) },
             uRadius: { value: MOON_RADIUS },
-            uLit: { value: 1 },
-            uPixelRatio: { value: 1 },
         }),
+        []
+    );
+    const strands = useMemo(
+        () =>
+            TRAIL_STRANDS.map((strand) => ({
+                ...strand,
+                uniforms: { uColor: { value: new Color(strand.color) }, uStrength: { value: strand.strength } },
+            })),
         []
     );
 
@@ -488,7 +551,12 @@ function Moon({
         moon.getWorldPosition(SPOT).project(state.camera);
         const x = ((SPOT.x + 1) / 2) * state.size.width;
         const y = ((1 - SPOT.y) / 2) * state.size.height;
-        title.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+        // A name stays on screen: near the right edge, it moves to the moon's other side.
+        const stageLeft = title.offsetParent?.getBoundingClientRect().left ?? 0;
+        const width = title.offsetWidth;
+        const isFlipped = stageLeft + x + TITLE_GAP + width > window.innerWidth - TITLE_GAP;
+        const left = isFlipped ? x - width - TITLE_GAP * 2 : x;
+        title.style.translate = `${left.toFixed(1)}px ${y.toFixed(1)}px`;
     });
 
     return (
@@ -496,23 +564,32 @@ function Moon({
             <group ref={orbitRef} rotation={[0, ORBIT_PHASE[index], 0]}>
                 <mesh ref={moonRef} position={[ORBIT_RADIUS, 0, 0]}>
                     <sphereGeometry args={[MOON_RADIUS, 32, 32]} />
-                    <shaderMaterial
-                        transparent
-                        uniforms={skin}
-                        vertexShader={SKIN_VERTEX}
-                        fragmentShader={SKIN_FRAGMENT}
-                    />
+                    <shaderMaterial uniforms={skin} vertexShader={SKIN_VERTEX} fragmentShader={MOON_FRAGMENT} />
                 </mesh>
-                <mesh rotation={[Math.PI / 2, 0, 0]}>
-                    <torusGeometry args={[ORBIT_RADIUS, 1.4, 6, 256]} />
+                <mesh position={[ORBIT_RADIUS, 0, 0]}>
+                    <sphereGeometry args={[MOON_RADIUS * 2.2, 24, 24]} />
                     <shaderMaterial
                         transparent
                         depthWrite={false}
                         blending={AdditiveBlending}
-                        vertexShader={TRAIL_VERTEX}
-                        fragmentShader={TRAIL_FRAGMENT}
+                        uniforms={skin}
+                        vertexShader={SKIN_VERTEX}
+                        fragmentShader={HALO_FRAGMENT}
                     />
                 </mesh>
+                {strands.map((strand) => (
+                    <mesh key={`${strand.offset}-${strand.tube}`} rotation={[Math.PI / 2, 0, 0]}>
+                        <torusGeometry args={[ORBIT_RADIUS + strand.offset, strand.tube, 6, 256]} />
+                        <shaderMaterial
+                            transparent
+                            depthWrite={false}
+                            blending={AdditiveBlending}
+                            uniforms={strand.uniforms}
+                            vertexShader={TRAIL_VERTEX}
+                            fragmentShader={TRAIL_FRAGMENT}
+                        />
+                    </mesh>
+                ))}
             </group>
         </group>
     );
@@ -644,7 +721,9 @@ export default function HeroOrbit({
         requestAnimationFrame(() => requestAnimationFrame(() => setIsDrawn(true)));
     }
 
-    if (hasFailed) return null;
+    // When WebGL refuses (or is lost), the planet says so, and the drawn stand-in shows. It never
+    // shows while the planet is still loading or starting (integration item 8).
+    if (hasFailed) return <span data-orbit-failed hidden />;
 
     return (
         <div ref={stageRef} className={styles.stage} data-orbit-drawn={isDrawn} aria-hidden="true">
