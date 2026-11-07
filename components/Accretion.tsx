@@ -247,6 +247,39 @@
  * REDUCED MOTION: the still, never the clip.
  */
 
+/*
+ * INTEGRATION PASS, POLISH — readable by a machine.
+ * What I found: I asked an AI the question a recruiter would, cold, about
+ * both my sites. Here it read the whole record, found the repo and told
+ * proven from claimed on its own. natmoges.com came back with "no code
+ * repositories found": the proof was a link away and nothing pointed to
+ * it. More and more, the first reader of a page isn't a person. It's a
+ * model fetching the link someone pasted, and it can't see a planet, a
+ * hover or a PDF it can't open. Like the old résumé parsers, it reads the
+ * text, so the text has to carry everything.
+ *
+ * THE SENTENCE FOR STRANGERS: the page's opening text (hidden while the
+ * scan runs, shown with motion reduced, read by every machine) says what
+ * kept and debris mean, that the satellite scans what you pass and the
+ * planet grows from what you keep, and what the strata and the seams are.
+ *
+ * WHO I AM, AS DATA: a schema.org ProfilePage about one Person in the
+ * page's head: name, the two titles the record proves, and the places to
+ * check (natmoges.com, the repo, LinkedIn). Links I already publish,
+ * nothing new.
+ *
+ * /llms.txt: the record as plain text, read from Notion the same way the
+ * page is, so it can't drift from it: who, what's kept, what's debris and
+ * what would lock it, and where to verify. A proposal more than a
+ * standard; cheap, and one source.
+ *
+ * THE DOORS: robots.txt lets every reader in and names the sitemap, which
+ * lists every page.
+ *
+ * FAILURE: if Notion can't be read, /llms.txt reads the stored copy and
+ * says so, as the page does.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";
@@ -310,6 +343,7 @@ function Satellite() {
 
 export default async function Accretion() {
     const { entries, source } = await readRecord();
+    const strataCount = new Set(entries.map((entry) => entry.stratum)).size;
     const record = recordCountOf(entries);
 
     return (
@@ -333,6 +367,9 @@ export default async function Accretion() {
                 <p>
                     My record, oldest first, {source === "substrate" ? "read live from Notion" : "from the stored copy"}.
                     What the record can prove is kept; what it can&apos;t yet is debris, with what would lock it.
+                    Scrolling is travel: SAT_1, the satellite, scans each object as you pass, and the planet grows
+                    from what you keep. The record runs in {strataCount} strata, from before it began to now, and the
+                    seams stay showing: what each build was made from, and who it&apos;s credited to.
                 </p>
             </header>
 
