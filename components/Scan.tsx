@@ -68,6 +68,9 @@ import dynamic from "next/dynamic";
 import { BAR_MS, TICK_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
 import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../lib/links";
 
+// An artifact that moves (polish): an Image ending in .mp4.
+const CLIP = /\.mp4$/i;
+
 const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
 const HOLD_TOLERANCE_PX = 6;
@@ -291,6 +294,11 @@ export default function Scan({ entries, source }: ScanProps) {
     const landedRef = useRef<string | null>(null);
     const isOnlineRef = useRef(false);
     const [failedImages, setFailedImages] = useState<string[]>([]);
+    // Polish, one moving artifact: a clip that won't load falls back to its still, and a clip that's
+    // playing holds the story back until it ends.
+    const [failedClips, setFailedClips] = useState<string[]>([]);
+    const [playingClipId, setPlayingClipId] = useState<string | null>(null);
+    const [prefersStill, setPrefersStill] = useState(false);
     const [bootStage, setBootStage] = useState<BootStage>("off");
     const scanRef = useRef<HTMLDivElement | null>(null);
     const fieldRef = useRef<HTMLDivElement | null>(null);
@@ -332,6 +340,15 @@ export default function Scan({ entries, source }: ScanProps) {
     useEffect(() => {
         window.history.scrollRestoration = "manual";
         window.scrollTo(0, 0);
+    }, []);
+
+    // Where motion is reduced, a clip shows its still.
+    useEffect(() => {
+        const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const update = () => setPrefersStill(query.matches);
+        update();
+        query.addEventListener("change", update);
+        return () => query.removeEventListener("change", update);
     }, []);
 
     useEffect(() => {
@@ -678,6 +695,10 @@ export default function Scan({ entries, source }: ScanProps) {
     const mass = counts.planet.mass;
 
     const hasImage = focus !== null && focus.image !== null && !failedImages.includes(focus.id);
+    // A clip is an Image ending in .mp4; its still is the same name as a .jpg.
+    const isClip =
+        hasImage && focus.image !== null && CLIP.test(focus.image) && !failedClips.includes(focus.id) && !prefersStill;
+    const stillSrc = focus !== null && focus.image !== null ? focus.image.replace(CLIP, ".jpg") : "";
     const hasArtifact = focus !== null && (hasImage || focus.snippet !== null);
     const isDissolved = focus !== null && (dissolvedId === focus.id || !hasArtifact);
 
@@ -688,14 +709,26 @@ export default function Scan({ entries, source }: ScanProps) {
     // The readout follows the artifact on its own (item 10): stay with a kept object for two bars and
     // its story replaces the picture, so a reader who pauses reads it without having to tap.
     const autoReadId = card === "kept" && focus !== null && hasArtifact && !isDissolved ? focus.id : null;
+    // A clip that's playing holds the story until it ends; one that stalls or never starts gets two bars.
+    const isClipPlaying = autoReadId !== null && playingClipId === autoReadId;
     useEffect(() => {
-        if (autoReadId === null) return;
+        if (autoReadId === null || isClipPlaying) return;
         const read = setTimeout(() => setDissolvedId(autoReadId), 2 * BAR_MS);
         return () => clearTimeout(read);
-    }, [autoReadId]);
+    }, [autoReadId, isClipPlaying]);
 
     function handleImageError(id: string) {
         setFailedImages((current) => (current.includes(id) ? current : [...current, id]));
+    }
+
+    function handleClipError(id: string) {
+        setPlayingClipId(null);
+        setFailedClips((current) => (current.includes(id) ? current : [...current, id]));
+    }
+
+    function handleClipEnded(id: string) {
+        setPlayingClipId(null);
+        setDissolvedId(id);
     }
 
     return (
@@ -872,10 +905,26 @@ export default function Scan({ entries, source }: ScanProps) {
                                         onClick={handleDissolve}
                                         aria-label={`${focus.title}: read the record`}
                                     >
-                                        {hasImage ? (
+                                        {isClip ? (
+                                            <video
+                                                key={`${focus.id}-clip`}
+                                                src={focus.image ?? ""}
+                                                poster={stillSrc}
+                                                className={styles.artifact}
+                                                muted
+                                                autoPlay
+                                                playsInline
+                                                preload="auto"
+                                                aria-hidden="true"
+                                                onPlaying={() => setPlayingClipId(focus.id)}
+                                                onWaiting={() => setPlayingClipId(null)}
+                                                onEnded={() => handleClipEnded(focus.id)}
+                                                onError={() => handleClipError(focus.id)}
+                                            />
+                                        ) : hasImage ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
-                                                src={focus.image ?? ""}
+                                                src={stillSrc}
                                                 alt=""
                                                 className={styles.artifact}
                                                 onError={() => handleImageError(focus.id)}

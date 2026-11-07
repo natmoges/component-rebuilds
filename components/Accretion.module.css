@@ -787,6 +787,14 @@
     animation: develop var(--bar) steps(8) both;
 }
 
+/* The one moving artifact (polish): sized like a still, so the HUD doesn't jump when it loads. */
+video.artifact {
+    width: auto;
+    height: 22vh;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+}
+
 .snippet {
     margin: 0 auto 0.4rem;
     padding: 0.6rem 0.8rem;

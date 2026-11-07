@@ -216,6 +216,37 @@
  * link gets a frame of the grown planet.
  */
 
+/*
+ * INTEGRATION PASS, POLISH — one moving artifact.
+ * What I found: every artifact in the record was a still, so the four
+ * builds that live on their own pages showed what they look like but
+ * never what they do. Here one of them moves: Motion Tiles shows five
+ * seconds of its Synthesis tile, the layers collapsing into the NatFTP
+ * plate. One clip, not four: the page's one interaction is still the
+ * scroll.
+ *
+ * WHAT MAKES IT A CLIP: the row's Image ends in .mp4. Its still sits
+ * beside it under the same name, as a .jpg, and stands in until the clip
+ * can play, if it never can, and wherever motion is reduced.
+ *
+ * THE INSTANT IT'S CAUGHT: the clip loads, muted and inline, and plays
+ * from the start. Never with the page.
+ *
+ * AT THE END: it plays once and stops on its last frame, the resolved
+ * plate. Then the story replaces it, the way a still's story replaces it
+ * after two bars.
+ *
+ * THE KNOBS: 5 s · 720 px wide · 217 KB · no sound.
+ *
+ * FAILURE: if the clip stalls or won't play, the story comes after two
+ * bars anyway. If it can't load at all, the record reads as it would with
+ * no artifact.
+ *
+ * PHONE: the same clip, inline.
+ *
+ * REDUCED MOTION: the still, never the clip.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";

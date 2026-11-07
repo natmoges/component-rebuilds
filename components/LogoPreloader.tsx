@@ -49,30 +49,38 @@
  */
 
 /*
- * POLISH, DEEP SPACE FIRST. On natmoges.com the preloader opens on space
- * black, and when it leaves you arrive in the charcoal: deep space first, then
- * our own neighbourhood. In Framer that is a Difference layer under the HUD.
- * Here the HUD only uses Screen, which can brighten the page but never darken
- * it, so it arrived on charcoal with nowhere to arrive from.
+ * INTEGRATION PASS, POLISH — deep space first.
+ * What I found: on natmoges.com the preloader opens on space black, and
+ * when it leaves you arrive in the charcoal: deep space first, then our
+ * own neighbourhood. In Framer that's a Difference layer under the HUD.
+ * Here the HUD only used Screen, which can brighten the page but never
+ * darken it, so it arrived on charcoal with nowhere to arrive from. Now
+ * one more layer sits under the HUD: the void.
  *
- * THE VOID: one more layer under the HUD, painted in the sky's own colours and
- * set to Difference. Where the page is sky it cancels to black. Where something
- * bright is drawn (the name, the stars, the planet) it barely moves. You see
- * the page's lights in deep space, not a black curtain over it.
+ * THE VOID: painted in the sky's own colours and set to Difference. Where
+ * the page is sky it cancels to black. Where something bright is drawn
+ * (the name, the stars, the planet) it barely moves. You see the page's
+ * lights in deep space, not a black curtain over it.
  *
  * IT MATCHES THE SKY IT COVERS: on Accretion the sky falls to the horizon
- * glow, so the void carries the same fall, and the glow comes back up with
- * the charcoal. Every other page is plain charcoal, so its void is too.
+ * glow, so the void carries the same fall, and the glow comes back up
+ * with the charcoal. Every other page is plain charcoal, so its void is
+ * too.
  *
- * FROM FIRST PAINT: it is in the page the server sends, so the first frame is
+ * BEFORE LOAD: it's in the page the server sends, so the first frame is
  * already black, never a flash of charcoal first.
  *
- * THE ARRIVAL: when the HUD lifts out, the void fades on the same 0.7 s curve
- * and the charcoal comes up around you. Clicks pass through it the whole time.
+ * AT THE END: when the HUD lifts out, the void fades on the same 0.7 s
+ * curve and the charcoal comes up around you. Clicks pass through it the
+ * whole time.
  *
- * FAILURE, PHONE, REDUCED MOTION: it leaves with the HUD and on the same
- * backstop · never shown where the HUD isn't (phones, tablets) · reduced
- * motion keeps the fade, since nothing here travels.
+ * THE KNOBS: the HUD's own fade and curve · --sky, the colour it cancels.
+ *
+ * FAILURE: it leaves with the HUD, on the same backstop.
+ *
+ * PHONE AND TABLET: never shown, like the HUD.
+ *
+ * REDUCED MOTION: the fade stays, since nothing here travels.
  */
 
 import { useEffect, useState, type CSSProperties } from "react";
