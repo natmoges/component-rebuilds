@@ -109,6 +109,34 @@
  * REDUCED MOTION: unchanged. No HUD, nothing boots.
  */
 
+/*
+ * INTEGRATION PASS, POLISH — the boot in plain words.
+ * What I found: the boot is the first thing a stranger reads, and four of
+ * its lines spoke my system's language: SOURCE: SUBSTRATE, GATE: PROVEN,
+ * POLISH: OFF · SEAMS: PUBLISHED, and four directives with nothing on the
+ * page to point to. They meant something to me and nothing to someone
+ * deciding whether to stay. Here the same log says the same things in
+ * words a stranger already has.
+ *
+ * THE RECORD: "RECORD: NOTION ... LIVE", or STORED COPY when Notion can't
+ * be read, the same words as the HUD's top line.
+ *
+ * THE RULE: "WITH PROOF → KEPT · NOT YET → DEBRIS". It's still the line
+ * that turns the planet's count on, the one build 13 calls GATE.
+ *
+ * THE SEAMS: "NOTHING POLISHED OUT · SEAMS SHOWN".
+ *
+ * THE LAST LINE BEFORE THE STATE: "// SCROLL TO TRAVEL. SAT_1 READS WHAT
+ * YOU PASS." The directives give way to the one instruction a stranger
+ * needs, and SAT_1 is the name printed beside the satellite, so the word
+ * points at the thing. Short enough to hold one line on a phone.
+ *
+ * THE KNOBS: unchanged. Nine lines, the same score and the same stages,
+ * so it lands in about the same 7 seconds.
+ *
+ * REDUCED MOTION: unchanged. No HUD, nothing boots.
+ */
+
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import styles from "./BootScreen.module.css";
 // Accretion's tempo, from the one clock: a one-second bar of eight ticks.
@@ -161,11 +189,11 @@ function bootLinesOf(objectCount: number, source: "substrate" | "cache"): Line[]
             ],
         },
         { segments: row("LINK: SATELLITE", "OK", "signal"), stage: "linked" },
-        { segments: row("SOURCE: SUBSTRATE", isLive ? "LIVE" : "CACHE", isLive ? "signal" : "value") },
+        { segments: row("RECORD: NOTION", isLive ? "LIVE" : "STORED COPY", isLive ? "signal" : "value") },
         { segments: row("INDEX: OLDEST FIRST", `${objectCount} OBJECTS`, "signal") },
         {
             segments: [
-                { text: "GATE: PROVEN → ", tone: "label" },
+                { text: "WITH PROOF → ", tone: "label" },
                 { text: "KEPT", tone: "signal", lands: true },
                 { text: " · NOT YET → ", tone: "label" },
                 { text: "DEBRIS", tone: "debris", lands: true },
@@ -174,13 +202,11 @@ function bootLinesOf(objectCount: number, source: "substrate" | "cache"): Line[]
         },
         {
             segments: [
-                { text: "POLISH: ", tone: "label" },
-                { text: "OFF", tone: "value", lands: true },
-                { text: " · SEAMS: ", tone: "label" },
-                { text: "PUBLISHED", tone: "value", lands: true },
+                { text: "NOTHING POLISHED OUT · ", tone: "label" },
+                { text: "SEAMS SHOWN", tone: "value", lands: true },
             ],
         },
-        { segments: [{ text: "// DIRECTIVES: SYSTEMS · FLOW · SYNTHESIS · INTENT", tone: "comment" }] },
+        { segments: [{ text: "// SCROLL TO TRAVEL. SAT_1 READS WHAT YOU PASS.", tone: "comment" }] },
         {
             segments: [
                 { text: "// STATE: ", tone: "comment" },
