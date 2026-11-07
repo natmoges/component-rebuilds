@@ -292,11 +292,15 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **How it was made:** Claude wrote the code from my paragraph, step by step, as whole files I pasted in. I made the design calls and caught by eye the starting size, the white flash on reload, the oversized titles, the overlap with the satellite and the HUD's overflowing code.
 - **Reduced motion:** Accretion shows its plain record list, so there's no planet to move.
 
+## The integration pass
+
+Fourteen builds on one page still read as fourteen builds, so I had three models read the site cold, reconciled what they found against my own record, and fixed it item by item, the same way as the ladder: a paragraph first, one commit per step, every change tested before it was committed. Then I ran it as a stranger at every speed and fixed what broke. The commits from `dfd3f92` on are the pass.
+
 ## Credits
 
 Every reference is a component from the Framer Marketplace or Framer University, credited above by its author, except build 14's, a Spline community scene by Tim Quirino. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 14 installs three.js and react-three-fiber (both MIT) to draw its scene. Build 13's boot log is my own text, read from the record. Build 10's logo and starfield are my own artwork and screen recording.
 
-**Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build.
+**Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build. In the integration pass, the roles shifted: Claude made the edits directly in my repo; I orchestrated, directed the pass, checked every change on localhost and made every commit.
 
 ## Run it locally
 
