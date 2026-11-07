@@ -1,5 +1,18 @@
 [
   {
+    "id": "40b92e44-9278-8138-a44d-c4e109a3f18c",
+    "title": "Behind the projector",
+    "when": "2002 →",
+    "stratum": "0 · Before the record",
+    "state": "Kept",
+    "whatChanged": "Born in Ethiopia; three to six in a refugee camp in Kenya. When the film truck came, the whole camp faced the screen. I was in the back of the truck, behind the projector, and the crew let me in on how it worked. I've faced the machine ever since.",
+    "lockCondition": "",
+    "credit": "",
+    "link": null,
+    "image": null,
+    "snippet": null
+  },
+  {
     "id": "40b92e44-9278-8191-995d-ca769e0e4401",
     "title": "Ten years, recorded as one",
     "when": "4th grade → 12th",
@@ -208,6 +221,19 @@
     "snippet": null
   },
   {
+    "id": "40b92e44-9278-818b-a5a9-dbb8c1a5f141",
+    "title": "The pads, in the car",
+    "when": "~2023 →",
+    "stratum": "3 · The substrate",
+    "state": "Kept",
+    "whatChanged": "After prodbynat I moved from Logic to the MPC. I'd watched a producer I looked up to make beats with no computer, so I bought a Live 2, and on the pads I felt the music more: a clap I could hit, not click in and snap to the grid. The sessions moved into my car and the park, the MPC on my lap, a Pocket 3 and a mic running, each one opened with a slate to camera: MPC session, the date, the time. The Live 3 came later. Years of sessions, filmed before I knew what they were for. The seams were filmed, not built.",
+    "lockCondition": "",
+    "credit": "",
+    "link": null,
+    "image": null,
+    "snippet": null
+  },
+  {
     "id": "40b92e44-9278-819c-b67e-e621d597560a",
     "title": "The year that wasn't missing",
     "when": "2025",
@@ -299,12 +325,38 @@
     "snippet": null
   },
   {
+    "id": "40f92e44-9278-8142-9534-cd91b19d8afc",
+    "title": "First sunlight",
+    "when": "May 28, 2026",
+    "stratum": "4 · Legibility",
+    "state": "Kept",
+    "whatChanged": "For years I built alone, in a cave: the private cloud, the beats, the operating system, all for my own reasons, with nobody watching. When I finally came out, I held the work up in front of me and expected it to walk out for me. Then a portfolio got me into a founder round at a startup, without a four-year degree, and I stood in sunlight for the first time. Asked what I was building, I took the room into the deep space where I lived, where nothing exists for anyone else. Every answer was true and none of them landed. But I'd felt the light, and I've walked back into it since. The work can't walk out for me; I have to. Everything after this row is that walk, in public: an index of what I'd built, then the ladder, built where anyone can watch.",
+    "lockCondition": "",
+    "credit": "",
+    "link": null,
+    "image": null,
+    "snippet": null
+  },
+  {
+    "id": "41192e44-9278-81b4-a554-d0d4adc6bde6",
+    "title": "The index, in a room",
+    "when": "Jul 27, 2026",
+    "stratum": "4 · Legibility",
+    "state": "Kept",
+    "whatChanged": "Back in a room that summer, on the sickest day of my year and with almost no prep. This time my answers had names: words that weren't in my mouth a month earlier came out live and right, and I cleared the gate. Indexing, not rehearsing, was what changed.",
+    "lockCondition": "",
+    "credit": "",
+    "link": null,
+    "image": null,
+    "snippet": null
+  },
+  {
     "id": "40b92e44-9278-8129-a43b-d20b6935eb79",
     "title": "The 56-Day Sprint",
     "when": "Aug 14, 2026",
     "stratum": "4 · Legibility",
     "state": "Kept",
-    "whatChanged": "250+ applications run as an instrumented campaign, then audited in public. Volume did nothing. I never lost a room with a human in it.",
+    "whatChanged": "250+ applications run as an instrumented campaign, then audited in public. Volume did nothing. Every room I lost was an abstract live round or a room with no human in it.",
     "lockCondition": "",
     "credit": "",
     "link": "https://www.linkedin.com/posts/natmoges_250-applications-four-interview-processes-activity-7494011208489050113-gr7G",
@@ -460,7 +512,7 @@
     "when": "Nov 2, 2026",
     "stratum": "5 · The middle floor",
     "state": "Kept",
-    "whatChanged": "The NatFTP HUD that opens my site, rebuilt to own the first three seconds of every visit: mounted in the frame around every page, on screen from the first paint, a projection of only the HUD and the stars over hyperspace, then gone without a trace. No black card, no ghost pane.",
+    "whatChanged": "The NatFTP HUD that opens my site, rebuilt to own the first three seconds of every visit: mounted in the frame around every page, on screen from the first paint, a projection of only the HUD and the stars over hyperspace, then gone without a trace. It opens on deep space and leaves you in the charcoal. No black card, no ghost pane.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
@@ -499,7 +551,7 @@
     "when": "Nov 3, 2026",
     "stratum": "5 · The middle floor",
     "state": "Kept",
-    "whatChanged": "The HUD you're reading from, powered on like a CRT. It types a kernel log written from this record (live or cache, the real object count) and brings the scene online line by line: the satellite's beacon lights on LINK, the body's count on GATE, and nothing locks until AWAITING SIGNAL. NOT FROM THIS PLANET reads in and out as NAT. On my site it's a retro screen pinned in a photo of a Mac; here the HUD is the computer.",
+    "whatChanged": "The HUD you're reading from, powered on like a CRT. It types a kernel log written from this record (live or the stored copy, the real object count) and brings the scene online line by line: the satellite's beacon lights on LINK, the body's count on the proof line, and nothing locks until AWAITING SIGNAL. NOT FROM THIS PLANET reads in and out as NAT. On my site it's a retro screen pinned in a photo of a Mac; here the HUD is the computer.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
