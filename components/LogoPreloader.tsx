@@ -48,6 +48,33 @@
  * REDUCED MOTION: no travel. The logo appears in place, holds, and fades.
  */
 
+/*
+ * POLISH, DEEP SPACE FIRST. On natmoges.com the preloader opens on space
+ * black, and when it leaves you arrive in the charcoal: deep space first, then
+ * our own neighbourhood. In Framer that is a Difference layer under the HUD.
+ * Here the HUD only uses Screen, which can brighten the page but never darken
+ * it, so it arrived on charcoal with nowhere to arrive from.
+ *
+ * THE VOID: one more layer under the HUD, painted in the sky's own colours and
+ * set to Difference. Where the page is sky it cancels to black. Where something
+ * bright is drawn (the name, the stars, the planet) it barely moves. You see
+ * the page's lights in deep space, not a black curtain over it.
+ *
+ * IT MATCHES THE SKY IT COVERS: on Accretion the sky falls to the horizon
+ * glow, so the void carries the same fall, and the glow comes back up with
+ * the charcoal. Every other page is plain charcoal, so its void is too.
+ *
+ * FROM FIRST PAINT: it is in the page the server sends, so the first frame is
+ * already black, never a flash of charcoal first.
+ *
+ * THE ARRIVAL: when the HUD lifts out, the void fades on the same 0.7 s curve
+ * and the charcoal comes up around you. Clicks pass through it the whole time.
+ *
+ * FAILURE, PHONE, REDUCED MOTION: it leaves with the HUD and on the same
+ * backstop · never shown where the HUD isn't (phones, tablets) · reduced
+ * motion keeps the fade, since nothing here travels.
+ */
+
 import { useEffect, useState, type CSSProperties } from "react";
 import styles from "./LogoPreloader.module.css";
 
@@ -103,36 +130,41 @@ export default function LogoPreloader({
     } as CSSProperties;
 
     return (
-        <div
-            className={styles.stage}
-            data-phase={phase}
-            style={tempo}
-            role="status"
-            aria-label="Loading"
-        >
-            <video
-                className={styles.video}
-                poster={posterSrc}
-                autoPlay
-                muted
-                loop
-                playsInline
-                aria-hidden="true"
+        <>
+            {/* The void: the sky cancelled to black, under the HUD. A sibling, not a child, because
+                the stage's Screen blend isolates its children from the page. */}
+            <div className={styles.void} data-phase={phase} style={tempo} aria-hidden="true" />
+            <div
+                className={styles.stage}
+                data-phase={phase}
+                style={tempo}
+                role="status"
+                aria-label="Loading"
             >
-                <source
-                    src={videoSrc}
-                    type="video/mp4"
-                    media="(min-width: 810px) and (hover: hover)"
+                <video
+                    className={styles.video}
+                    poster={posterSrc}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    aria-hidden="true"
+                >
+                    <source
+                        src={videoSrc}
+                        type="video/mp4"
+                        media="(min-width: 810px) and (hover: hover)"
+                    />
+                </video>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    className={styles.logo}
+                    src={logoSrc}
+                    alt="NatFTP"
+                    width={logoSize}
+                    draggable={false}
                 />
-            </video>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-                className={styles.logo}
-                src={logoSrc}
-                alt="NatFTP"
-                width={logoSize}
-                draggable={false}
-            />
-        </div>
+            </div>
+        </>
     );
 }

@@ -282,7 +282,7 @@ export default async function Accretion() {
     const record = recordCountOf(entries);
 
     return (
-        <main className={styles.space} style={tempoStyle}>
+        <main className={styles.space} style={tempoStyle} data-sky="horizon">
             <div className={styles.stars} aria-hidden="true">
                 <span className={styles.starLayer} style={{ boxShadow: starField(140, 7) }} />
                 <span className={styles.starLayer} style={{ boxShadow: starField(60, 23) }} />

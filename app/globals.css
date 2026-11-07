@@ -71,6 +71,9 @@
   --world-deep: #19897C;
   /* The horizon: the green-grey glow my hero falls to at the bottom of the sky (item 8). */
   --horizon: #56655d;
+  /* The sky as painted (polish): what LogoPreloader's void cancels to black. Plain charcoal,
+     unless the page falls to the horizon (below). */
+  --sky: var(--ground);
   /* The glitch: the one red, and its split partner. */
   --glitch: #ff0000;
   --glitch-pair: #00ffff;
@@ -89,6 +92,12 @@
   --ease-travel: cubic-bezier(0.3, 0, 0.2, 1);
   /* Snap: a control answering a tap. */
   --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Accretion's sky falls from charcoal to the horizon glow (item 8), so the void falls the same way:
+   the glow at 70% over charcoal, from 42% down, as .stars paints it. */
+html:has(main[data-sky="horizon"]) {
+  --sky: linear-gradient(to bottom, var(--ground) 42%, color-mix(in srgb, var(--horizon) 70%, var(--ground)) 100%);
 }
 
 * { box-sizing: border-box; }
