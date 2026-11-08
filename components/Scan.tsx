@@ -65,7 +65,16 @@ import type { Entry } from "../lib/record";
 import { chapterOf } from "../lib/chapters";
 import styles from "./Accretion.module.css";
 import dynamic from "next/dynamic";
-import { BAR_MS, TICK_MS, HUNT_MS, countsOf, type Decision } from "../lib/tempo";
+import {
+    BAR_MS,
+    TICK_MS,
+    HUNT_MS,
+    DEBRIS_CARD_MS,
+    KEPT_CARD_MS,
+    ARTIFACT_CARD_MS,
+    countsOf,
+    type Decision,
+} from "../lib/tempo";
 import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../lib/links";
 
 // An artifact that moves (polish): an Image ending in .mp4.
@@ -78,7 +87,7 @@ const DRIFT_PER_ENTRY = 5;
 // Integration item 9: fewer meteors, each on its own cycle, so the sky has weather, not rain.
 const METEOR_COUNT = 10;
 // The breath before each new stratum, in vh (item 9).
-const BREATH_VH = 20;
+const BREATH_VH = 30;
 
 // The finale's volley fits inside two bars, however many objects are left.
 const VOLLEY_MS = 2 * BAR_MS;
@@ -323,15 +332,20 @@ export default function Scan({ entries, source }: ScanProps) {
     const [isRiding, setIsRiding] = useState(false);
     const hudRef = useRef<HTMLElement | null>(null);
     const drifts = useMemo(() => driftOf(entries), [entries]);
+    // Which objects carry an artifact, so the HUD knows to give their card time to be looked at.
+    const artifactIds = useMemo(
+        () => new Set(entries.filter((entry) => entry.image !== null || entry.snippet !== null).map((entry) => entry.id)),
+        [entries],
+    );
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
     // The record's average passage, so the drift matter keeps its era's stretch now that passages
-    // vary (integration item 9): kept 70vh, debris 60vh, a 20vh breath at each new stratum, and the
-    // object itself (about 6.5vh).
+    // vary (integration item 9): kept 100vh, debris 80vh since the polish (room to look), a breath
+    // at each new stratum, and the object itself (about 6.5vh).
     const pitchVh = useMemo(() => {
         if (entries.length === 0) return 90;
         const opens = entries.filter((entry, index) => index === 0 || entries[index - 1].stratum !== entry.stratum).length;
         const kept = entries.filter((entry) => entry.state === "Kept").length;
-        const total = kept * 70 + (entries.length - kept) * 60 + opens * BREATH_VH + entries.length * 6.5;
+        const total = kept * 100 + (entries.length - kept) * 80 + opens * BREATH_VH + entries.length * 6.5;
         return total / entries.length;
     }, [entries]);
 
@@ -469,13 +483,21 @@ export default function Scan({ entries, source }: ScanProps) {
             const isCard = current !== null && decided[current] !== undefined;
             if (isCard && cardSinceRef.current === null) cardSinceRef.current = performance.now();
             const next = isRidingRef.current || isHome ? null : (landedRef.current ?? targetRef.current ?? held ?? current);
-            // A fresh card holds while the next object is still decoding, up to a bar, so its title
-            // decodes once. The next card always takes over the moment it lands, so none is skipped.
-            const shownFor = cardSinceRef.current === null ? BAR_MS : performance.now() - cardSinceRef.current;
-            const isNextDecoding = next !== null && decided[next] === undefined;
-            if (next !== current && isNextDecoding && isCard && shownFor < BAR_MS) {
+            // A fresh card holds long enough to be looked at before the next one takes it (polish,
+            // time to look): a bar for debris, two for a kept card, five for one with an artifact.
+            // The satellite doesn't wait; only the HUD does. The rocket and the top never wait.
+            const shownFor = cardSinceRef.current === null ? Infinity : performance.now() - cardSinceRef.current;
+            const minShown =
+                current === null || !isCard
+                    ? 0
+                    : decided[current] !== "kept"
+                      ? DEBRIS_CARD_MS
+                      : artifactIds.has(current)
+                        ? ARTIFACT_CARD_MS
+                        : KEPT_CARD_MS;
+            if (next !== current && next !== null && isCard && shownFor < minShown) {
                 if (cardHold !== null) clearTimeout(cardHold);
-                cardHold = setTimeout(locate, BAR_MS - shownFor);
+                cardHold = setTimeout(locate, minShown - shownFor);
             } else if (next !== current) {
                 if (next === landedRef.current) landedRef.current = null;
                 focusRef.current = next;
@@ -504,7 +526,7 @@ export default function Scan({ entries, source }: ScanProps) {
             if (cardHold !== null) clearTimeout(cardHold);
             locateRef.current = null;
         };
-    }, [entries, drifts, pitchVh]);
+    }, [entries, drifts, pitchVh, artifactIds]);
 
     // The HUD tells the page how much of the screen's foot it takes, so the rocket can ride above it on a phone.
     useEffect(() => {
@@ -706,14 +728,14 @@ export default function Scan({ entries, source }: ScanProps) {
         if (focus !== null) setDissolvedId(focus.id);
     }
 
-    // The readout follows the artifact on its own (item 10): stay with a kept object for two bars and
+    // The readout follows the artifact on its own (item 10; five bars since the polish): stay with a kept object and
     // its story replaces the picture, so a reader who pauses reads it without having to tap.
     const autoReadId = card === "kept" && focus !== null && hasArtifact && !isDissolved ? focus.id : null;
-    // A clip that's playing holds the story until it ends; one that stalls or never starts gets two bars.
+    // A clip that's playing holds the story until it ends; one that stalls or never starts gets five bars.
     const isClipPlaying = autoReadId !== null && playingClipId === autoReadId;
     useEffect(() => {
         if (autoReadId === null || isClipPlaying) return;
-        const read = setTimeout(() => setDissolvedId(autoReadId), 2 * BAR_MS);
+        const read = setTimeout(() => setDissolvedId(autoReadId), ARTIFACT_CARD_MS);
         return () => clearTimeout(read);
     }, [autoReadId, isClipPlaying]);
 

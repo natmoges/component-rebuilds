@@ -77,6 +77,13 @@ export const ABSORB_MS = HOLD_MS + FLIGHT_MS;
 // The planet grows when the object lands: after exactly the absorb, read, not copied.
 export const ARRIVAL_MS = ABSORB_MS;
 
+// How long the HUD holds a card before the next one may take it (polish, time to look): a debris
+// card for a bar, a kept card for two, and a card with an artifact (a picture, a snippet, a clip)
+// for five, after which its story replaces the artifact.
+export const DEBRIS_CARD_MS = BAR_MS;
+export const KEPT_CARD_MS = 2 * BAR_MS;
+export const ARTIFACT_CARD_MS = 5 * BAR_MS;
+
 // The same numbers, handed to the CSS on Accretion's page.
 export const tempoStyle = {
     "--bar": `${BAR_MS}ms`,

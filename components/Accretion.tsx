@@ -280,6 +280,37 @@
  * says so, as the page does.
  */
 
+/*
+ * INTEGRATION PASS, POLISH — room to look.
+ * What I found: reading my own record at my own pace, the HUD changed
+ * before my eye had taken a card in. A snippet, a picture or the clip got
+ * about a second before the next object took the screen, and the objects
+ * sat so close that the next one was already in frame while I read the
+ * last. The scan felt like it was sitting on the object before it instead
+ * of travelling.
+ *
+ * THE ROOM: about a screen per kept object. Each one holds at the lock
+ * over 65vh of scroll, with 35vh of open sky before it (15vh before
+ * debris, which still passes quicker) and a 30vh breath before each
+ * stratum. The drifting matter keeps its spacing from the same numbers.
+ *
+ * THE TIME: a card holds before the next one may take the HUD: a bar for
+ * debris, two for a kept object, five for one with an artifact (a
+ * picture, a snippet, the clip). At five bars the artifact gives way to
+ * its story, unless the clip is still playing.
+ *
+ * WHAT DOESN'T WAIT: the satellite. It keeps scanning while a card holds,
+ * so nothing you pass goes unrecorded. If you scroll past several objects
+ * while an artifact holds, you get the newest card when it lets go, and
+ * the ones in between still fall into the planet.
+ *
+ * THE KNOBS: DEBRIS_CARD_MS · KEPT_CARD_MS · ARTIFACT_CARD_MS in
+ * lib/tempo.ts · --approach · --breath and the 65vh hold in
+ * Accretion.module.css.
+ *
+ * REDUCED MOTION: unchanged. No HUD, nothing holds.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";

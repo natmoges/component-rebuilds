@@ -505,23 +505,25 @@
 /* Integration item 9: the record's rhythm, measured. Every object holds at the lock over the same
    55vh of scroll (about 440 px on a laptop: 0.9 s at an easy 480 px/s, past the hunt's 0.75 s),
    so kept and debris both decode. What changes is the approach: 15vh before a kept object, 5vh
-   before debris, so debris passes quicker, plus a 20vh breath before each new stratum. */
+   before debris, so debris passes quicker, plus a 20vh breath before each new stratum.
+   Polish, room to look: about a screen per kept object, so the next one isn't in frame while you
+   read the last. Hold 65vh, approach 35vh before kept and 15vh before debris, breath 30vh. */
 .passage {
-    --approach: 15vh;
+    --approach: 35vh;
     --breath: 0vh;
     position: relative;
-    height: calc(var(--breath) + var(--approach) + 52px + 55vh);
+    height: calc(var(--breath) + var(--approach) + 52px + 65vh);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .passage[data-state="Debris"] {
-    --approach: 5vh;
+    --approach: 15vh;
 }
 
 .passage[data-opens] {
-    --breath: 20vh;
+    --breath: 30vh;
 }
 
 .object {
