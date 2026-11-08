@@ -1,7 +1,7 @@
 // Polish, readable by a machine: the record as plain text, for a model reading on someone's behalf.
 // It reads Notion the same way the page does, so the two can't disagree.
 import { readRecord, type Entry } from "../../lib/record";
-import { NAME, TITLES, SITE_URL, GITHUB_URL, LINKEDIN_URL } from "../../lib/profile";
+import { NAME, TITLES, TARGET_ROLES, SITE_URL, GITHUB_URL, LINKEDIN_URL } from "../../lib/profile";
 import { REPO_URL, PORTFOLIO_URL, CONTACT_URL } from "../../lib/links";
 
 export const revalidate = 60;
@@ -25,6 +25,10 @@ export async function GET() {
             "Nothing is promoted because it looks good; the state is a field in the database.",
         "",
         `Titles: ${TITLES.join(" · ")}, the two names the planet's moons take once the record proves each one.`,
+        "",
+        "## Roles, with the public evidence for each",
+        "",
+        ...TARGET_ROLES.map(({ role, evidence }) => `- **${role}**: ${evidence}.`),
         "",
         "## Where to verify",
         "",

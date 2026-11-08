@@ -276,6 +276,10 @@
  * THE DOORS: robots.txt lets every reader in and names the sitemap, which
  * lists every page.
  *
+ * THE ROLES (added Nov 7): /llms.txt names the roles I'm going for, each
+ * with the public evidence for it, from lib/profile.ts. Public evidence
+ * only: what happened in a room stays out of a public page.
+ *
  * FAILURE: if Notion can't be read, /llms.txt reads the stored copy and
  * says so, as the page does.
  */
