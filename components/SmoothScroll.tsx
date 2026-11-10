@@ -42,6 +42,10 @@
  * TOUCH: phones and tablets keep their own native scroll; only the wheel
  * and trackpad glide.
  *
+ * THE HANDSHAKE: while it runs, the engine sits on the window as
+ * __natSmoothScroll. Back2Top resets it before a ride, so a glide still
+ * settling can't drag the page back to where the glide was going.
+ *
  * FAILURE: if the engine can't start, the page scrolls natively. Nothing
  * breaks; it just isn't smoothed.
  *
@@ -66,7 +70,14 @@ export default function SmoothScroll({ smoothness = 30 }: SmoothScrollProps) {
                 duration: Math.min(smoothness, 100) / 25,
                 autoRaf: true,
             });
-            return () => lenis.destroy();
+            // The handshake: anything on the page that moves it (the rocket)
+            // can find the engine here and tell it to drop a glide.
+            const page = window as Window & { __natSmoothScroll?: Lenis };
+            page.__natSmoothScroll = lenis;
+            return () => {
+                if (page.__natSmoothScroll === lenis) delete page.__natSmoothScroll;
+                lenis.destroy();
+            };
         } catch {
             // The engine didn't start. Native scroll stays.
         }

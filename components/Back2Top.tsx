@@ -40,6 +40,10 @@
  *
  * (Integration item 7: the click ring is Signal green now, not blue. One
  * green, my portfolio's.)
+ *
+ * (Integration pass, Framer: with SmoothScroll on the page, a ride pressed
+ * mid-glide landed, then the glide dragged the page back down. The rocket
+ * now resets the engine before it rides. Same fix on natmoges.com.)
  */
 
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
@@ -134,6 +138,11 @@ export default function Back2Top({
     }, []);
 
     function rideUp() {
+        // The handshake with SmoothScroll (build 08): drop any glide still
+        // settling. Without it, a short ride lands first and the glide drags
+        // the page back to where it was going.
+        (window as Window & { __natSmoothScroll?: { reset?: () => void } }).__natSmoothScroll?.reset?.();
+
         const prefersReducedMotion = window.matchMedia(
             "(prefers-reduced-motion: reduce)"
         ).matches;
