@@ -14,6 +14,8 @@ export interface Entry {
     link: string | null;
     image: string | null;
     snippet: string | null;
+    // What the image shows, for anyone who can't see it (polish, the edges). Empty: title and date.
+    alt: string | null;
 }
 
 export interface Reading {
@@ -36,6 +38,7 @@ type Row = {
         Link: { url: string | null };
         Image: { rich_text: Text };
         Snippet: { rich_text: Text };
+        Alt?: { rich_text: Text };
     };
 };
 
@@ -57,6 +60,7 @@ function toEntry(row: Row): Entry {
         link: p.Link.url,
         image: plain(p.Image.rich_text) || null,
         snippet: plain(p.Snippet.rich_text) || null,
+        alt: plain(p.Alt?.rich_text ?? []) || null,
     };
 }
 

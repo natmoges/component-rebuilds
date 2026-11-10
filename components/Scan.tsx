@@ -947,7 +947,7 @@ export default function Scan({ entries, source }: ScanProps) {
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
                                                 src={stillSrc}
-                                                alt=""
+                                                alt={focus.alt ?? `${focus.title}, ${focus.when}`}
                                                 className={styles.artifact}
                                                 onError={() => handleImageError(focus.id)}
                                             />
