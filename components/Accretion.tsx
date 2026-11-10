@@ -315,6 +315,39 @@
  * REDUCED MOTION: unchanged. No HUD, nothing holds.
  */
 
+/*
+ * INTEGRATION PASS, POLISH — the edges.
+ * What I found: the repo still wore the starter's face. Every tab showed
+ * Next.js's logo, five of its SVGs sat unused, the build pages borrowed
+ * the home page's preview, and the record's screenshots were silent to
+ * anyone who can't see them. The README's notes for 07, 13 and 14
+ * described the page as it shipped, in the present tense.
+ *
+ * THE FACE: the beam from my HUD, the T with me in it, as the tab icon:
+ * the first thing the preloader shows is the last thing the tab keeps.
+ * At home-screen size it's my bedroom studio, the icon natmoges.com
+ * uses. Both repos. The five starter SVGs and one orphaned image go.
+ * History isn't rewritten; the first commit stays the seam.
+ *
+ * THE PREVIEWS: every page says what it is, in its own words, and a
+ * shared link to a build page names that build.
+ *
+ * THE PICTURES: each artifact names what it shows, read from the record
+ * (Alt), and falls back to its title and date.
+ *
+ * THE NOTES: 07, 13 and 14 are labelled as shipped, with their dates,
+ * and The integration pass lists what it changed.
+ *
+ * THE COUNT (added after approval, operator's call): Vercel Web
+ * Analytics, cookieless. It counts visits to each page and nothing else:
+ * no cookie, nothing that follows a visitor between sites. The README
+ * says so in one line.
+ *
+ * FAILURE: no icon falls back to the browser's blank; no Alt falls back
+ * to the title and date; analytics blocked by an extension changes
+ * nothing on the page.
+ */
+
 import Link from "next/link";
 import { readRecord } from "../lib/record";
 import { tempoStyle, recordCountOf } from "../lib/tempo";
