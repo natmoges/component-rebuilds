@@ -10,7 +10,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8191-995d-ca769e0e4401",
@@ -23,7 +24,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81dd-bbde-fd91fa14c98b",
@@ -36,7 +38,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81ce-82db-d9e9c6fbafc1",
@@ -49,7 +52,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81b7-9739-c1892b11ee91",
@@ -62,7 +66,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8135-91a9-ccfcc10a6f4f",
@@ -75,7 +80,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8114-9860-e8681e3d069b",
@@ -88,7 +94,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8122-8e27-f154d19f4243",
@@ -101,7 +108,8 @@
     "credit": "",
     "link": "https://www.youtube.com/@NatFTP",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8181-8e91-c184b4e87f3a",
@@ -114,7 +122,8 @@
     "credit": "",
     "link": "https://www.youtube.com/watch?v=PCOmx8DYk74",
     "image": "https://i.ytimg.com/vi/PCOmx8DYk74/hqdefault.jpg",
-    "snippet": null
+    "snippet": null,
+    "alt": "YouTube thumbnail of a Freestyle Fridays episode"
   },
   {
     "id": "40b92e44-9278-819e-9daa-c6a4bd56ab19",
@@ -127,7 +136,8 @@
     "credit": "",
     "link": "https://component-rebuilds.vercel.app/motiontiles",
     "image": "/accretion/shotbynat-2022.jpg",
-    "snippet": null
+    "snippet": null,
+    "alt": "Screenshot of shotbynat, my 2022 photography site: a dark grid of street portraits"
   },
   {
     "id": "40b92e44-9278-81a1-967e-c876e7d56a8f",
@@ -140,7 +150,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8134-a4ef-c04119f539d2",
@@ -153,7 +164,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-810e-b0d9-ca9f52b4ead4",
@@ -166,7 +178,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": "type: thermostat\nentity: climate.ecobee\nname: Ecobee"
+    "snippet": "type: thermostat\nentity: climate.ecobee\nname: Ecobee",
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81ae-bfc0-f72434ea5662",
@@ -179,7 +192,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81fd-9bb5-d5352d5642f2",
@@ -192,7 +206,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8188-84b5-c45d0fbd2cab",
@@ -205,7 +220,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8114-b9af-fcb80b5a67c9",
@@ -218,7 +234,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-818b-a5a9-dbb8c1a5f141",
@@ -231,7 +248,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-819c-b67e-e621d597560a",
@@ -244,7 +262,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81fc-90d2-cad6890febad",
@@ -257,7 +276,8 @@
     "credit": "My artwork: composed from my own generations, Apr 2025",
     "link": "https://www.youtube.com/@NatFTP",
     "image": "/accretion/natftp-record.webp",
-    "snippet": null
+    "snippet": null,
+    "alt": "My NatFTP record artwork: an astronaut with a laptop in the middle of a vinyl ring, planets and a flame trail in orbit around him"
   },
   {
     "id": "40b92e44-9278-8109-a456-e6961721de7b",
@@ -270,7 +290,8 @@
     "credit": "Started from a public homelab diagram as reference; drawn in draw.io over nine days",
     "link": "https://internal-architecture-brief.my.canva.site/sovereign-infrastructure-case-study",
     "image": "/accretion/homelab-diagram-jan-2026.jpg",
-    "snippet": null
+    "snippet": null,
+    "alt": "My homelab diagram, drawn in draw.io: the network, the services and the server, each boxed by where it runs"
   },
   {
     "id": "40b92e44-9278-815f-bd8f-d5450a4cfd8f",
@@ -283,7 +304,8 @@
     "credit": "",
     "link": "https://internal-architecture-brief.my.canva.site/sovereign-infrastructure-case-study",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81ba-8070-e515e0c6d2ed",
@@ -296,7 +318,8 @@
     "credit": "",
     "link": "https://internal-architecture-brief.my.canva.site/digital-product-engine-case-study",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8106-a3ee-fe05ce8954fd",
@@ -309,7 +332,8 @@
     "credit": "",
     "link": "https://internal-architecture-brief.my.canva.site/business-operating-system-case-study",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81d2-b7dd-c46297c43561",
@@ -322,7 +346,8 @@
     "credit": "Community components, each credited by author",
     "link": "https://natmoges.com",
     "image": "https://framerusercontent.com/images/yWD9GBadfD8Y7IlAfg3RGslJA.png",
-    "snippet": null
+    "snippet": null,
+    "alt": "Screenshot of natmoges.com, my portfolio composed in Framer"
   },
   {
     "id": "40f92e44-9278-8142-9534-cd91b19d8afc",
@@ -335,7 +360,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "41192e44-9278-81b4-a554-d0d4adc6bde6",
@@ -348,7 +374,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8129-a43b-d20b6935eb79",
@@ -361,7 +388,8 @@
     "credit": "",
     "link": "https://www.linkedin.com/posts/natmoges_250-applications-four-interview-processes-activity-7494011208489050113-gr7G",
     "image": "/accretion/56-day-sprint.jpg",
-    "snippet": "250+ applications. Four interview processes. Zero offers.\n\nThe interesting part isn't the zero.\nIt's where the zeros clustered."
+    "snippet": "250+ applications. Four interview processes. Zero offers.\n\nThe interesting part isn't the zero.\nIt's where the zeros clustered.",
+    "alt": "Screenshot of my LinkedIn post auditing the 56-Day Sprint"
   },
   {
     "id": "40b92e44-9278-81e7-b400-f15109407f83",
@@ -374,7 +402,8 @@
     "credit": "",
     "link": "https://natmoges.com/recall",
     "image": "/accretion/recall.jpg",
-    "snippet": null
+    "snippet": null,
+    "alt": "The opening of Recall Is Not Evidence on natmoges.com"
   },
   {
     "id": "40f92e44-9278-8182-8145-fdc61f978fec",
@@ -387,7 +416,8 @@
     "credit": "",
     "link": "https://github.com/natmoges/component-rebuilds",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-818d-b84f-c039a628743f",
@@ -400,7 +430,8 @@
     "credit": "Reference: DiscPlayer by Ahmad (@ohitshmad)",
     "link": "https://vinyl-swart.vercel.app/",
     "image": "/accretion/01-vinyl.jpg",
-    "snippet": null
+    "snippet": null,
+    "alt": "Build 01, vinyl: my record artwork as a disc under a tonearm, with a green progress bar above it"
   },
   {
     "id": "40b92e44-9278-814f-8fd4-e5014fb1af3e",
@@ -413,7 +444,8 @@
     "credit": "Reference: TextScrambler by Solt Wagner (@solt)",
     "link": "https://component-rebuilds.vercel.app/textscrambler",
     "image": "/accretion/02-textscrambler.jpg",
-    "snippet": "export interface TextScramblerProps {\n    text: string;\n    textColor?: string;\n    scrambleColor?: string;\n    durationMs?: number;\n    flickerRate?: number;\n}"
+    "snippet": "export interface TextScramblerProps {\n    text: string;\n    textColor?: string;\n    scrambleColor?: string;\n    durationMs?: number;\n    flickerRate?: number;\n}",
+    "alt": "Build 02, TextScrambler: a green headline decoding letter by letter"
   },
   {
     "id": "40b92e44-9278-8161-b6f1-c9399b2faae7",
@@ -426,7 +458,8 @@
     "credit": "Reference: BackToTop by The Velox Studio",
     "link": "https://component-rebuilds.vercel.app/back2top",
     "image": "/accretion/03-back2top.jpg",
-    "snippet": "export interface Back2TopProps {\n    scrollThreshold?: number;\n    rideUpPxPerSec?: number;\n    maxRideMs?: number;\n    hasExhaust?: boolean;\n}"
+    "snippet": "export interface Back2TopProps {\n    scrollThreshold?: number;\n    rideUpPxPerSec?: number;\n    maxRideMs?: number;\n    hasExhaust?: boolean;\n}",
+    "alt": "Build 03, Back2Top: a white rocket inside a green ring"
   },
   {
     "id": "40b92e44-9278-8111-b643-fd2618da9dbe",
@@ -439,7 +472,8 @@
     "credit": "Reference: AnimatedFolder by Launchly",
     "link": "https://component-rebuilds.vercel.app/animatedfolder",
     "image": "/accretion/04-animatedfolder.jpg",
-    "snippet": "export interface Project {\n    id: string;\n    image: string;\n    title: string;\n    link?: string;\n}"
+    "snippet": "export interface Project {\n    id: string;\n    image: string;\n    title: string;\n    link?: string;\n}",
+    "alt": "Build 04, AnimatedFolder: three folders, one for each case study, on a dark page"
   },
   {
     "id": "40b92e44-9278-8139-826e-f636c7959259",
@@ -452,7 +486,8 @@
     "credit": "Reference: Motion Tiles by Uzair J.",
     "link": "https://component-rebuilds.vercel.app/motiontiles",
     "image": "/accretion/05-motiontiles.mp4",
-    "snippet": null
+    "snippet": null,
+    "alt": "Build 05, Motion Tiles: seven photo and video tiles in a tilted 3D stack"
   },
   {
     "id": "40b92e44-9278-817c-9461-c215e59081c9",
@@ -465,7 +500,8 @@
     "credit": "Reference: Live Location by Amr Rashed",
     "link": "https://component-rebuilds.vercel.app/signallocation",
     "image": "/accretion/06-signallocation.jpg",
-    "snippet": "type Reception =\n    | \"hunting\"\n    | \"locked\"\n    | \"partial\"\n    | \"adrift\"\n    | \"lost\";"
+    "snippet": "type Reception =\n    | \"hunting\"\n    | \"locked\"\n    | \"partial\"\n    | \"adrift\"\n    | \"lost\";",
+    "alt": "Build 06, SignalLocation: an intercepted-transmission readout locating the reader"
   },
   {
     "id": "40b92e44-9278-8181-b6a6-f1718448d900",
@@ -478,7 +514,8 @@
     "credit": "No reference",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8110-9db6-e75dbd2cb8d9",
@@ -491,7 +528,8 @@
     "credit": "Reference: Smooth Scroll by Nandi Muzsik and Clément Roche (Framer University), built on Lenis by darkroom.engineering",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": "const lenis = new Lenis({\nduration: Math.min(smoothness, 100) / 25,\nautoRaf: true,\n});\nreturn () => lenis.destroy();"
+    "snippet": "const lenis = new Lenis({\nduration: Math.min(smoothness, 100) / 25,\nautoRaf: true,\n});\nreturn () => lenis.destroy();",
+    "alt": null
   },
   {
     "id": "40b92e44-9278-812c-a925-c55754d34133",
@@ -504,7 +542,8 @@
     "credit": "Reference: Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": "lettersRef.current.push({ el, bornAt: performance.now(), x, y });\nif (frameRef.current === null) {\nframeRef.current = requestAnimationFrame(drawFrame);\n}"
+    "snippet": "lettersRef.current.push({ el, bornAt: performance.now(), x, y });\nif (frameRef.current === null) {\nframeRef.current = requestAnimationFrame(drawFrame);\n}",
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81e2-aa25-cf834906b80f",
@@ -517,7 +556,8 @@
     "credit": "Reference: Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": "const leaveAt = ARRIVE_DELAY_MS + holdMs;\nconst leaveIn = Math.max(0, leaveAt - performance.now());\nconst leaveTimer = setTimeout(() => setPhase(\"leaving\"), leaveIn);"
+    "snippet": "const leaveAt = ARRIVE_DELAY_MS + holdMs;\nconst leaveIn = Math.max(0, leaveAt - performance.now());\nconst leaveTimer = setTimeout(() => setPhase(\"leaving\"), leaveIn);",
+    "alt": null
   },
   {
     "id": "40b92e44-9278-81fd-9e0b-c040306ab6f7",
@@ -530,7 +570,8 @@
     "credit": "Reference: StarCloud by Sabo Sugi (v1), Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8153-b6a2-da972b56ec22",
@@ -543,7 +584,8 @@
     "credit": "Reference: Gravity Component by Framer University",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8193-bc8c-c6f633332b3e",
@@ -556,7 +598,8 @@
     "credit": "Reference: Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40f92e44-9278-8174-acec-e9e74e086366",
@@ -569,7 +612,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "41092e44-9278-81ea-9ab8-c9c938543801",
@@ -582,7 +626,8 @@
     "credit": "Outside reads by Grok and ChatGPT; built with Claude (Anthropic) as co-pilot",
     "link": "https://github.com/natmoges/component-rebuilds/commits/main",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8176-bcb9-e38231788f0e",
@@ -595,7 +640,8 @@
     "credit": "Reference: Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz",
     "link": "https://component-rebuilds.vercel.app/",
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40f92e44-9278-8158-b529-fa4f96ade175",
@@ -608,7 +654,8 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   },
   {
     "id": "40b92e44-9278-8191-b5da-d0ff0bf2e368",
@@ -621,6 +668,7 @@
     "credit": "",
     "link": null,
     "image": null,
-    "snippet": null
+    "snippet": null,
+    "alt": null
   }
 ]
