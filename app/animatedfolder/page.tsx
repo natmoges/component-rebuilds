@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/meta";
 import AnimatedFolder, { type Project } from "../../components/AnimatedFolder";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-    title: "AnimatedFolder · Component Rebuilds",
-};
+export const metadata: Metadata = pageMeta(
+    "AnimatedFolder · Component Rebuilds",
+    "Folders that fan open from data. One component, three copies, three different lists. Build 04, rebuilt from AnimatedFolder by Launchly.",
+    "/animatedfolder"
+);
 
 const sovereign: Project[] = [
     { id: "artifact", title: "Artifact", image: "/animatedfolder/sovereign-artifact.jpg", link: "https://internal-architecture-brief.my.canva.site/sovereign-infrastructure-case-study" },

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/lib/meta";
 import MotionTiles, { type Tile } from "../../components/MotionTiles";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-    title: "Motion Tiles · Component Rebuilds",
-};
+export const metadata: Metadata = pageMeta(
+    "Motion Tiles · Component Rebuilds",
+    "My 2019–2022 arc as seven video tiles, rebuilt with my real photographs, from shotbynat to NatFTP. Build 05, rebuilt from Motion Tiles by Uzair J.",
+    "/motiontiles"
+);
 
 const tiles: Tile[] = [
     {

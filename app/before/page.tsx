@@ -3,9 +3,14 @@
 import styles from "./page.module.css";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMeta } from "../../lib/meta";
 
 // Integration item 10: the root title is Accretion now, so the old index names itself.
-export const metadata: Metadata = { title: "The ladder index · Component Rebuilds" };
+export const metadata: Metadata = pageMeta(
+  "The ladder index · Component Rebuilds",
+  "The index Accretion grew out of: fourteen builds in five rungs, each listed with the component it rebuilds and who made the original.",
+  "/before"
+);
 
 type BuildStatus = "shipped" | "next" | "planned";
 
