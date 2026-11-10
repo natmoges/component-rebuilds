@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import LogoPreloader from "../components/LogoPreloader";
+// Polish, the edges: Vercel Web Analytics counts page visits without a cookie. Nothing else.
+import { Analytics } from "@vercel/analytics/next";
 
 // Integration item 7: type in three roles, loaded once for every page. next/font serves the
 // files from this site, so no visitor's browser calls Google. globals.css maps each face to its role.
@@ -44,6 +46,7 @@ export default function RootLayout({
           posterSrc="/preloader/preloader-starfield-poster.jpg"
         />
         {children}
+        <Analytics />
       </body>
     </html>
   );

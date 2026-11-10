@@ -321,6 +321,10 @@ Every reference is a component from the Framer Marketplace or Framer University,
 
 **Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build. In the integration pass, the roles shifted: Claude made the edits directly in my repo; I orchestrated, directed the pass, checked every change on localhost and made every commit.
 
+## Privacy
+
+The site counts visits to each page with Vercel Web Analytics, which sets no cookie and doesn't follow anyone between sites. SignalLocation (build 06) reads the rough location Vercel attaches to each request and saves nothing. Accretion remembers a finished record in your own browser, and nowhere else.
+
 ## Run it locally
 
 ```bash
