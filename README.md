@@ -122,6 +122,8 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 ### 07 · Accretion
 
+*As shipped, Nov 1, 2026. What the integration pass changed since is listed under [The integration pass](#the-integration-pass).*
+
 **Reference:** none. The first build with nothing to copy. It started as "The Ladder", an index of the builds, and grew into the whole record: from the early years to this page. The paragraph above the code is mine, edited with Claude (Anthropic), which was used as co-pilot.
 
 **What it is:** a satellite in deep space. Scrolling is travel through a meteor field. Each object is held in the crosshair and decoded on a green HUD. If the record can prove it, it's kept: its real artifact develops on the HUD, a tap dissolves it into the text, and it accretes into a body that grows beside the crosshair. If the record can't prove it yet, it's debris and falls away, showing what would lock it.
@@ -245,6 +247,8 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 ### 13 · BootScreen
 
+*As shipped, Nov 3, 2026. What the integration pass changed since is listed under [The integration pass](#the-integration-pass).*
+
 - **Reference:** Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace, bought. On natmoges.com it's the Dossier's System Monitor: his screen, pinned in his photo of a Mac, which I ran in code mode as a boot terminal typing my four principles. Read for behaviour and numbers only. None of its code is here, and neither is his Mac.
 - **Reused, credited:** my natmoges.com settings on his component: line numbers on, glow 00FF41 at 0.1, Heavy scanlines (1 px, black at 0.3), band speed 0.8, inner shadow 1.2, reflection 0.1 at 0.8 in Overlay. His glitch colours, FF0000 and 00FFFF.
 - **The one new idea, layered visual effects:** one screen built as a stack (inner shadow, content, scanlines with a rising band, glass sheen), each its own layer that switches on its own. The effects are CSS; only the typing ticks.
@@ -269,6 +273,8 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - **Reduced motion:** Accretion shows its plain record list with no HUD, so nothing boots and nothing waits on it.
 
 ### 14 · HeroOrbit
+
+*As shipped, Nov 4, 2026. What the integration pass changed since is listed under [The integration pass](#the-integration-pass).*
 
 - **Reference:** Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene and the masthead of timq.xyz. I remixed it for my natmoges.com hero. It's a Spline scene, not code, so it was read from its editor panels, the community viewer and both live sites, for numbers and behaviour only. No Spline file, export or runtime is in this repo.
 - **Reused, credited:** Tim's numbers: an orthographic camera at zoom 1.7, tilted −25.3°, 49.49°, 37.99° · a planet 275 across, one turn every 120 s · a Fresnel rim in 4CB2AF (bias 0.2, power 2) · contour rings in 22C55E · a base of 0F1C19 at half opacity · dust in C4D1D6 and 19897C with a 5 s life · two orbits at 120 s and 60 s, the second tilted −5° and a quarter turn behind, so the moons pass each other.
@@ -295,6 +301,19 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 ## The integration pass
 
 Fourteen builds on one page still read as fourteen builds, so I had three models read the site cold, reconciled what they found against my own record, and fixed it item by item, the same way as the ladder: a paragraph first, one commit per step, every change tested before it was committed. Then I ran it as a stranger at every speed and fixed what broke. The commits from `dfd3f92` on are the pass.
+
+**What it changed in the builds above** (07, 13 and 14 are described there as they shipped):
+
+- **One clock.** Every timing reads `lib/tempo.ts`: a 1000 ms bar, the lock's brackets closing over one bar, the decode landing at 0.75 of one, the flight one bar, the absorb two.
+- **Three counts, kept apart.** The planet's label reads `SCANNED NN / total`; the planet grows only from what you keep; at the end of the record the record reveals the rest ("Accreting the remaining N") and the numbers meet. A finished record is remembered, and Rescan resets it.
+- **The boot.** The first scroll finishes it (it no longer doubles the pace), and its lines are in plain words: `RECORD: NOTION · LIVE` or `STORED COPY`, and a proof line instead of GATE.
+- **Cards you don't have to tap.** A kept object's story replaces its artifact on its own: after two bars, or five for a card with a picture, snippet or clip.
+- **The planet.** The hero's light: a thin rim, seven rings, a haze of dust, lit and banded moons, comet trails. At hero size it's framed so both moons stay on screen (it no longer bleeds off the right edge). The grey sphere is gone: a drawn planet stands in only if WebGL fails.
+- **One space.** The satellite, SAT_1, keeps its distance from the planet and orbits the lock on one track; the count sits at the planet's edge; meteors pass behind it.
+- **The frame.** The HUD names whose record it is, Back2Top (build 03) rides home after 30%, and the end of the record links these commits, natmoges.com and contact.
+- **One set of tokens with natmoges.com:** Space Grotesk, Inter and Roboto Mono, its charcoal, one Signal green. The preloader (build 10) opens on deep space and leaves you in the charcoal.
+- **Room to look:** about a screen per kept object, and a chapter title as each stratum begins.
+- **Readable by a machine:** structured data about me, [/llms.txt](https://component-rebuilds.vercel.app/llms.txt), robots.txt and a sitemap.
 
 ## Credits
 
