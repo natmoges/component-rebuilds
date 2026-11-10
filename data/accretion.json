@@ -467,7 +467,7 @@
     "when": "Oct 14, 2026",
     "stratum": "5 · The middle floor",
     "state": "Kept",
-    "whatChanged": "Folders that fan open from data. One component, three copies, three different lists. It also fixed a bug that's still live on my site.",
+    "whatChanged": "Folders that fan open from data. One component, three copies, three different lists. It also fixed a bug my site had. Since Nov 10, the build itself runs there.",
     "lockCondition": "",
     "credit": "Reference: AnimatedFolder by Launchly",
     "link": "https://component-rebuilds.vercel.app/animatedfolder",
