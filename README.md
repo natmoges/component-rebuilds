@@ -131,14 +131,14 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **What it is:** a satellite in deep space. Scrolling is travel through a meteor field. Each object is held in the crosshair and decoded on a green HUD. If the record can prove it, it's kept: its real artifact develops on the HUD, a tap dissolves it into the text, and it accretes into a body that grows beside the crosshair. If the record can't prove it yet, it's debris and falls away, showing what would lock it.
 
 **Net-new in mine:**
-- **It reads my record live.** The page is a server component that queries my Notion database on the server (`revalidate: 60`), so an edit in Notion shows up on the page within a minute. The key never reaches the browser. If Notion can't be reached, it reads a stored copy (`data/accretion.json`) and the end of the record says which one it read from.
-- **The record decides, not the animation.** Kept or debris is a field in the database. Nothing is promoted because it looks good scrolling past. Claims I can't make yet (React/TypeScript proficiency, a deployed multi-agent system) sit in the debris with their lock conditions.
-- **The scan is a hold test.** Every frame it checks whether an object's centre is within 6 px of the scan line. Objects ride the beam (`position: sticky`) while held. Decisions are remembered, so scrolling back doesn't re-scan.
-- **One tempo,** carried over from SignalLocation (build 06): a 1000 ms bar. The satellite arrives on the first bar, and a decode lasts two.
-- **Bounded parallax.** The drifting matter moves at its own depth but stays inside its slot, so the page ends where the record ends.
-- **The seam is kept.** The old index lives at `/before`: a plain, static page beside the meteor-shower record.
-- **The ladder reusing itself:** every HUD title decodes with my TextScrambler (build 02).
-- **Reduced motion:** no travel, no scan. The whole record as a plain list, with the source line and the link to `/before`.
+- It reads my record live. The page is a server component that queries my Notion database on the server (`revalidate: 60`), so an edit in Notion shows up on the page within a minute. The key never reaches the browser. If Notion can't be reached, it reads a stored copy (`data/accretion.json`) and the end of the record says which one it read from.
+- The record decides, not the animation. Kept or debris is a field in the database. Nothing is promoted because it looks good scrolling past. Claims I can't make yet (React/TypeScript proficiency, a deployed multi-agent system) sit in the debris with their lock conditions.
+- The scan is a hold test. Every frame it checks whether an object's centre is within 6 px of the scan line. Objects ride the beam (`position: sticky`) while held. Decisions are remembered, so scrolling back doesn't re-scan.
+- One tempo, carried over from SignalLocation (build 06): a 1000 ms bar. The satellite arrives on the first bar, and a decode lasts two.
+- Bounded parallax. The drifting matter moves at its own depth but stays inside its slot, so the page ends where the record ends.
+- The seam is kept. The old index lives at `/before`: a plain, static page beside the meteor-shower record.
+- The ladder reusing itself: every HUD title decodes with my TextScrambler (build 02).
+- Reduced motion: no travel, no scan. The whole record as a plain list, with the source line and the link to `/before`.
 
 **The artifacts are mine:** screenshots of my builds, my 2022 site, the NatFTP frame from Motion Tiles, my homelab diagram, the 56-Day and Recall posts, and my own YouTube thumbnail. They're served from this repo, not from Notion, whose file links expire. The satellite and the era icons are drawn in SVG for this page. Nothing private is published: the database has a Publish field, and only those rows are read.
 
@@ -149,13 +149,13 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **Reused, with credit:** a single knob turned into a glide length, Lenis's ease-out curve, and Lenis's recommended stylesheet.
 
 **Net-new in mine:**
-- **One engine, one clock.** The reference runs its own animation loop and only ever cancels the first frame, so when its setting changes (or React mounts it twice in development), the old loop keeps driving the new engine. Mine lets Lenis run its own clock, and each run of the effect destroys exactly the engine it built.
-- **0 means off.** The reference falls back to its default when set to 0, so its slider can't turn smoothing off. Here 0 is native scroll, and 1–100 sets the weight: the glide lasts `smoothness ÷ 25` seconds.
-- **Reduced motion:** no glide, native scroll, and Accretion's plain list. The reference smooths everyone.
-- **A failed start leaves native scroll.** Nothing on the page depends on the engine.
-- **Accretion's page only.** It mounts with the page and is destroyed when you leave; `/before` and every other build keep the browser's own scroll. Touch stays native too.
-- **Cut what this page doesn't need:** the reference's jump-to-top (it runs before the engine exists, so it never fires), a watcher on every change in the page, a one-time sweep for scrollable boxes that misses `overflow: scroll` and anything added later, and an anchor-link sweep. Current Lenis has an option for each if a page needs it.
-- **Current Lenis (1.3)** instead of the 1.1.2 bundled inside the reference.
+- One engine, one clock. The reference runs its own animation loop and only ever cancels the first frame, so when its setting changes (or React mounts it twice in development), the old loop keeps driving the new engine. Mine lets Lenis run its own clock, and each run of the effect destroys exactly the engine it built.
+- 0 means off. The reference falls back to its default when set to 0, so its slider can't turn smoothing off. Here 0 is native scroll, and 1–100 sets the weight: the glide lasts `smoothness ÷ 25` seconds.
+- Reduced motion: no glide, native scroll, and Accretion's plain list. The reference smooths everyone.
+- A failed start leaves native scroll. Nothing on the page depends on the engine.
+- Accretion's page only. It mounts with the page and is destroyed when you leave; `/before` and every other build keep the browser's own scroll. Touch stays native too.
+- Cut what this page doesn't need: the reference's jump-to-top (it runs before the engine exists, so it never fires), a watcher on every change in the page, a one-time sweep for scrollable boxes that misses `overflow: scroll` and anything added later, and an anchor-link sweep. Current Lenis has an option for each if a page needs it.
+- Current Lenis (1.3) instead of the 1.1.2 bundled inside the reference.
 
 **Tuned by eye, then measured** on localhost at 40: one wheel tick finishes 90% of its move in about half a second and settles by 1.3 s; a burst of five glides as one move with no bounce-back; flinging into the end of the record stops exactly at the end, with no overshoot. The scan still locks mid-glide.
 
@@ -168,14 +168,14 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **Reused, with credit:** a letter dropped per distance travelled with a longer gap before each word, the envelope (hold for 70% of a letter's life, fade the last 30%), the cube-root fade curve, the shrink to half size, and my own settings from natmoges.com.
 
 **Net-new in mine:**
-- **Refs, not state.** This rung's idea. The reference keeps every letter in React state, so the whole trail redraws on every letter and on a cleanup timer 10 times a second, forever, even with nothing on screen. Mine places each letter on the glass by hand and remembers it in a ref; React draws the component once.
-- **A real fade.** The reference only updates when React redraws, so its fade moves in 100 ms steps blurred by a CSS transition. Mine runs one animation loop that draws every frame.
-- **Sleeps when empty.** The loop stops when the last letter is gone and wakes on the next one. A still mouse costs nothing.
-- **One label for the zone.** The Scan is marked `data-trail-zone` and the readout panel `data-trail-off`. The reference hunts up every parent comparing names four ways: any layer named "section" counts as inside, and hovering an SVG icon throws an error.
-- **Every pass reads from the start.** Entering the Scan (or coming back into the window) restarts the phrase and drops the first letter right under the pointer.
-- **Moved by transform,** not by `left`/`top`, so letters never re-lay out the page.
-- **Touch, reduced motion and failure:** no trail on touch screens, none with reduced motion, and none if the Scan isn't on the page.
-- **Cut:** a true/false the reference sets on every move and never reads, two window listeners that never fire, and a counter bumped inside a state update (React can run that twice, which skips letters).
+- Refs, not state. This rung's idea. The reference keeps every letter in React state, so the whole trail redraws on every letter and on a cleanup timer 10 times a second, forever, even with nothing on screen. Mine places each letter on the glass by hand and remembers it in a ref; React draws the component once.
+- A real fade. The reference only updates when React redraws, so its fade moves in 100 ms steps blurred by a CSS transition. Mine runs one animation loop that draws every frame.
+- Sleeps when empty. The loop stops when the last letter is gone and wakes on the next one. A still mouse costs nothing.
+- One label for the zone. The Scan is marked `data-trail-zone` and the readout panel `data-trail-off`. The reference hunts up every parent comparing names four ways: any layer named "section" counts as inside, and hovering an SVG icon throws an error.
+- Every pass reads from the start. Entering the Scan (or coming back into the window) restarts the phrase and drops the first letter right under the pointer.
+- Moved by transform, not by `left`/`top`, so letters never re-lay out the page.
+- Touch, reduced motion and failure: no trail on touch screens, none with reduced motion, and none if the Scan isn't on the page.
+- Cut: a true/false the reference sets on every move and never reads, two window listeners that never fire, and a counter bumped inside a state update (React can run that twice, which skips letters).
 
 **Measured** on localhost at 120 frames a second: a letter holds at full strength until about 490 ms, fades and shrinks over 27 frames, and is gone at 706 ms; with the mouse still, the trail books zero frames. Phrase: INSPECT OBJECTS, kept to 15 characters so a slow pass reads it whole.
 
@@ -186,15 +186,15 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 **Reused, with credit:** the four-stop sequence (arrive, hold, leave, gone), the 50 ms beat before the rise, the 0.7 s moves on his curve `cubic-bezier(.7,.2,.2,1)`, the 80 px travel in and out, and my own settings from natmoges.com (a 2.2 s hold, my NatFTP HUD logo, my starfield screen recording).
 
 **Net-new in mine:**
-- **It lives in the layout.** This rung's idea: the frame around every page, so it plays on every refresh or first arrival on any route. The layout stays mounted while pages swap, so clicking between pages never replays it.
-- **It rises on first paint.** The server prints it into the page, and the entrance is a CSS animation, so nothing waits for JavaScript. My first cut ran the whole clock in React: on localhost it looked right, but live the logo appeared 1.2 s late, the time the JavaScript took to arrive. Now React only times the exit, and it counts from the start of the visit, so a late wake-up waits only for what's left.
-- **No ghost pane.** On my Framer site the component disappears after three seconds, but its frame stays over the hero, catching the mouse. Here, when it's done, it's removed; nothing is left on top.
-- **A HUD, not a card.** The logo is cut clear, the video is graded to true black, and the layer uses Screen blending, so only the HUD and the stars land on the page, and the fade changes no colours. On Framer I used Difference blending over the logo's black card; here the card is gone. (Cut and graded by Claude from my originals; 7.9 MB of video down to 1 MB.)
-- **Clicks:** blocked during the hold, released the moment it starts leaving.
-- **Pinned to the glass.** The reference scrolls away with the page; mine is fixed to the screen.
-- **Guards:** if the JavaScript never arrives, the HUD clears itself about 6 s in. With reduced motion it fades in place with no travel. On phones and tablets it's never shown and the video is never downloaded.
-- **"Desktop" means a mouse and 810 px or more.** My Framer site only shows it from 1510 px, so 13-inch laptops never see it there.
-- **Cut:** the reference's three easing menus and their custom fields, which aren't wired to anything (every move uses the one curve), and its background image and colour options.
+- It lives in the layout. This rung's idea: the frame around every page, so it plays on every refresh or first arrival on any route. The layout stays mounted while pages swap, so clicking between pages never replays it.
+- It rises on first paint. The server prints it into the page, and the entrance is a CSS animation, so nothing waits for JavaScript. My first cut ran the whole clock in React: on localhost it looked right, but live the logo appeared 1.2 s late, the time the JavaScript took to arrive. Now React only times the exit, and it counts from the start of the visit, so a late wake-up waits only for what's left.
+- No ghost pane. On my Framer site the component disappears after three seconds, but its frame stays over the hero, catching the mouse. Here, when it's done, it's removed; nothing is left on top.
+- A HUD, not a card. The logo is cut clear, the video is graded to true black, and the layer uses Screen blending, so only the HUD and the stars land on the page, and the fade changes no colours. On Framer I used Difference blending over the logo's black card; here the card is gone. (Cut and graded by Claude from my originals; 7.9 MB of video down to 1 MB.)
+- Clicks: blocked during the hold, released the moment it starts leaving.
+- Pinned to the glass. The reference scrolls away with the page; mine is fixed to the screen.
+- Guards: if the JavaScript never arrives, the HUD clears itself about 6 s in. With reduced motion it fades in place with no travel. On phones and tablets it's never shown and the video is never downloaded.
+- "Desktop" means a mouse and 810 px or more. My Framer site only shows it from 1510 px, so 13-inch laptops never see it there.
+- Cut: the reference's three easing menus and their custom fields, which aren't wired to anything (every move uses the one curve), and its background image and colour options.
 
 **Trade-off:** it covers `/before`'s text for its three seconds. I kept it on every route so Accretion's opening stays seamless.
 
@@ -202,10 +202,10 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 ### 11 · StarCloud
 
-- **Reference:** StarCloud by Sabo Sugi (v1), Framer Marketplace, read for behaviour and numbers only. None of its code is here.
-- **Reused, credited:** Sabo's 300 px focal length, 50 px dead zone, 150 px blend ring on a smoothstep, dive at 10×, steering at 1200 ÷ distance, and a 10% opacity floor. My settings from natmoges.com: 440 stars, 3 px, white, 1800 deep, base speed 0.7, Lighten blending. The handoff borrows Brett Jackson's 0.7 s fade and curve from build 10.
-- **The one new idea, drawing the pixels:** 440 particles painted on one canvas, kept in a ref. The reference kept every star in React state as its own div and re-rendered all 440 on every frame.
-- **Fixed from the reference:**
+- Reference: StarCloud by Sabo Sugi (v1), Framer Marketplace, read for behaviour and numbers only. None of its code is here.
+- Reused, credited: Sabo's 300 px focal length, 50 px dead zone, 150 px blend ring on a smoothstep, dive at 10×, steering at 1200 ÷ distance, and a 10% opacity floor. My settings from natmoges.com: 440 stars, 3 px, white, 1800 deep, base speed 0.7, Lighten blending. The handoff borrows Brett Jackson's 0.7 s fade and curve from build 10.
+- The one new idea, drawing the pixels: 440 particles painted on one canvas, kept in a ref. The reference kept every star in React state as its own div and re-rendered all 440 on every frame.
+- Fixed from the reference:
   - It moves per second, not per frame, so it runs the same at 60 Hz and 120 Hz.
   - No pop: a recycled star fades in over 0.4 s. The reference flashed far stars back at full size up close, and sideways wraps teleported across the screen.
   - It dives on load. The reference read an unmoved mouse as the top-left corner.
@@ -213,25 +213,25 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
   - It's sharp on Retina.
   - Reduced motion shows a still frame. The reference had no reduced-motion option.
   - One effect does the work of its four.
-- **Kept on purpose:** Sabo's direction (the dive falls away from you, matching my preloader recording) and his inverse steering (fastest just past the ring, slower toward the edges).
-- **The handoff:** under the HUD the cloud is already flying, but invisible. It fades in on the same 0.7 s that the preloader's starfield fades out, so the logo is the only thing you see leave. One CSS rule listens to the preloader's phase, without React.
-- **Speed:** Sabo's moves are per frame, and my MacBook draws 120 frames a second, so I converted them at ×120. I checked that against my preloader recording: it measures about 3 px per frame toward the centre, and the math predicts about 2.4.
-- **Layering:** Accretion's three twinkle layers and the meteors stay under the cloud.
-- **A bug I made and caught:** in the guards step, the loop's schedule line landed inside the steering block. Every frame in the ring booked two more frames, so the loop doubled until the page lagged. I caught it on localhost and fixed it before committing.
+- Kept on purpose: Sabo's direction (the dive falls away from you, matching my preloader recording) and his inverse steering (fastest just past the ring, slower toward the edges).
+- The handoff: under the HUD the cloud is already flying, but invisible. It fades in on the same 0.7 s that the preloader's starfield fades out, so the logo is the only thing you see leave. One CSS rule listens to the preloader's phase, without React.
+- Speed: Sabo's moves are per frame, and my MacBook draws 120 frames a second, so I converted them at ×120. I checked that against my preloader recording: it measures about 3 px per frame toward the centre, and the math predicts about 2.4.
+- Layering: Accretion's three twinkle layers and the meteors stay under the cloud.
+- A bug I made and caught: in the guards step, the loop's schedule line landed inside the steering block. Every frame in the ring booked two more frames, so the loop doubled until the page lagged. I caught it on localhost and fixed it before committing.
 
 ### 12 · Gravity
 
-- **Reference:** Gravity Component by Nandi, David and Prianca, Framer University, the July 2025 version that runs on my natmoges.com hero. Read for behaviour and numbers only. None of its code is here.
-- **Reused, credited:** Framer University's walls (100 px thick, just past the edges) and their grab spring, which I softened from 0.2 to 0.05 and damped. My settings from natmoges.com: friction 0.08, bounce 0.69, density 1. Gravity is 0, 0 here: space, not my hero's 0.5.
-- **The one new idea, a physics engine driving a body:** a twin of Accretion's satellite lives in a Matter.js world, and every frame the satellite is moved onto its twin. The engine decides where it is; my code asks and draws.
-- **What I built around it, my calls:**
+- Reference: Gravity Component by Nandi, David and Prianca, Framer University, the July 2025 version that runs on my natmoges.com hero. Read for behaviour and numbers only. None of its code is here.
+- Reused, credited: Framer University's walls (100 px thick, just past the edges) and their grab spring, which I softened from 0.2 to 0.05 and damped. My settings from natmoges.com: friction 0.08, bounce 0.69, density 1. Gravity is 0, 0 here: space, not my hero's 0.5.
+- The one new idea, a physics engine driving a body: a twin of Accretion's satellite lives in a Matter.js world, and every frame the satellite is moved onto its twin. The engine decides where it is; my code asks and draws.
+- What I built around it, my calls:
   - The satellite is the body, so it's grabbed and thrown directly. Nothing covers the sky, and StarCloud keeps steering.
   - The beam re-aims every frame from wherever the satellite is to the scan line, so it scans from any direction.
   - Weight that rewards effort: space drag is thick when it's slow and thin when it's fast. A lazy flick dies within its own length; a hard one bounces around the screen.
   - Alive at rest: the drag pulls toward a slow space current instead of zero, so it drifts and tumbles a little and is never quite still.
   - An orbit around the lock, 185 px out, that its centre can never cross. Thrown at it, it glances off and slides around.
   - Scrolling drives it around its own orbit: one lap per 2,400 px, clockwise going down. Round above the lock, flattened below so it turns back above the HUD.
-- **Fixed from the reference:**
+- Fixed from the reference:
   - One body works. The reference's Evenly spread divides by zero with a single body, which is why my natmoges.com hero carries an invisible 1 × 1 px second one.
   - No grab canvas over the page. The reference catches the mouse with a full-size invisible canvas, which is why my hero keeps it in a 47 px rail; its touch handling also blocks scrolling on phones.
   - One loop instead of three. The reference runs Matter's Runner, a Render that draws an invisible canvas, and its own sync loop, then starts two of them again.
@@ -239,23 +239,23 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
   - Resizing keeps the satellite. The reference cleared its bodies on resize and never added them back; here the walls move, the twin is rescaled, and home is re-measured.
   - Body Type is honoured. The reference never passed it to the engine.
   - Reduced motion: no engine, the satellite stays home and the beam stays straight. The reference had no reduced-motion path.
-- **Can't be thrown off screen:** a speed limit (it never moves far enough in one step to cross a wall) and a backstop that puts it back inside. An early version of mine could be thrown into deep space.
-- **Measured:**
+- Can't be thrown off screen: a speed limit (it never moves far enough in one step to cross a wall) and a backstop that puts it back inside. An early version of mine could be thrown into deep space.
+- Measured:
   - Flicks with the same 300 px of hand travel: 87 px at 600 px/s, 1,384 px with one bounce at 3,000 px/s, 3,298 px with two bounces at 6,000 px/s.
   - The orbit holds its size over ten laps; the space current wanders it about ±30 px.
   - On a kept lock the readout can grow over the bottom of the orbit; the readout stays on top and the satellite passes behind it.
-- **A bug I made and caught:** the beam's four values first went on the page root, which restyled the whole page every frame (1,445 ms in 3 s) and made StarCloud stutter. Moved onto Scan's sight: 78 ms.
-- **Seen, not fixed here:** scrolling Accretion restyles about 1,800 elements a frame when only its drifts and meteors need it. That's build 07's code; it gets its own commit.
+- A bug I made and caught: the beam's four values first went on the page root, which restyled the whole page every frame (1,445 ms in 3 s) and made StarCloud stutter. Moved onto Scan's sight: 78 ms.
+- Seen, not fixed here: scrolling Accretion restyles about 1,800 elements a frame when only its drifts and meteors need it. That's build 07's code; it gets its own commit.
 
 ### 13 · BootScreen
 
 *As shipped, Nov 3, 2026. What the integration pass changed since is listed under [The integration pass](#the-integration-pass).*
 
-- **Reference:** Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace, bought. On natmoges.com it's the Dossier's System Monitor: his screen, pinned in his photo of a Mac, which I ran in code mode as a boot terminal typing my four principles. Read for behaviour and numbers only. None of its code is here, and neither is his Mac.
-- **Reused, credited:** my natmoges.com settings on his component: line numbers on, glow 00FF41 at 0.1, Heavy scanlines (1 px, black at 0.3), band speed 0.8, inner shadow 1.2, reflection 0.1 at 0.8 in Overlay. His glitch colours, FF0000 and 00FFFF.
-- **The one new idea, layered visual effects:** one screen built as a stack (inner shadow, content, scanlines with a rising band, glass sheen), each its own layer that switches on its own. The effects are CSS; only the typing ticks.
-- **Reused:** `children` as an insert slot, first used in build 12: Scan's readouts pass through the screen.
-- **What I built around it, my calls:**
+- Reference: Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace, bought. On natmoges.com it's the Dossier's System Monitor: his screen, pinned in his photo of a Mac, which I ran in code mode as a boot terminal typing my four principles. Read for behaviour and numbers only. None of its code is here, and neither is his Mac.
+- Reused, credited: my natmoges.com settings on his component: line numbers on, glow 00FF41 at 0.1, Heavy scanlines (1 px, black at 0.3), band speed 0.8, inner shadow 1.2, reflection 0.1 at 0.8 in Overlay. His glitch colours, FF0000 and 00FFFF.
+- The one new idea, layered visual effects: one screen built as a stack (inner shadow, content, scanlines with a rising band, glass sheen), each its own layer that switches on its own. The effects are CSS; only the typing ticks.
+- Reused: `children` as an insert slot, first used in build 12: Scan's readouts pass through the screen.
+- What I built around it, my calls:
   - No Mac. Accretion's HUD is the computer and the satellite is its antenna.
   - The log is written from the record it's about to read: SOURCE prints LIVE or CACHE, and the object count is read from Notion.
   - The boot brings the scene online: the beacon stays dark until LINK reads OK, the body's count lights on the GATE line, and nothing hunts or locks until AWAITING SIGNAL.
@@ -264,41 +264,41 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
   - A tube, not a list: it opens from a line at its final size, power-cycles into the scan on the first move off rest, settles clean on a kept lock, and stutters on debris.
   - NOT / NAT: the word reads in and out every bar. NOT, white, is the thinking; NAT, in Signal green, is the name and the systems.
   - Every refresh boots it, and a scroll mid-boot doubles the pace.
-- **Fixed from the reference:**
+- Fixed from the reference:
   - No eval. The reference runs its code text through `new Function()` on every load, whatever Execute Code says. My boot text isn't JavaScript, so it throws and leaves `console.log` replaced for the whole page; that's live on natmoges.com today.
   - No dead knobs. Syntax Highlight, Line Numbers, Screen Background, Scanline Colour and Scanline Blur do nothing in the reference.
   - No re-render every frame. With scanlines on, the reference re-renders all 3,300 lines every frame to move one stripe; here the band is a CSS animation.
   - It loops by design. The reference's typing never repeats, which is why my natmoges.com log is pasted three times.
   - Line numbers stay beside wrapped lines; the reference counts line breaks, so a wrapped line knocks every later number out of place.
   - The screen doesn't swap itself out while you're reading beside it; the reference's screensaver only counts mouse movement over the screen.
-- **Measured:** the boot types in about 7.2 s, 3.6 s with a scroll. On a phone it powers on about 0.6 s after load; on desktop it waits for the preloader. The screen holds one height from power-on to the end of the boot.
-- **Reduced motion:** Accretion shows its plain record list with no HUD, so nothing boots and nothing waits on it.
+- Measured: the boot types in about 7.2 s, 3.6 s with a scroll. On a phone it powers on about 0.6 s after load; on desktop it waits for the preloader. The screen holds one height from power-on to the end of the boot.
+- Reduced motion: Accretion shows its plain record list with no HUD, so nothing boots and nothing waits on it.
 
 ### 14 · HeroOrbit
 
 *As shipped, Nov 4, 2026. What the integration pass changed since is listed under [The integration pass](#the-integration-pass).*
 
-- **Reference:** Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene and the masthead of timq.xyz. I remixed it for my natmoges.com hero. It's a Spline scene, not code, so it was read from its editor panels, the community viewer and both live sites, for numbers and behaviour only. No Spline file, export or runtime is in this repo.
-- **Reused, credited:** Tim's numbers: an orthographic camera at zoom 1.7, tilted −25.3°, 49.49°, 37.99° · a planet 275 across, one turn every 120 s · a Fresnel rim in 4CB2AF (bias 0.2, power 2) · contour rings in 22C55E · a base of 0F1C19 at half opacity · dust in C4D1D6 and 19897C with a 5 s life · two orbits at 120 s and 60 s, the second tilted −5° and a quarter turn behind, so the moons pass each other.
-- **The one new idea, scene · camera · mesh · light:** react-three-fiber on three.js. One scene, an orthographic camera, a sphere mesh with a shader I wrote by hand (the light is baked into it), a cloud of points for the dust, and two moons on spinning nulls. The loop is `useFrame`, the fifth time this ladder has written an animation loop.
-- **Reused:** client-only rendering (build 01) · `map` + `key` for the two moons (04) · the seeded starfield pattern for the dust (07) · refs at 60 fps, so each title follows its moon without React re-rendering (09) · TextScrambler decoding the titles (02) · BootScreen's GATE line (13).
-- **What I built around it, my calls:**
+- Reference: Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene and the masthead of timq.xyz. I remixed it for my natmoges.com hero. It's a Spline scene, not code, so it was read from its editor panels, the community viewer and both live sites, for numbers and behaviour only. No Spline file, export or runtime is in this repo.
+- Reused, credited: Tim's numbers: an orthographic camera at zoom 1.7, tilted −25.3°, 49.49°, 37.99° · a planet 275 across, one turn every 120 s · a Fresnel rim in 4CB2AF (bias 0.2, power 2) · contour rings in 22C55E · a base of 0F1C19 at half opacity · dust in C4D1D6 and 19897C with a 5 s life · two orbits at 120 s and 60 s, the second tilted −5° and a quarter turn behind, so the moons pass each other.
+- The one new idea, scene · camera · mesh · light: react-three-fiber on three.js. One scene, an orthographic camera, a sphere mesh with a shader I wrote by hand (the light is baked into it), a cloud of points for the dust, and two moons on spinning nulls. The loop is `useFrame`, the fifth time this ladder has written an animation loop.
+- Reused: client-only rendering (build 01) · `map` + `key` for the two moons (04) · the seeded starfield pattern for the dust (07) · refs at 60 fps, so each title follows its moon without React re-rendering (09) · TextScrambler decoding the titles (02) · BootScreen's GATE line (13).
+- What I built around it, my calls:
   - Not a backdrop: it's Accretion's body. Every kept object falls into its skin and becomes dust, and the planet grows from medium to hero size as the record is read.
   - The moons are named late. Each carries a blank label until the record proves it: SYSTEMS ARCHITECT when The substrate's last kept object lands, CREATIVE TECHNOLOGIST when The middle floor's does. They're titles no degree, certificate or mentor gave me, so they arrive after the evidence, not before.
   - The orb stays muted, as it is on natmoges.com: StarCloud and the trail already own the pointer.
   - It arrives dim and comes online on the GATE line, the same tick the count lights.
   - It lands on arrival: the growth and the burst wait for the object's fall (one bar of hold plus two of flight), and the burst kicks from the side facing the lock.
   - It keeps its left edge clear of the satellite's orbit (on a phone, the scan's lane) and bleeds off the right edge instead, the way my planet bleeds on natmoges.com.
-- **Fixed from the reference and from my embed:**
+- Fixed from the reference and from my embed:
   - No iframe and no badge. My natmoges.com framing (a 1397 × 576 embed at 1.3 scale, bled past a clipped hero to keep the badge out of view) is retired.
   - No stretched first frame. The planet draws hidden, then fades in over the grey sphere.
   - No dead interaction. On natmoges.com the moon reveals were still wired to the hidden orb, and one of their transitions had no target.
   - A fixed 6,000 grains moved on the GPU, instead of 8,000 new particles a second (about 40,000 alive at once).
   - No white flash on reload: the stage hides itself before the page is torn down.
   - A fallback: if WebGL can't start, or the GPU drops the scene mid-visit, the grey sphere and its ring of moons come back.
-- **Honest differences:** Tim's dust drifts on curl noise; mine drifts on three slow sine waves per grain. His bloom is a post-processing pass; mine is glow inside the materials and additive dust.
-- **How it was made:** Claude wrote the code from my paragraph, step by step, as whole files I pasted in. I made the design calls and caught by eye the starting size, the white flash on reload, the oversized titles, the overlap with the satellite and the HUD's overflowing code.
-- **Reduced motion:** Accretion shows its plain record list, so there's no planet to move.
+- Honest differences: Tim's dust drifts on curl noise; mine drifts on three slow sine waves per grain. His bloom is a post-processing pass; mine is glow inside the materials and additive dust.
+- How it was made: Claude wrote the code from my paragraph, step by step, as whole files I pasted in. I made the design calls and caught by eye the starting size, the white flash on reload, the oversized titles, the overlap with the satellite and the HUD's overflowing code.
+- Reduced motion: Accretion shows its plain record list, so there's no planet to move.
 
 ## The integration pass
 
