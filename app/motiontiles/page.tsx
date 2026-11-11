@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
 import MotionTiles, { type Tile } from "../../components/MotionTiles";
 import styles from "./page.module.css";
+import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
     "Motion Tiles · Component Rebuilds",
@@ -64,6 +65,7 @@ const tiles: Tile[] = [
 export default function MotionTilesPage() {
     return (
         <main className={styles.main}>
+            <RecordLink />
             <MotionTiles tiles={tiles} />
         </main>
     );

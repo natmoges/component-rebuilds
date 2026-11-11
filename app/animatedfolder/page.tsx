@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
 import AnimatedFolder, { type Project } from "../../components/AnimatedFolder";
 import styles from "./page.module.css";
+import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
     "AnimatedFolder · Component Rebuilds",
@@ -37,6 +38,7 @@ export default function AnimatedFolderPage() {
 
     return (
         <main className={styles.main}>
+            <RecordLink />
             <AnimatedFolder title="SOVEREIGN INFRASTRUCTURE" projects={sovereign} {...fonts} />
             <AnimatedFolder title="DIGITAL PRODUCT ENGINE" projects={product} {...fonts} />
             <AnimatedFolder title="BUSINESS OPERATING SYSTEM" projects={businessOs} {...fonts} />

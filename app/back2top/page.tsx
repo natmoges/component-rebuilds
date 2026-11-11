@@ -3,6 +3,7 @@ import { pageMeta } from "@/lib/meta";
 import Back2Top from "../../components/Back2Top";
 import TextScrambler from "../../components/TextScrambler";
 import styles from "./page.module.css";
+import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
     "Back2Top · Component Rebuilds",
@@ -13,6 +14,7 @@ export const metadata: Metadata = pageMeta(
 export default function Back2TopPage() {
   return (
     <main>
+      <RecordLink />
       <section className={styles.section}>
         <TextScrambler text="INCOMING TRANSMISSION" />
         <p>scroll down to explore ↓</p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageMeta } from "@/lib/meta";
 import SignalLocation from "../../components/SignalLocation";
 import styles from "./page.module.css";
+import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
     "Signal Location · Component Rebuilds",
@@ -12,6 +13,7 @@ export const metadata: Metadata = pageMeta(
 export default function SignalLocationPage() {
     return (
         <main className={styles.main}>
+            <RecordLink />
             <p className={styles.caption}>INTERCEPTED TRANSMISSION</p>
             <SignalLocation />
             <p className={styles.caption}>
