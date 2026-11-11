@@ -1,6 +1,7 @@
 import Accretion from "../components/Accretion";
 import SmoothScroll from "../components/SmoothScroll";
 import TrailCursor from "../components/TrailCursor";
+import RecordLink from "../components/RecordLink";
 import { profileData } from "../lib/profile";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
             />
             <SmoothScroll smoothness={40} />
             <Accretion />
+            <RecordLink onRecord />
             <TrailCursor text="INSPECT OBJECTS" />
         </>
     );

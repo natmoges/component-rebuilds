@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PORTFOLIO_URL, REPO_URL } from "../lib/links";
+import { CONTACT_URL, PORTFOLIO_URL, REPO_URL } from "../lib/links";
 import styles from "./RecordLink.module.css";
 
 /*
@@ -21,10 +21,40 @@ import styles from "./RecordLink.module.css";
  *
  * TOUCH AND SMALL SCREENS: the same three links, at a tap-sized height.
  *
+ * ON THE RECORD ITSELF (final check, the operator's pick A): the same line
+ * pinned to the same corner, so every page on the site behaves the same way.
+ * There it reads "natmoges.com · Code · Contact": the record is the page
+ * already, so its first link is my site, and Contact goes to the email on
+ * natmoges.com. The top-left corner is clear there too: the satellite and the
+ * beam sit centred, the stratum label sits at 38% down (10% on a phone), the
+ * HUD sits at the bottom and the counter on the right.
+ *
  * FAILURE: it's three anchors with real hrefs; with no JavaScript, no CSS or
  * a failed font, they're still links that go where they say.
  */
-export default function RecordLink() {
+interface RecordLinkProps {
+    /** True on the record's own page: the first link becomes my site, and the last one Contact. */
+    onRecord?: boolean;
+}
+
+export default function RecordLink({ onRecord = false }: RecordLinkProps) {
+    if (onRecord) {
+        return (
+            <nav className={styles.bar} aria-label="Leave the record">
+                <a href={PORTFOLIO_URL} className={styles.link}>
+                    natmoges.com
+                </a>
+                <span className={styles.dot} aria-hidden="true">·</span>
+                <a href={REPO_URL} className={styles.link}>
+                    Code
+                </a>
+                <span className={styles.dot} aria-hidden="true">·</span>
+                <a href={CONTACT_URL} className={styles.link}>
+                    Contact
+                </a>
+            </nav>
+        );
+    }
     return (
         <nav className={styles.bar} aria-label="Leave this build">
             <Link href="/" className={styles.link}>
