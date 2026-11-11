@@ -264,7 +264,8 @@ function forgetMemory() {
 
 // Where a record's link goes, named (integration item 10), so "Open" says what it opens. A link back
 // to this page itself is dropped: it would only reload the record you're reading.
-const SITE_HOST = "component-rebuilds.vercel.app";
+// Final check (Nov 10): the record moved to record.natmoges.com; the old vercel.app address still counts as here.
+const SITE_HOSTS = ["record.natmoges.com", "component-rebuilds.vercel.app"];
 function destinationOf(link: string): string | null {
     let url: URL;
     try {
@@ -272,7 +273,7 @@ function destinationOf(link: string): string | null {
     } catch {
         return null;
     }
-    const isThisSite = url.hostname === SITE_HOST || url.origin === window.location.origin;
+    const isThisSite = SITE_HOSTS.includes(url.hostname) || url.origin === window.location.origin;
     if (isThisSite) return url.pathname === "/" || url.pathname === window.location.pathname ? null : url.pathname;
     const host = url.hostname.replace(/^www\./, "");
     const parts = host.split(".");

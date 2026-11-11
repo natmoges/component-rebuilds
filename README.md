@@ -20,19 +20,19 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | # | Build | Reference (credited) | Rung |
 |---|---|---|---|
 | 01 | [vinyl](https://vinyl-swart.vercel.app) (own repo: [natmoges/vinyl](https://github.com/natmoges/vinyl)) | DiscPlayer by Ahmad (@ohitshmad) | 1 · Single components |
-| 02 | [TextScrambler](https://component-rebuilds.vercel.app/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
-| 03 | [Back2Top](https://component-rebuilds.vercel.app/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
-| 04 | [AnimatedFolder](https://component-rebuilds.vercel.app/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
-| 05 | [Motion Tiles](https://component-rebuilds.vercel.app/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
-| 06 | [SignalLocation](https://component-rebuilds.vercel.app/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
-| 07 | [Accretion](https://component-rebuilds.vercel.app) | None. My own | 2 |
-| 08 | [SmoothScroll](https://component-rebuilds.vercel.app) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
-| 09 | [TrailCursor](https://component-rebuilds.vercel.app) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
-| 10 | [LogoPreloader](https://component-rebuilds.vercel.app) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
+| 02 | [TextScrambler](https://record.natmoges.com/textscrambler) | TextScrambler by Solt Wagner (@solt), Frameblox / Framer Marketplace | 1 |
+| 03 | [Back2Top](https://record.natmoges.com/back2top) | BackToTop by The Velox Studio, Framer Marketplace | 1 |
+| 04 | [AnimatedFolder](https://record.natmoges.com/animatedfolder) | AnimatedFolder by Launchly, Framer Marketplace (listing no longer available) | 2 · Composition + data |
+| 05 | [Motion Tiles](https://record.natmoges.com/motiontiles) | Motion Tiles by Uzair J., Framer Marketplace | 2 |
+| 06 | [SignalLocation](https://record.natmoges.com/signallocation) | Live Location by Amr Rashed, Framer Marketplace | 2 |
+| 07 | [Accretion](https://record.natmoges.com) | None. My own | 2 |
+| 08 | [SmoothScroll](https://record.natmoges.com) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
+| 09 | [TrailCursor](https://record.natmoges.com) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
+| 10 | [LogoPreloader](https://record.natmoges.com) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
 | 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
-| 12 | [Gravity](https://component-rebuilds.vercel.app) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
-| 13 | [BootScreen](https://component-rebuilds.vercel.app) (Accretion's HUD) | Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace (paid) | 4 |
-| 14 | [HeroOrbit](https://component-rebuilds.vercel.app) (Accretion's body) | Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz | 5 · 3D / WebGL |
+| 12 | [Gravity](https://record.natmoges.com) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
+| 13 | [BootScreen](https://record.natmoges.com) (Accretion's HUD) | Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace (paid) | 4 |
+| 14 | [HeroOrbit](https://record.natmoges.com) (Accretion's body) | Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz | 5 · 3D / WebGL |
 
 ## Build notes
 
@@ -315,7 +315,7 @@ Fourteen builds on one page still read as fourteen builds, so I had three models
 - **The frame.** The HUD names whose record it is, Back2Top (build 03) rides home after 30%, and the end of the record links these commits, natmoges.com and contact.
 - **One set of tokens with natmoges.com:** Space Grotesk, Inter and Roboto Mono, its charcoal, one Signal green. The preloader (build 10) opens on deep space and leaves you in the charcoal.
 - **Room to look:** about a screen per kept object, and a chapter title as each stratum begins.
-- **Readable by a machine:** structured data about me, [/llms.txt](https://component-rebuilds.vercel.app/llms.txt), robots.txt and a sitemap.
+- **Readable by a machine:** structured data about me, [/llms.txt](https://record.natmoges.com/llms.txt), robots.txt and a sitemap.
 
 ## Credits
 

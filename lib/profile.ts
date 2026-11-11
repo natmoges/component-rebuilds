@@ -2,7 +2,7 @@
 // data and /llms.txt both read from here; the links are the ones lib/links.ts already publishes.
 import { PORTFOLIO_URL, REPO_URL } from "./links";
 
-export const SITE_URL = "https://component-rebuilds.vercel.app";
+export const SITE_URL = "https://record.natmoges.com";
 export const NAME = "Nat Moges";
 // The two titles the record proves: the moons name themselves with them (build 14).
 export const TITLES = ["Creative Technologist", "Systems Architect"];
@@ -27,7 +27,7 @@ export const TARGET_ROLES: { role: string; evidence: string }[] = [
     },
     {
         role: "Systems / knowledge architect (AI ops)",
-        evidence: "the Notion operating system this page reads from; a private cloud run alone for four years",
+        evidence: "the Notion operating system this page reads from; a private cloud run alone since June 2023",
     },
     {
         role: "Creative / growth consulting",

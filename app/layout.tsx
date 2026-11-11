@@ -17,7 +17,7 @@ const DESCRIPTION =
   "My record, read live from Notion and scanned in order: kept if the record can prove it, debris if it can't yet. Fourteen rebuilt components, one object.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://component-rebuilds.vercel.app"),
+  metadataBase: new URL("https://record.natmoges.com"),
   title: "Accretion · Nat Moges",
   description: DESCRIPTION,
   openGraph: {
