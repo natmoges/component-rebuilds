@@ -2,6 +2,8 @@
 
 The sourced components from my portfolio ([natmoges.com](https://natmoges.com)), rebuilt from scratch in React + TypeScript (Next.js), one layer at a time. Each build has its own page. The home page is build 07, Accretion, given its weight by build 08, SmoothScroll, with build 09, TrailCursor, trailing the mouse through its space; build 10, LogoPreloader, opens every first visit to any page; build 11, StarCloud, flies its sky; and build 12, Gravity, sets its satellite loose in zero gravity; build 13, BootScreen, turns its HUD into the computer that brings it all online; and build 14, HeroOrbit, is its planet, grown from what the record keeps.
 
+Since Nov 10, 2026 four of them run back on natmoges.com, ported to Framer code components: build 03, Back2Top; build 04, AnimatedFolder; build 05, Motion Tiles; and build 08, SmoothScroll.
+
 ## The method
 
 I come from music production, motion design and home automation, so I build the way producers sample: take the finished record apart, keep what matters, credit the source, make it mine.

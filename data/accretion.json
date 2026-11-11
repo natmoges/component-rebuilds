@@ -644,6 +644,20 @@
     "alt": null
   },
   {
+    "id": "41592e44-9278-8171-857c-deed475687f8",
+    "title": "natmoges.com, Portfolio No.002",
+    "when": "Nov 10, 2026",
+    "stratum": "5 · The middle floor",
+    "state": "Kept",
+    "whatChanged": "The ladder went home. Four of my builds now run on the site that started it: the folders, the tiles, the rocket and the scroll, plus a 404 where SAT_1 has lost its tether and reconnects to take you back. The old rocket's glitch, the ride that dragged you back down, is fixed on both sites. Underneath, a frame every page shares and a room for writing, with Recall as its first piece, so the next page is an addition, not a rebuild. Still composed in Framer, now with parts I wrote.",
+    "lockCondition": "",
+    "credit": "Built with Claude (Anthropic) as co-pilot",
+    "link": "https://natmoges.com",
+    "image": null,
+    "snippet": null,
+    "alt": null
+  },
+  {
     "id": "40f92e44-9278-8158-b529-fa4f96ade175",
     "title": "React / TypeScript, on my own",
     "when": "not yet",
