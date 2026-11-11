@@ -46,7 +46,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 4 — one space.
+ * ONE SPACE.
  * What I found: each build placed itself, so nothing knew where anything
  * else was. The satellite's orbit carried it straight across the planet.
  * The count sat on the planet's face, crossed by the moons' path. The
@@ -86,7 +86,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 6 — the frame.
+ * THE FRAME.
  * What I found: once the boot hands over, the page never says whose it is
  * or where its record comes from. The only way back up 30,000 px of record
  * is to scroll it. And the end is a dead end: one link, to /before. Back2Top
@@ -134,7 +134,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 9 — polish.
+ * POLISH.
  * What I found: with the pieces integrated, what's left is rhythm and
  * composition. The meteors fall like rain: eighteen streaks, one angle,
  * one pace. The left third of the screen holds nothing but passing
@@ -173,7 +173,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 10 — the pre-lock audit's fixes.
+ * THE PRE-LOCK AUDIT'S FIXES.
  * What I found: running the site as a stranger, at every speed, the scan
  * had a cliff. At an easy scroll every object decodes; a little faster
  * and none do, because an object only hunts while it sits at the lock. A
@@ -217,7 +217,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — one moving artifact.
+ * ONE MOVING ARTIFACT.
  * What I found: every artifact in the record was a still, so the four
  * builds that live on their own pages showed what they look like but
  * never what they do. Here one of them moves: Motion Tiles shows five
@@ -248,7 +248,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — readable by a machine.
+ * READABLE BY A MACHINE.
  * What I found: I asked an AI the question a recruiter would, cold, about
  * both my sites. Here it read the whole record, found the repo and told
  * proven from claimed on its own. natmoges.com came back with "no code
@@ -285,7 +285,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — room to look.
+ * ROOM TO LOOK.
  * What I found: reading my own record at my own pace, the HUD changed
  * before my eye had taken a card in. A snippet, a picture or the clip got
  * about a second before the next object took the screen, and the objects
@@ -316,7 +316,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — the edges.
+ * THE EDGES.
  * What I found: the repo still wore the starter's face. Every tab showed
  * Next.js's logo, five of its SVGs sat unused, the build pages borrowed
  * the home page's preview, and the record's screenshots were silent to
@@ -338,7 +338,7 @@
  * THE NOTES: 07, 13 and 14 are labelled as shipped, with their dates,
  * and The integration pass lists what it changed.
  *
- * THE COUNT (added after approval, operator's call): Vercel Web
+ * THE COUNT (added after approval): Vercel Web
  * Analytics, cookieless. It counts visits to each page and nothing else:
  * no cookie, nothing that follows a visitor between sites. The README
  * says so in one line.
@@ -370,7 +370,7 @@ function starField(count: number, seed: number): string {
     ).join(", ");
 }
 
-// Integration item 8: SAT_1, a probe drawn in the planet's own language. Its dish is a record:
+// SAT_1, a probe drawn in the planet's own language. Its dish is a record:
 // grooves in Tim's green inside the world's teal rim, a highlight sweeping round at 33⅓. Lit by the
 // planet's key light (upper left): the body's top catches it, its left face is half lit, its
 // right face is in shade. The grooves light as the planet fills (Scan's data-grooves).
@@ -428,7 +428,7 @@ export default async function Accretion() {
             </Gravity>
             <Scan entries={entries} source={source} />
 
-            {/* Integration item 10: the page's name. Read aloud on every visit; shown with the plain
+            {/* The page's name. Read aloud on every visit; shown with the plain
                 list when motion is reduced, where it's the first thing on the page. */}
             <header className={styles.intro}>
                 <h1>Nat Moges · Accretion</h1>
@@ -444,7 +444,7 @@ export default async function Accretion() {
             <ol className={styles.record}>
                 {entries.map((entry, index) => (
                     <li key={entry.id} className={styles.entry} data-state={entry.state}>
-                        {/* Integration item 9: the strata as headings in the plain list. */}
+                        {/* The strata as headings in the plain list. */}
                         {(index === 0 || entries[index - 1].stratum !== entry.stratum) && (
                             <p className={styles.recordChapter}>
                                 {chapterOf(entries, entry.stratum).label} · {chapterOf(entries, entry.stratum).name} ·{" "}

@@ -49,7 +49,7 @@
  * grows one step over one bar. Every kept object leaves a little more
  * dust behind, so the planet gets heavier as well as bigger. The count
  * under it reads your scan out of the record: Scanned 01 / 41, 02 / 41,
- * and so on (integration pass, item 2).
+ * and so on.
  *
  * DEBRIS: the planet doesn't move. Debris never reaches it.
  *
@@ -61,7 +61,7 @@
  * (build #2), then stays.
  *
  * SCROLLING BACK: a decision stays made, so the mass stays and the names
- * stay. Nothing climbs back out. (Integration item 5: a Rescan is the one
+ * stay. Nothing climbs back out. (A Rescan is the one
  * way back to zero, and it lands at once.)
  *
  * THE END: the planet at full size, both moons named, the count, and
@@ -83,7 +83,7 @@
  * redrawn to fit when the window changes size.
  *
  * FAILURE: if WebGL can't start, the grey sphere stays and grows the way
- * it does today, with its ring of moons. (Integration item 8: a drawn
+ * it does today, with its ring of moons. (A drawn
  * planet in CSS instead: the same teal body, rim and green rings.)
  *
  * PHONE: the same planet with half the dust. It keeps clear of the
@@ -95,7 +95,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 8 — the gate.
+ * THE GATE.
  * What I found: side by side with my hero, the planet I drew in code
  * reads as a sketch of it. The rings are many and faint where Tim's are
  * few and bright. The dust is a wide cloud of white specks where his is a
@@ -187,7 +187,7 @@ const ZOOM = 1.7;
 const DEGREE = Math.PI / 180;
 const START_SCALE = 0.45;
 const RADIUS = 137.5;
-// The planet's colours come from the shared tokens (integration item 7). Its contours are
+// The planet's colours come from the shared tokens. Its contours are
 // still Signal green, as Tim drew them; by the colour roles they're the world's. Item 8's call.
 const RIM = WORLD;
 const CONTOUR = SIGNAL;
@@ -219,7 +219,7 @@ const CAMERA_RIGHT = new Vector3(1, 0, 0).applyEuler(CAMERA_ROTATION);
 const SATELLITE_CLEARANCE = 185 + 24;
 const NARROW_WIDTH = 700;
 const LANE_CLEARANCE = 22 + 16;
-// Integration item 10: how far a moon's orbit reaches across the screen, in planet radii (measured
+// How far a moon's orbit reaches across the screen, in planet radii (measured
 // from Tim's camera: 1.6 × 0.954), plus room for the moon itself. On a laptop the grown planet is
 // framed so both moons stay on screen, because their names are the payoff.
 const ORBIT_REACH = 1.53;
@@ -232,7 +232,7 @@ varying vec3 vView;
 
 void main() {
     vLocal = position;
-    // Where this point sits on the body, as the camera sees it, whatever the spin (item 9).
+    // Where this point sits on the body, as the camera sees it, whatever the spin.
     vView = mat3(modelViewMatrix) * position;
     vNormal = normalize(normalMatrix * normal);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -253,11 +253,11 @@ varying vec3 vView;
 
 const vec3 VIEW = vec3(0.0, 0.0, 1.0);
 const vec3 LIGHT = vec3(-0.4, 0.6, 0.7);
-// Integration item 9: the rings' pole is fixed toward the camera, up and to the right, so they
+// The rings' pole is fixed toward the camera, up and to the right, so they
 // always read as nested curves, as on my hero. They used to turn with the planet and, at some
 // points in the spin, went edge-on and read as stripes. The dust carries the turn now.
 const vec3 POLE = vec3(0.42, 0.38, 0.82);
-// Integration item 8: fewer rings, as on my hero, each drawn the same width on any screen.
+// Fewer rings, as on my hero, each drawn the same width on any screen.
 const float RINGS = 7.0;
 const float RING_WIDTH = 1.6;
 
@@ -295,7 +295,7 @@ varying float vAlpha;
 varying float vTint;
 
 const float LIFE = 5.0;
-// Integration item 8: a haze on the skin, as on my hero, not a cloud around it.
+// A haze on the skin, as on my hero, not a cloud around it.
 const float LIFT = 9.0;
 const float SWIRL = 3.0;
 const float SIZE = 1.3;
@@ -343,7 +343,7 @@ void main() {
 }
 `;
 
-// Integration item 8: the moons, lit white and banded like my hero's, wound like a ball of thread.
+// The moons, lit white and banded like my hero's, wound like a ball of thread.
 const MOON_FRAGMENT = /* glsl */ `
 uniform vec3 uWhite;
 uniform vec3 uDark;
@@ -391,7 +391,7 @@ void main() {
 }
 `;
 
-// Integration item 8: a short comet trail that fades behind the moon, not a full orbit line.
+// A short comet trail that fades behind the moon, not a full orbit line.
 const TRAIL_FRAGMENT = /* glsl */ `
 uniform vec3 uColor;
 uniform float uStrength;
@@ -440,7 +440,7 @@ export interface HeroOrbitProps {
     mass: number;
     fullMass: number;
     // How long an arrival takes to land. A scanned object takes the absorb; what the record
-    // reveals, or a Rescan, lands at once (integration item 5).
+    // reveals, or a Rescan, lands at once.
     arrivalMs?: number;
     isOnline: boolean;
     isArchitectNamed: boolean;
@@ -658,7 +658,7 @@ function Body({
         const lockX = width / 2;
         const isNarrow = width < NARROW_WIDTH;
         const clearance = isNarrow ? LANE_CLEARANCE : SATELLITE_CLEARANCE;
-        // The biggest planet whose moons fit between the satellite's lane and the screen's edge (item 10).
+        // The biggest planet whose moons fit between the satellite's lane and the screen's edge.
         // A phone keeps its own layout: there the names stay on screen even when a moon can't.
         const room = width - MOON_ROOM - lockX - clearance;
         const fit = isNarrow ? HERO_SCALE : room / ((1 + ORBIT_REACH) * RADIUS * zoom);
@@ -766,7 +766,7 @@ export default function HeroOrbit({
     }
 
     // When WebGL refuses (or is lost), the planet says so, and the drawn stand-in shows. It never
-    // shows while the planet is still loading or starting (integration item 8).
+    // shows while the planet is still loading or starting.
     if (hasFailed) return <span data-orbit-failed hidden />;
 
     return (

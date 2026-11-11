@@ -41,10 +41,10 @@
  * two thirds of its speed. It never leaves the screen, however hard it's
  * thrown, and it passes over the planet without touching it.
  *
- * KEEPING ITS DISTANCE (and, since integration item 4, a second ring around
+ * KEEPING ITS DISTANCE (and, since the integration pass, a second ring around
  * the planet, its radius plus 32 px: it glances off that one too, so it
  * never crosses the body): an invisible orbit, 185 px around the lock (130 px
- * since integration item 8, so the scroll track clears the planet), is as
+ * since the integration pass, so the scroll track clears the planet), is as
  * close as its centre can ever come to what it scans. Thrown at it, it glances off
  * and slides around the curve, circling the lock instead of covering it.
  *
@@ -66,7 +66,7 @@
  * past its end, there's nothing left to circle: scrolling stops turning the
  * orbit and it only drifts (integration pass).
  *
- * (Integration item 8: scrolling now rides one track, a full circle around
+ * (Scrolling now rides one track, a full circle around
  * the lock, as tight as the keep-out allows (130 px plus a little), never
  * wider than the room above the HUD or before the planet. It used to circle
  * at whatever distance the satellite was floating, so after a fling it rode
@@ -152,7 +152,7 @@ const TRACK_GAP_PX = 6;
 const TRACK_GLIDE = 0.12;
 const ORBIT_SHARE = 0.3;
 
-// The planet's ring (integration item 4): as close as the satellite's centre can
+// The planet's ring: as close as the satellite's centre can
 // come to the planet's edge. The planet's size and place come from HeroOrbit.
 const PLANET_MARGIN_PX = 32;
 
@@ -241,7 +241,7 @@ export default function Gravity({ children }: GravityProps) {
                 Bodies.rectangle(width + half, height / 2, WALL_PX, height + WALL_PX * 2, wall),
                 // The orbit: sized so the satellite's centre stops on the line,
                 // and slippery, so it slides around instead of sticking.
-                // (Integration item 8: sized by the satellite's width, so its wings never touch it
+                // (Sized by the satellite's width, so its wings never touch it
                 // while it rides the track; the backstop in keepOnScreen guards the centre.)
                 Bodies.circle(width / 2, height / 2, Math.max(1, orbitRadius - twinWidth / 2), {
                     isStatic: true,

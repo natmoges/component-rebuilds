@@ -35,7 +35,7 @@
  * on a phone it starts right away. The tube opens from its line to full
  * height in a tick, already the size it will stay.
  *
- * DURING: about 7 seconds (it ran about 20 until integration item 3 put
+ * DURING: about 7 seconds (it ran about 20 until the integration pass put
  * it on the clock). Lines start on SignalLocation's tick, the dot
  * leaders run out fast, and each reading drops whole on the next tick,
  * quantized like a note on the grid.
@@ -78,7 +78,7 @@
  */
 
 /*
- * INTEGRATION PASS, ITEM 3 — usable from the first frame.
+ * USABLE FROM THE FIRST FRAME.
  * What I found: the boot's score is written to run about 7 seconds, but it
  * was played as 302 timers in a row, one per character, each starting after
  * the last one finished drawing. The drawing added up, and the boot came in
@@ -110,7 +110,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — the boot in plain words.
+ * THE BOOT IN PLAIN WORDS.
  * What I found: the boot is the first thing a stranger reads, and four of
  * its lines spoke my system's language: SOURCE: SUBSTRATE, GATE: PROVEN,
  * POLISH: OFF · SEAMS: PUBLISHED, and four directives with nothing on the

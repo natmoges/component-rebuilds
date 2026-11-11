@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import LogoPreloader from "../components/LogoPreloader";
-// Polish, the edges: Vercel Web Analytics counts page visits without a cookie. Nothing else.
+// Vercel Web Analytics counts page visits without a cookie. Nothing else.
 import { Analytics } from "@vercel/analytics/next";
 
-// Integration item 7: type in three roles, loaded once for every page. next/font serves the
+// Type in three roles, loaded once for every page. next/font serves the
 // files from this site, so no visitor's browser calls Google. globals.css maps each face to its role.
 const display = Space_Grotesk({ subsets: ["latin"], variable: "--face-display" });
 const text = Inter({ subsets: ["latin"], variable: "--face-text" });
 const mono = Roboto_Mono({ subsets: ["latin"], variable: "--face-mono" });
 
-// Integration item 10: the page is Accretion now, and a shared link says so, with a frame of the
+// The page is Accretion now, and a shared link says so, with a frame of the
 // grown planet (app/opengraph-image.png, a capture of the page itself). Subpages keep their own titles.
 const DESCRIPTION =
   "My record, read live from Notion and scanned in order: kept if the record can prove it, debris if it can't yet. Fourteen rebuilt components, one object.";

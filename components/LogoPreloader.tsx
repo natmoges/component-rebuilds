@@ -49,7 +49,7 @@
  */
 
 /*
- * INTEGRATION PASS, POLISH — deep space first.
+ * DEEP SPACE FIRST.
  * What I found: on natmoges.com the preloader opens on space black, and
  * when it leaves you arrive in the charcoal: deep space first, then our
  * own neighbourhood. In Framer that's a Difference layer under the HUD.

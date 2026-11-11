@@ -1,4 +1,4 @@
-// Polish, readable by a machine: the record as plain text, for a model reading on someone's behalf.
+// The record as plain text, for a model reading on someone's behalf.
 // It reads Notion the same way the page does, so the two can't disagree.
 import { readRecord, type Entry } from "../../lib/record";
 import { NAME, TITLES, TARGET_ROLES, SITE_URL, GITHUB_URL, LINKEDIN_URL } from "../../lib/profile";

@@ -15,7 +15,7 @@
     inset: 0;
     overflow: hidden;
     pointer-events: none;
-    /* Integration item 8: the sky falls from charcoal to a green-grey glow at the horizon, as on
+    /* The sky falls from charcoal to a green-grey glow at the horizon, as on
        natmoges.com. */
     background: linear-gradient(to bottom, transparent 42%, color-mix(in srgb, var(--horizon) 70%, transparent) 100%);
 }
@@ -56,7 +56,7 @@
 
 /* ---------- The satellite: top centre, alive ---------- */
 
-/* Integration item 7: one stroke for everything drawn, the same on screen whatever the
+/* One stroke for everything drawn, the same on screen whatever the
    drawing's size: the satellite, the record's objects, the drifts, the moons. */
 .satellite g > *,
 .object svg path,
@@ -97,7 +97,7 @@
     }
 }
 
-/* Integration item 8: SAT_1's dish is a record. */
+/* SAT_1's dish is a record. */
 .rim {
     fill: color-mix(in srgb, #0F1C19 90%, transparent);
     stroke: var(--world);
@@ -196,7 +196,7 @@
 
 /* ---------- The sight: a beam and a lock, only while tractoring ---------- */
 
-/* Integration item 8: the scan's geometry is in the front plane, with the satellite and the
+/* The scan's geometry is in the front plane, with the satellite and the
    record, so the beam crosses in front of the planet, never behind it. */
 .sight {
     position: fixed;
@@ -329,7 +329,7 @@
     pointer-events: none;
 }
 
-/* Integration item 8: the stand-in is a drawn planet, the same teal body, rim and green rings
+/* The stand-in is a drawn planet, the same teal body, rim and green rings
    as the real one, not a grey ball. */
 .planet {
     position: absolute;
@@ -398,11 +398,11 @@
     }
 }
 
-/* The count sits at the planet's limb (integration item 4): under its bottom edge,
+/* The count sits at the planet's limb: under its bottom edge,
    following its size and slide. Without WebGL, the grey sphere's size stands in. */
 .massLabel {
     position: absolute;
-    /* Integration item 8: under the planet, but never past the screen's right edge (on a phone the
+    /* Under the planet, but never past the screen's right edge (on a phone the
        planet bleeds off it): the label's centre stops 4.75rem short of the edge. */
     left: min(calc(50% + var(--planet-shift, 0px)), calc(50vw - var(--orbit) + var(--size) / 2 - 4.75rem));
     top: calc(50% + var(--planet-radius, calc(var(--size) / 2)) + 20px);
@@ -423,7 +423,7 @@
     overflow: hidden;
     pointer-events: none;
     transition: opacity calc(var(--bar) / 2);
-    /* Integration item 8: meteors pass behind the planet, never across its face. The field is
+    /* Meteors pass behind the planet, never across its face. The field is
        cut away over the planet's disc, wherever HeroOrbit says it is; the stars still show
        through the skin, as Tim made it. */
     mask-image: radial-gradient(circle at calc(50% + var(--orbit) + var(--planet-shift, 0px)) 50%,
@@ -451,7 +451,7 @@
     height: var(--length);
     border-radius: 1px;
     background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, var(--brightness)));
-    /* Integration item 9: each meteor its own angle, within one shared direction. */
+    /* Each meteor its own angle, within one shared direction. */
     rotate: var(--tilt, 5deg);
     /* The warp stretches the streak on the compositor (scale), not by re-laying it out (height). */
     transform-origin: top;
@@ -502,11 +502,11 @@
     overflow: clip;
 }
 
-/* Integration item 9: the record's rhythm, measured. Every object holds at the lock over the same
+/* The record's rhythm, measured. Every object holds at the lock over the same
    55vh of scroll (about 440 px on a laptop: 0.9 s at an easy 480 px/s, past the hunt's 0.75 s),
    so kept and debris both decode. What changes is the approach: 15vh before a kept object, 5vh
    before debris, so debris passes quicker, plus a 20vh breath before each new stratum.
-   Polish, room to look: about a screen per kept object, so the next one isn't in frame while you
+   About a screen per kept object, so the next one isn't in frame while you
    read the last. Hold 65vh, approach 35vh before kept and 15vh before debris, breath 30vh. */
 .passage {
     --approach: 35vh;
@@ -612,7 +612,7 @@
     pointer-events: none;
 }
 
-/* Integration item 9: the record's chapters, in the left third, in my portfolio's telemetry voice
+/* The record's chapters, in the left third, in my portfolio's telemetry voice
    (label · name · coordinates). It surfaces, holds, and fades; it isn't a frame. */
 .chapter {
     position: fixed;
@@ -722,7 +722,7 @@
     text-transform: uppercase;
 }
 
-/* Integration item 6: whose record it is, and where it came from. */
+/* Whose record it is, and where it came from. */
 .hudOwner {
     display: block;
     margin-bottom: 0.55rem;
@@ -754,7 +754,7 @@
     text-transform: uppercase;
 }
 
-/* Integration item 6: the last transmission's ways out, wrapped to the HUD's width. */
+/* The last transmission's ways out, wrapped to the HUD's width. */
 .hudLinks {
     display: flex;
     flex-wrap: wrap;
@@ -881,7 +881,7 @@ video.artifact {
     transition: opacity var(--bar);
 }
 
-/* Integration item 8: on a phone the HUD fills the screen's foot and would cover a count under the
+/* On a phone the HUD fills the screen's foot and would cover a count under the
    planet, so the count sits just above the planet's top edge instead. */
 @media (max-width: 700px) {
     .massLabel {
@@ -890,7 +890,7 @@ video.artifact {
     }
 }
 
-/* Integration item 5: once the record is finished, a second line says what the planet carries. */
+/* Once the record is finished, a second line says what the planet carries. */
 .massRecord {
     display: block;
     margin-top: 4px;
@@ -972,7 +972,7 @@ video.artifact {
     text-align: center;
 }
 
-/* Integration item 10: the page's name, read aloud but not drawn while the scan runs. */
+/* The page's name, read aloud but not drawn while the scan runs. */
 .intro {
     position: absolute;
     width: 1px;
@@ -1057,7 +1057,7 @@ video.artifact {
     }
 }
 
-/* Integration item 6: on a phone the HUD fills the width, so the rocket rides just above the
+/* On a phone the HUD fills the width, so the rocket rides just above the
    HUD's left corner, in thumb reach. (button. outranks Back2Top's own corner.) */
 @media (max-width: 600px) {
     button.rocketLane {
@@ -1067,7 +1067,7 @@ video.artifact {
     }
 }
 
-/* Integration item 10: the artifact's hint names the gesture you have. */
+/* The artifact's hint names the gesture you have. */
 .onPointer {
     display: none;
 }

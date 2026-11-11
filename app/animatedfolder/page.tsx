@@ -29,7 +29,7 @@ const businessOs: Project[] = [
 ];
 
 export default function AnimatedFolderPage() {
-    // The folder's fonts are its knobs; they now come from the shared roles (integration item 7).
+    // The folder's fonts are its knobs; they now come from the shared roles.
     const fonts = {
         titleFont: "var(--font-mono)",
         cardTitleFont: "var(--font-mono)",

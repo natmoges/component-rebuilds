@@ -1,4 +1,4 @@
-/* The display face, from the shared tokens (integration item 7). */
+/* The display face, from the shared tokens. */
 .page {
     font-family: var(--font-display);
 }

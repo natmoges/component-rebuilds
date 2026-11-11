@@ -3,7 +3,7 @@ import { CONTACT_URL, PORTFOLIO_URL, REPO_URL } from "../lib/links";
 import styles from "./RecordLink.module.css";
 
 /*
- * INTEGRATION PASS, FINAL CHECK — a way back from every build page.
+ * A WAY BACK FROM EVERY BUILD PAGE.
  *
  * What I found: the build pages (02–06) had no links at all. The record sends
  * a reader to them in the same tab, so the only way out was the browser's
@@ -21,7 +21,7 @@ import styles from "./RecordLink.module.css";
  *
  * TOUCH AND SMALL SCREENS: the same three links, at a tap-sized height.
  *
- * ON THE RECORD ITSELF (final check, the operator's pick A): the same line
+ * ON THE RECORD ITSELF: the same line
  * pinned to the same corner, so every page on the site behaves the same way.
  * There it reads "natmoges.com · Code · Contact": the record is the page
  * already, so its first link is my site, and Contact goes to the email on

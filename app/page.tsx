@@ -11,7 +11,7 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 export default function Home() {
     return (
         <>
-            {/* Polish, readable by a machine: who this record belongs to, as data. */}
+            {/* Who this record belongs to, as data. */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(profileData).replace(/</g, "\\u003c") }}

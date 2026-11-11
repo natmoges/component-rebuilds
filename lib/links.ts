@@ -1,4 +1,4 @@
-// Where the end of the record points (integration item 6). Written once, so the HUD's
+// Where the end of the record points. Written once, so the HUD's
 // last transmission and the plain record list always agree.
 
 // The proof: the repo, every paragraph above its code, every commit in order.

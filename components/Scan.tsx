@@ -1,7 +1,7 @@
 "use client";
 
 /*
- * INTEGRATION PASS, ITEM 5 — the finale.
+ * THE FINALE.
  * What I found: the planet only grows from what you scan, so whoever
  * skims reaches the end with a small planet, while the end card counts the
  * whole record. Two numbers on one screen that don't agree. And the only
@@ -84,9 +84,9 @@ const HeroOrbit = dynamic(() => import("./HeroOrbit"), { ssr: false });
 
 const HOLD_TOLERANCE_PX = 6;
 const DRIFT_PER_ENTRY = 5;
-// Integration item 9: fewer meteors, each on its own cycle, so the sky has weather, not rain.
+// Fewer meteors, each on its own cycle, so the sky has weather, not rain.
 const METEOR_COUNT = 10;
-// The breath before each new stratum, in vh (item 9).
+// The breath before each new stratum, in vh.
 const BREATH_VH = 30;
 
 // The finale's volley fits inside two bars, however many objects are left.
@@ -262,7 +262,7 @@ function forgetMemory() {
     }
 }
 
-// Where a record's link goes, named (integration item 10), so "Open" says what it opens. A link back
+// Where a record's link goes, named, so "Open" says what it opens. A link back
 // to this page itself is dropped: it would only reload the record you're reading.
 // Final check (Nov 10): the record moved to record.natmoges.com; the old vercel.app address still counts as here.
 const SITE_HOSTS = ["record.natmoges.com", "component-rebuilds.vercel.app"];
@@ -290,7 +290,7 @@ export default function Scan({ entries, source }: ScanProps) {
     // How the planet takes what arrives: a scanned object after its absorb, the rest at once.
     const [arrival, setArrival] = useState<"absorb" | "now">("absorb");
     const [dissolvedId, setDissolvedId] = useState<string | null>(null);
-    // Integration item 10: the object the satellite is decoding. Once it's acquired, its hunt
+    // The object the satellite is decoding. Once it's acquired, its hunt
     // runs to the end even if you scroll on, so a brisk scroll still reads; whatever passes while
     // the satellite is busy is left for the finale. And the HUD reads what it last read (the
     // focus) until the next object is acquired, instead of blinking back to "Scanning…".
@@ -304,7 +304,7 @@ export default function Scan({ entries, source }: ScanProps) {
     const landedRef = useRef<string | null>(null);
     const isOnlineRef = useRef(false);
     const [failedImages, setFailedImages] = useState<string[]>([]);
-    // Polish, one moving artifact: a clip that won't load falls back to its still, and a clip that's
+    // A clip that won't load falls back to its still, and a clip that's
     // playing holds the story back until it ends.
     const [failedClips, setFailedClips] = useState<string[]>([]);
     const [playingClipId, setPlayingClipId] = useState<string | null>(null);
@@ -324,7 +324,7 @@ export default function Scan({ entries, source }: ScanProps) {
     const heldRef = useRef<string | null>(null);
     // The finale waits until you've travelled into the record, so a Rescan at the end doesn't refire it.
     const isFinaleArmedRef = useRef(true);
-    // The chapter you're in (integration item 9): the stratum of the passage at the lock.
+    // The chapter you're in: the stratum of the passage at the lock.
     const [chapter, setChapter] = useState<string | null>(null);
     const chapterRef = useRef<string | null>(null);
     // The rocket (build #3): while it carries you, the scan stands down.
@@ -340,7 +340,7 @@ export default function Scan({ entries, source }: ScanProps) {
     );
     const meteors = useMemo(() => meteorsOf(METEOR_COUNT), []);
     // The record's average passage, so the drift matter keeps its era's stretch now that passages
-    // vary (integration item 9): kept 100vh, debris 80vh since the polish (room to look), a breath
+    // vary: kept 100vh, debris 80vh since the polish (room to look), a breath
     // at each new stratum, and the object itself (about 6.5vh).
     const pitchVh = useMemo(() => {
         if (entries.length === 0) return 90;
@@ -350,7 +350,7 @@ export default function Scan({ entries, source }: ScanProps) {
         return total / entries.length;
     }, [entries]);
 
-    // Every visit starts at the top, where the boot is (item 10). A reload used to put you back mid-record
+    // Every visit starts at the top, where the boot is. A reload used to put you back mid-record
     // under a replaying boot, with the count back at zero.
     useEffect(() => {
         window.history.scrollRestoration = "manual";
@@ -424,7 +424,7 @@ export default function Scan({ entries, source }: ScanProps) {
             const isPastLast =
                 !!last && last.getBoundingClientRect().bottom < scanLine - HOLD_TOLERANCE_PX;
             // The chapter: the stratum of the last passage that has reached the lock. None before
-            // the first, none past the last, and none while the rocket carries you (item 9).
+            // the first, none past the last, and none while the rocket carries you.
             let reached: string | null = null;
             if (!isRidingRef.current && !isPastLast) {
                 for (let index = 0; index < entries.length; index++) {
@@ -466,7 +466,7 @@ export default function Scan({ entries, source }: ScanProps) {
 
             heldRef.current = held;
             setHeldId(held);
-            // Acquire (item 10): a fresh object at the lock becomes the target, if the satellite
+            // Acquire: a fresh object at the lock becomes the target, if the satellite
             // is free. Past the last object the hunt stands down, and the finale accounts for it.
             if (isPastLast && targetRef.current !== null) {
                 targetRef.current = null;
@@ -586,7 +586,7 @@ export default function Scan({ entries, source }: ScanProps) {
         locateRef.current?.();
     }, [isOnline]);
 
-    // The hunt runs on the target, not on what's at the lock: scrolling on doesn't cancel it (item 10).
+    // The hunt runs on the target, not on what's at the lock: scrolling on doesn't cancel it.
     useEffect(() => {
         if (!isOnline || targetId === null) return;
         const entry = entries.find((candidate) => candidate.id === targetId);
@@ -698,7 +698,7 @@ export default function Scan({ entries, source }: ScanProps) {
         decisions[id] !== undefined ? settled[id] === true : revealed[id] !== undefined;
     const isRereading = isOnline && phase === "held" && held !== null && volley === null && isTaken(held.id);
     if (isRereading) reading = isFinished ? "end" : "searching";
-    // The HUD reads the focus (item 10): its card once it's decided or revealed, "Decoding" while
+    // The HUD reads the focus: its card once it's decided or revealed, "Decoding" while
     // it's the target. At the top and at the end of the record, the HUD says so instead.
     const focus = entries.find((entry) => entry.id === focusId) ?? null;
     const isFocusShown = isOnline && focus !== null && phase !== "rest" && !(phase === "end" && held === null);
@@ -712,7 +712,7 @@ export default function Scan({ entries, source }: ScanProps) {
     // Where the record came from, in a stranger's words.
     const provenance = source === "substrate" ? "Read live from Notion" : "From the stored copy";
     const captured = entries.filter((entry) => done[entry.id] === "kept");
-    // SAT_1's dish lights a groove for each sixth of the record the planet holds (integration item 8).
+    // SAT_1's dish lights a groove for each sixth of the record the planet holds.
     const grooves =
         counts.record.kept > 0 ? Math.min(6, Math.floor((counts.planet.mass / counts.record.kept) * 6)) : 0;
     const mass = counts.planet.mass;
@@ -874,7 +874,7 @@ export default function Scan({ entries, source }: ScanProps) {
                     </span>
                     <span className={styles.massLabel}>
                         {/* Your scan, out of the record: every decision counts here; only kept ones grow the planet. */}
-                        {/* A return visit that scanned nothing yet shows only the record it remembers (item 10). */}
+                        {/* A return visit that scanned nothing yet shows only the record it remembers. */}
                         {!(isFinished && counts.scan.decided === 0) && (
                             <>
                                 Scanned {String(counts.scan.decided).padStart(2, "0")} / {counts.record.total}

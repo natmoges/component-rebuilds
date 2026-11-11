@@ -1,5 +1,5 @@
 .main {
-    /* Telemetry: the mono face, from the shared tokens (integration item 7). */
+    /* Telemetry: the mono face, from the shared tokens. */
     font-family: var(--font-mono);
     min-height: 100vh;
     display: grid;

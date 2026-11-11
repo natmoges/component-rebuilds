@@ -14,7 +14,7 @@ export interface Entry {
     link: string | null;
     image: string | null;
     snippet: string | null;
-    // What the image shows, for anyone who can't see it (polish, the edges). Empty: title and date.
+    // What the image shows, for anyone who can't see it. Empty: title and date.
     alt: string | null;
 }
 

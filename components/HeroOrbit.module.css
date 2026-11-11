@@ -21,7 +21,7 @@
     margin: 6px 0 0 14px;
     white-space: nowrap;
     color: var(--muted);
-    /* Integration item 8: the hero's small-mono label style. */
+    /* The hero's small-mono label style. */
     font-family: var(--font-mono);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
@@ -30,7 +30,7 @@
 .slot {
     display: block;
     height: 0.62rem;
-    /* Integration item 4: no blank line before the title is earned. */
+    /* No blank line before the title is earned. */
 }
 
 .title .titleText {

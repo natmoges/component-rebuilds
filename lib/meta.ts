@@ -1,4 +1,4 @@
-// Each page's preview, written once (polish, the edges). A shared link to a build page names that
+// Each page's preview, written once. A shared link to a build page names that
 // build in its own words; the image stays the grown planet (app/opengraph-image.png).
 import type { Metadata } from "next";
 

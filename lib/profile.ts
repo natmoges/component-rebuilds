@@ -1,4 +1,4 @@
-// Who the record belongs to, written once (polish, readable by a machine). The page's structured
+// Who the record belongs to, written once. The page's structured
 // data and /llms.txt both read from here; the links are the ones lib/links.ts already publishes.
 import { PORTFOLIO_URL, REPO_URL } from "./links";
 
@@ -9,7 +9,7 @@ export const TITLES = ["Creative Technologist", "Systems Architect"];
 export const GITHUB_URL = "https://github.com/natmoges";
 export const LINKEDIN_URL = "https://www.linkedin.com/in/natmoges";
 
-// The roles he's going for, each with the public evidence for it (polish, readable by a machine;
+// The roles he's going for, each with the public evidence for it (
 // Operating Parameters → Target role types, Nov 7, 2026). Public evidence only: never interview outcomes.
 export const TARGET_ROLES: { role: string; evidence: string }[] = [
     { role: "Creative technologist", evidence: "the whole record end to end (the music, the media, the systems, the builds) and natmoges.com" },

@@ -1,5 +1,5 @@
 /*
- * Tempo — integration pass, item 2 of Accretion.
+ * Tempo — the integration pass, for Accretion.
  * Reference: none. This is the page's own wiring, not a rebuild. What's
  * mine: fourteen builds each kept their own time. Scan's bar, BootScreen's
  * bar and the CSS bar were three copies of 1000 ms, and the planet waited
@@ -77,7 +77,7 @@ export const ABSORB_MS = HOLD_MS + FLIGHT_MS;
 // The planet grows when the object lands: after exactly the absorb, read, not copied.
 export const ARRIVAL_MS = ABSORB_MS;
 
-// How long the HUD holds a card before the next one may take it (polish, time to look): a debris
+// How long the HUD holds a card before the next one may take it: a debris
 // card for a bar, a kept card for two, and a card with an artifact (a picture, a snippet, a clip)
 // for five, after which its story replaces the artifact.
 export const DEBRIS_CARD_MS = BAR_MS;
@@ -128,7 +128,7 @@ export function recordCountOf(entries: Entry[]): RecordCount {
 }
 
 // What the record revealed at the finale (or this browser remembered) grows the planet, but it
-// is never added to your scan: revealed and scanned are kept apart (integration item 5).
+// is never added to your scan: revealed and scanned are kept apart.
 export function countsOf(
     entries: Entry[],
     decisions: Record<string, Decision>,
