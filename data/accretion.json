@@ -134,7 +134,7 @@
     "whatChanged": "A photography site built to get me into real-estate work. I thought a body of work was a portfolio. The structure was right before I had words for any of it.",
     "lockCondition": "",
     "credit": "",
-    "link": "https://component-rebuilds.vercel.app/motiontiles",
+    "link": "https://record.natmoges.com/motiontiles",
     "image": "/accretion/shotbynat-2022.jpg",
     "snippet": null,
     "alt": "Screenshot of shotbynat, my 2022 photography site: a dark grid of street portraits"
@@ -442,7 +442,7 @@
     "whatChanged": "A signal fighting through noise. My first reusable component: one set of knobs, used anywhere. It's decoding the titles on this page.",
     "lockCondition": "",
     "credit": "Reference: TextScrambler by Solt Wagner (@solt)",
-    "link": "https://component-rebuilds.vercel.app/textscrambler",
+    "link": "https://record.natmoges.com/textscrambler",
     "image": "/accretion/02-textscrambler.jpg",
     "snippet": "export interface TextScramblerProps {\n    text: string;\n    textColor?: string;\n    scrambleColor?: string;\n    durationMs?: number;\n    flickerRate?: number;\n}",
     "alt": "Build 02, TextScrambler: a green headline decoding letter by letter"
@@ -456,7 +456,7 @@
     "whatChanged": "A rocket that rides you back to the top. First time a component listened to the whole window instead of just itself.",
     "lockCondition": "",
     "credit": "Reference: BackToTop by The Velox Studio",
-    "link": "https://component-rebuilds.vercel.app/back2top",
+    "link": "https://record.natmoges.com/back2top",
     "image": "/accretion/03-back2top.jpg",
     "snippet": "export interface Back2TopProps {\n    scrollThreshold?: number;\n    rideUpPxPerSec?: number;\n    maxRideMs?: number;\n    hasExhaust?: boolean;\n}",
     "alt": "Build 03, Back2Top: a white rocket inside a green ring"
@@ -470,7 +470,7 @@
     "whatChanged": "Folders that fan open from data. One component, three copies, three different lists. It also fixed a bug my site had. Since Nov 10, the build itself runs there.",
     "lockCondition": "",
     "credit": "Reference: AnimatedFolder by Launchly",
-    "link": "https://component-rebuilds.vercel.app/animatedfolder",
+    "link": "https://record.natmoges.com/animatedfolder",
     "image": "/accretion/04-animatedfolder.jpg",
     "snippet": "export interface Project {\n    id: string;\n    image: string;\n    title: string;\n    link?: string;\n}",
     "alt": "Build 04, AnimatedFolder: three folders, one for each case study, on a dark page"
@@ -484,7 +484,7 @@
     "whatChanged": "My 2019–2022 arc as seven video tiles, rebuilt with my real photographs, from shotbynat to NatFTP. Seven videos, one playing at a time.",
     "lockCondition": "",
     "credit": "Reference: Motion Tiles by Uzair J.",
-    "link": "https://component-rebuilds.vercel.app/motiontiles",
+    "link": "https://record.natmoges.com/motiontiles",
     "image": "/accretion/05-motiontiles.mp4",
     "snippet": null,
     "alt": "Build 05, Motion Tiles: seven photo and video tiles in a tilted 3D stack"
@@ -498,7 +498,7 @@
     "whatChanged": "Finds where you're reading from, on my own route, fresh every visit. Five states on one tempo, and a rocket if the signal comes back with no place.",
     "lockCondition": "",
     "credit": "Reference: Live Location by Amr Rashed",
-    "link": "https://component-rebuilds.vercel.app/signallocation",
+    "link": "https://record.natmoges.com/signallocation",
     "image": "/accretion/06-signallocation.jpg",
     "snippet": "type Reception =\n    | \"hunting\"\n    | \"locked\"\n    | \"partial\"\n    | \"adrift\"\n    | \"lost\";",
     "alt": "Build 06, SignalLocation: an intercepted-transmission readout locating the reader"
@@ -512,7 +512,7 @@
     "whatChanged": "This page. My record read live from Notion, scanned in order, nothing polished to match. The first build with nothing to copy.",
     "lockCondition": "",
     "credit": "No reference",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": null,
     "alt": null
@@ -526,7 +526,7 @@
     "whatChanged": "This page's weight. Every scroll is one glide that starts quick and settles slowly, by wrapping Lenis, a library I didn't write. One engine, one clock; 0 is native scroll; reduced motion and touch stay native.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Smooth Scroll by Nandi Muzsik and Clément Roche (Framer University), built on Lenis by darkroom.engineering",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": "const lenis = new Lenis({\nduration: Math.min(smoothness, 100) / 25,\nautoRaf: true,\n});\nreturn () => lenis.destroy();",
     "alt": null
@@ -540,7 +540,7 @@
     "whatChanged": "A trail that spells INSPECT OBJECTS behind the mouse across the Scan. The letters live in refs, not state, so React draws once; one loop fades them every frame and sleeps when the glass is empty. Touch and reduced motion get no trail.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": "lettersRef.current.push({ el, bornAt: performance.now(), x, y });\nif (frameRef.current === null) {\nframeRef.current = requestAnimationFrame(drawFrame);\n}",
     "alt": null
@@ -554,7 +554,7 @@
     "whatChanged": "The NatFTP HUD that opens my site, rebuilt to own the first three seconds of every visit: mounted in the frame around every page, on screen from the first paint, a projection of only the HUD and the stars over hyperspace, then gone without a trace. It opens on deep space and leaves you in the charcoal. No black card, no ghost pane.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": "const leaveAt = ARRIVE_DELAY_MS + holdMs;\nconst leaveIn = Math.max(0, leaveAt - performance.now());\nconst leaveTimer = setTimeout(() => setPhase(\"leaving\"), leaveIn);",
     "alt": null
@@ -568,7 +568,7 @@
     "whatChanged": "The stars you're flying through now. 440 real particles on one canvas, kept in a ref so React draws once: diving away from you, steered by the mouse, the same cloud behind my name on natmoges.com. It flies hidden under the HUD and fades in as the HUD leaves, so the logo is the only thing that changes. Touch dives straight ahead; reduced motion gets one still frame.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: StarCloud by Sabo Sugi (v1), Framer Marketplace",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": null,
     "alt": null
@@ -596,7 +596,7 @@
     "whatChanged": "The HUD you're reading from, powered on like a CRT. It types a kernel log written from this record (live or the stored copy, the real object count) and brings the scene online line by line: the satellite's beacon lights on LINK, the body's count on the proof line, and nothing locks until AWAITING SIGNAL. NOT FROM THIS PLANET reads in and out as NAT. On my site it's a retro screen pinned in a photo of a Mac; here the HUD is the computer.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": null,
     "alt": null
@@ -638,7 +638,7 @@
     "whatChanged": "The planet you're filling, drawn in code: my own version of the Spline scene I remixed for my site's hero. Every object the scan keeps falls into its skin as dust, and it grows from medium to hero size as you read. Two moons orbit it unnamed; SYSTEMS ARCHITECT and CREATIVE TECHNOLOGIST decode onto them only once the record has proved each one. On my site it's an embed under my name; here it's the body, and this row is the last thing it takes in.",
     "lockCondition": "It ships live at a public URL.",
     "credit": "Reference: Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz",
-    "link": "https://component-rebuilds.vercel.app/",
+    "link": "https://record.natmoges.com/",
     "image": null,
     "snippet": null,
     "alt": null
