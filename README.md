@@ -29,7 +29,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 | 08 | [SmoothScroll](https://record.natmoges.com) (on Accretion's page) | Smooth Scroll by Nandi Muzsik and Clément Roche, Framer University; built on Lenis by darkroom.engineering | 3 · Page-level behaviour |
 | 09 | [TrailCursor](https://record.natmoges.com) (on Accretion's page) | Cursor Trail Text by Akın Gündoğan (@akn-gundogan), Framer Marketplace | 3 |
 | 10 | [LogoPreloader](https://record.natmoges.com) (on every page) | Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design, Framer Marketplace | 3 |
-| 11 | StarCloud (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
+| 11 | [StarCloud](https://record.natmoges.com) (on Accretion's page) | StarCloud by Sabo Sugi (v1), Framer Marketplace | 4 · Drawing the pixels |
 | 12 | [Gravity](https://record.natmoges.com) (on Accretion's page) | Gravity Component by Nandi, David and Prianca, Framer University (July 2025 version); built on Matter.js by Liam Brummitt | 4 |
 | 13 | [BootScreen](https://record.natmoges.com) (Accretion's HUD) | Retro Screen Effect by Blue Jackson (@blue-jackson), Framer Marketplace (paid) | 4 |
 | 14 | [HeroOrbit](https://record.natmoges.com) (Accretion's body) | Orbital View of Arrakis by Tim Quirino (tim), a Spline community scene, the masthead of timq.xyz | 5 · 3D / WebGL |
@@ -321,7 +321,7 @@ Fourteen builds on one page still read as fourteen builds, so I had three models
 
 Every reference is a component from the Framer Marketplace or Framer University, credited above by its author, except build 14's, a Spline community scene by Tim Quirino. **None of their code is in this repo.** Each build is written from scratch; where I reuse a value (an easing curve, a timing), I say so in that build's notes. Build 08 installs Lenis (MIT) as a library, which is the point of that build. Build 12 installs Matter.js (MIT) as its physics engine. Build 14 installs three.js and react-three-fiber (both MIT) to draw its scene. Build 13's boot log is my own text, read from the record. Build 10's logo and starfield are my own artwork and screen recording.
 
-**Co-pilot:** Claude (Anthropic) worked alongside me: explaining code, translating it into my own terms, and writing code from my paragraphs. I write the paragraphs, make the design calls, and type, debug and tune every build. In the integration pass, the roles shifted: Claude made the edits directly in my repo; I orchestrated, directed the pass, checked every change on localhost and made every commit.
+**Co-pilot:** Claude (Anthropic), in three ways. On vinyl (build 01) I typed all of it myself, with Claude explaining as I went. On builds 02 to 14 I wrote the paragraph for each step, Claude gave me the code for it and explained it in my terms, and I put it in, ran it, and debugged and tuned it. In the integration pass Claude edited the repo directly and explained whatever I pointed at; I directed the pass, checked every change on localhost and made every commit.
 
 ## Privacy
 
