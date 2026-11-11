@@ -1,5 +1,9 @@
 import Link from "next/link";
 import styles from "./not-found.module.css";
+import type { Metadata } from "next";
+
+// A wrong address names itself in the tab, instead of borrowing the record's title.
+export const metadata: Metadata = { title: "Signal lost · Nat Moges" };
 
 // A wrong address gets the record's own voice, not a white default page.
 export default function NotFound() {
