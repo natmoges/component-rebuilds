@@ -14,7 +14,7 @@ const mono = Roboto_Mono({ subsets: ["latin"], variable: "--face-mono" });
 // The page is Accretion now, and a shared link says so, with a frame of the
 // grown planet (app/opengraph-image.png, a capture of the page itself). Subpages keep their own titles.
 const DESCRIPTION =
-  "My record, read live from Notion and scanned in order: kept if the record can prove it, debris if it can't yet. Fourteen rebuilt components, one object.";
+  "My record, read live from Notion and scanned in order: kept if the record can prove it, debris if it can't yet, with the fourteen components I rebuilt.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://record.natmoges.com"),
