@@ -6,7 +6,7 @@ import styles from "./page.module.css";
 import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
-    "Back2Top · Component Rebuilds",
+    "Back2Top · Nat Moges",
     "A rocket that rides you back to the top. The first time a component listened to the whole window instead of just itself. Build 03, rebuilt from BackToTop by The Velox Studio.",
     "/back2top"
 );

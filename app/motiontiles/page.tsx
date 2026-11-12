@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
-    "Motion Tiles · Component Rebuilds",
+    "Motion Tiles · Nat Moges",
     "My 2019–2022 arc as seven video tiles, rebuilt with my real photographs, from shotbynat to NatFTP. Build 05, rebuilt from Motion Tiles by Uzair J.",
     "/motiontiles"
 );

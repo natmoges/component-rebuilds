@@ -38,7 +38,7 @@ const builds: Build[] = [
   { number: "04", name: "AnimatedFolder", reference: "AnimatedFolder by Launchly", rung: 2, status: "shipped", href: "/animatedfolder" },
   { number: "05", name: "Motion Tiles", reference: "Motion Tiles by Uzair J.", rung: 2, status: "shipped", href: "/motiontiles" },
   { number: "06", name: "SignalLocation", reference: "Live Location by Amr Rashed", rung: 2, status: "shipped", href: "/signallocation" },
-  { number: "07", name: "Accretion (was The Ladder)", reference: "My own — no reference", rung: 2, status: "shipped", href: "/" },
+  { number: "07", name: "Accretion (was The Ladder)", reference: "My own, no reference", rung: 2, status: "shipped", href: "/" },
   { number: "08", name: "SmoothScroll", reference: "Smooth Scroll by Nandi Muzsik and Clément Roche (Framer University)", rung: 3, status: "shipped", href: "/" },
   { number: "09", name: "TrailCursor", reference: "Cursor Trail Text by Akın Gündoğan (@akn-gundogan)", rung: 3, status: "shipped", href: "/" },
   { number: "10", name: "LogoPreloader", reference: "Logo Preloader by Brett Jackson (@brett-jackson), Sukoya Design", rung: 3, status: "shipped", href: "/" },

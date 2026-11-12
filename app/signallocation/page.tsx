@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
-    "Signal Location · Component Rebuilds",
+    "Signal Location · Nat Moges",
     "Finds where you're reading from, on my own route, fresh every visit. Five states on one tempo. Build 06, rebuilt from Live Location by Amr Rashed.",
     "/signallocation"
 );

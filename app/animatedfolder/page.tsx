@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
-    "AnimatedFolder · Component Rebuilds",
+    "AnimatedFolder · Nat Moges",
     "Folders that fan open from data. One component, three copies, three different lists. Build 04, rebuilt from AnimatedFolder by Launchly.",
     "/animatedfolder"
 );

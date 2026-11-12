@@ -5,7 +5,7 @@ import styles from "./page.module.css";
 import RecordLink from "../../components/RecordLink";
 
 export const metadata: Metadata = pageMeta(
-    "TextScrambler · Component Rebuilds",
+    "TextScrambler · Nat Moges",
     "A signal fighting through noise. My first reusable component: one set of knobs, used anywhere. Build 02, rebuilt from TextScrambler by Solt Wagner.",
     "/textscrambler"
 );
