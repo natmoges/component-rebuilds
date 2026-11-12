@@ -284,7 +284,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 - Reused: client-only rendering (build 01) · `map` + `key` for the two moons (04) · the seeded starfield pattern for the dust (07) · refs at 60 fps, so each title follows its moon without React re-rendering (09) · TextScrambler decoding the titles (02) · BootScreen's GATE line (13).
 - What I built around it, my calls:
   - Not a backdrop: it's Accretion's body. Every kept object falls into its skin and becomes dust, and the planet grows from medium to hero size as the record is read.
-  - The moons are named late. Each carries a blank label until the record proves it: SYSTEMS ARCHITECT when The substrate's last kept object lands, CREATIVE TECHNOLOGIST when The middle floor's does. They're titles no degree, certificate or mentor gave me, so they arrive after the evidence, not before.
+  - The moons are named late. Each carries a blank label until the record proves it: SYSTEMS ARCHITECT when Building alone's last kept object lands, CREATIVE TECHNOLOGIST when Learning the code's does. They're titles no degree, certificate or mentor gave me, so they arrive after the evidence, not before.
   - The orb stays muted, as it is on natmoges.com: StarCloud and the trail already own the pointer.
   - It arrives dim and comes online on the GATE line, the same tick the count lights.
   - It lands on arrival: the growth and the burst wait for the object's fall (one bar of hold plus two of flight), and the burst kicks from the side facing the lock.

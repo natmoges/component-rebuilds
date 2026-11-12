@@ -149,7 +149,7 @@
  *
  * THE LEFT THIRD: the record's chapters. As you cross into a stratum, its
  * name and years surface on the left in my portfolio's telemetry voice
- * (THE SUBSTRATE · 2023–2024), then fade as you read on. Not a frame and
+ * (BUILDING ALONE · 2023–2025), then fade as you read on. Not a frame and
  * not a position readout: a chapter title that comes and goes.
  *
  * THE RHYTHM: measured, not guessed. Passages tighten from 90vh to 75vh, so

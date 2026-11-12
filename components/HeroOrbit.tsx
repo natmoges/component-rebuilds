@@ -55,8 +55,8 @@
  *
  * THE MOONS: two moons on Tim's two orbits, each with a blank label.
  * SYSTEMS ARCHITECT decodes onto its moon when the last kept object from
- * The substrate falls in. CREATIVE TECHNOLOGIST decodes onto the other
- * when the last kept object from The middle floor does, where the creative
+ * Building alone falls in. CREATIVE TECHNOLOGIST decodes onto the other
+ * when the last kept object from Learning the code does, where the creative
  * work meets the code. Each name types itself in with my TextScrambler
  * (build #2), then stays.
  *
