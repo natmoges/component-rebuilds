@@ -302,7 +302,7 @@ Each rung is a layer. Each build reuses what the last one taught and adds one ne
 
 ## The integration pass
 
-Fourteen builds on one page still read as fourteen builds, so I had three models read the site cold, reconciled what they found against my own record, and fixed it item by item, the same way as the ladder: a paragraph first, one commit per step, every change tested before it was committed. Then I ran it as a stranger at every speed and fixed what broke. The commits from `dfd3f92` on are the pass.
+Fourteen builds on one page still read as fourteen builds, so I had three models read the site cold, reconciled what they found against my own record, and fixed it item by item, the same way as the ladder: a paragraph first, one commit per step, every change checked on localhost before it was committed. Then I ran it as a stranger at every speed and fixed what broke. The commits from `dfd3f92` on are the pass.
 
 **What it changed in the builds above** (07, 13 and 14 are described there as they shipped):
 
